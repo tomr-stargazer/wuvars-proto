@@ -1,0 +1,16 @@
+import atpy
+import numpy
+
+
+
+
+''' 
+Let's take one source in a table (known by its Source ID) and spit out some
+statistics on it as return values. 
+Returns a tuple of min, max, mean, stddev
+'''
+
+def arraystat (sid, table) :
+    ''' Inputs: source ID integer, atpy.Table. Outputs: tuple of four floats'''
+    
+    

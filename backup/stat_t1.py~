@@ -1,0 +1,14 @@
+import atpy 
+import numpy, math
+import matplotlib.pyplot as plt
+
+where = numpy.where
+
+data = '/home/trice/reu/'
+data2= '/home/trice/reu/DATA/2MASS/'
+data3 = '/home/trice/reu/DATA/Merged_Catalogs/'
+data4= '/home/trice/reu/DATA/'
+
+Tmass = atpy.Table(data2+'fp_2mass.fp_psc26068.tbl',verbose=False)
+Userv = atpy.Table(data3+'USERV1678_error_filtered_0.1.fits',verbose=False)
+Match = atpy.Table(data + 'test_output.fits',verbose=False)

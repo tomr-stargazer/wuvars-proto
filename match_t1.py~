@@ -1,0 +1,14 @@
+import atpy
+import numpy
+import matplotlib.pyplot as plt
+import coords
+
+data = '/home/trice/reu/DATA/Merged_Catalogs/'
+data2= '/home/trice/reu/DATA/2MASS/'
+
+userv= atpy.Table(data+'USERV1678_error_filtered_0.1.fits')
+u08b = atpy.Table(data+'U08BH2_error_filtered_0.1.fits')
+u09b = atpy.Table(data+'U09BH14_error_filtered_0.1.fits')
+tmass= atpy.Table(data2+'fp_2mass.fp_psc26068.tbl')
+iras = atpy.Table(data2+'iras.iraspsc26148.tbl')
+

@@ -1,0 +1,26 @@
+import atpy
+import numpy
+import matplotlib.pyplot as plt
+
+data = '/home/trice/reu/DATA/'
+
+# don't forget: 0 mag is brighter than 30 mag
+
+t = atpy.Table(data+'results14_22_20_4_15864.fits')
+
+j = t.JAPERMAG3
+h = t.HAPERMAG3
+k = t.KAPERMAG3
+
+mag = [j,h,k]
+
+#for i in mag:
+#    i[i<0] = 0
+
+plt.plot(j,h-k,'ro')
+plt.xlabel("J magnitude")
+plt.ylabel("H-K color")
+plt.title("Braid nebula region J vs H-K, U08B")
+#plt.axis([35,5,28,8])
+
+plt.show()

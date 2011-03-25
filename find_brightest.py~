@@ -1,0 +1,23 @@
+import atpy,numpy
+
+data = '/home/trice/reu/DATA/Merged_Catalogs/'
+
+userv = atpy.Table(data+'USERV1678_error_filtered_0.1.fits')
+u08b = atpy.Table(data+'U08BH2_error_filtered_0.1.fits')
+u09b = atpy.Table(data+'U09BH14_error_filtered_0.1.fits')
+
+l = [userv,u08b,u09b]
+
+for t in l:
+    t.j = t.JAPERMAG3
+    t.h = t.HAPERMAG3
+    t.k = t.KAPERMAG3
+    t.jmh = t.JMHPNT
+    t.hmk = t.HMKPNT
+    
+    print t.j.min(),t.h.min(),t.k.min()
+
+
+a =  numpy.where(userv.j==userv.j.max())
+print userv.data[a]
+print userv.h[a],userv.k[a]

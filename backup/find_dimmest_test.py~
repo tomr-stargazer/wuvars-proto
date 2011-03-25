@@ -1,0 +1,7 @@
+import atpy,numpy
+
+data = '/home/trice/reu/DATA/'
+
+t = atpy.Table(data+'results15_21_51_0_15909.fits')
+
+print t.columns
