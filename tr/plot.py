@@ -364,7 +364,13 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123):
 
         
     
-
+# Functionality to add to plot_5:
+# 1. color-color Trajectory plots (in their own function, to be implemented
+# and incorporated)
+# 2. a map and chip identifier, about the same size as that guy
+# note: perhaps make colors and k-dex smaller vertically 
+# to make room for those guys
+# also: rename k-dex to "k excess"
 def plot_5 (table,sid, outfile='', name='?', season = 2) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.

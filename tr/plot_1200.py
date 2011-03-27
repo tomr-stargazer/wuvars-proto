@@ -13,7 +13,7 @@ wc = atpy.Table(datapath + 'wserv_errbits_combined.fits')
 goods = atpy.Table(datapath + '5_sigma_disks_good1.fits')
 
 for row in goods:
-    desig = row[4]
+    desig = row['Designation']
     name = "p%d.%d" % ( row[4], round(row[3]*100, 0) )
     sid = row[0]
     
