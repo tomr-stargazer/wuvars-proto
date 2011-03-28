@@ -16,57 +16,84 @@ from chi2 import test_analyze
 from scargle import fasper as lsp
 from tr_helpers import season_cut, data_cut, ensemble_cut
 
+# Let's define Koornneef's main-sequence colors.
+ms_jmh = np.array(
+    [-0.16, -0.14, -0.13, -0.12, -0.11, -0.1 , -0.09, -0.08, -0.07,
+      -0.06, -0.05, -0.03, -0.03, -0.01,  0.01,  0.02,  0.03,  0.04,
+      0.05,  0.07,  0.08,  0.1 ,  0.11,  0.13,  0.16,  0.19,  0.2 ,
+      0.23,  0.24,  0.29,  0.32,  0.37,  0.43,  0.49,  0.53,  0.57,
+      0.61,  0.65,  0.67,  0.68,  0.66,  0.62,  0.61,  0.58,  0.58,  0.57] )
+ms_hmk = np.array(
+    [-0.05, -0.05, -0.05, -0.05, -0.04, -0.04, -0.04, -0.03, -0.03,
+      -0.02, -0.02, -0.02, -0.01, -0.01,  0.  ,  0.  ,  0.01,  0.01,
+      0.02,  0.02,  0.02,  0.02,  0.03,  0.04,  0.04,  0.05,  0.06,
+      0.06,  0.07,  0.08,  0.09,  0.1 ,  0.11,  0.13,  0.14,  0.15,
+      0.16,  0.18,  0.19,  0.21,  0.26,  0.28,  0.29,  0.3 ,  0.31,  0.33] )
 
-#from tr import stetson, test_analyze
-#from tr import lsp
 
-
-
-# def season_cut (table, sid, season, flags=-1) :
-#     ''' Returns a subset of a table that corresponds to 
-#     one source for one season. 
-
-#     Also filters datapoints for quality!
-
-#     Arguments:
-#       table: an atpy table
-#       sid: a Source ID from WFCAM (13 digits)
-#       season: Which observing season of our dataset (1,2, or 3)
-
-#     Keywords:
-#       flags: whether to remove bad observations (default: no)
-#              and where to draw the cutoff.
-#     '''
-
-#     source = table.where(table.SOURCEID == sid)
-
-#     offset = 54579
-#     cut1 = 100
-#     cut2 = 300
-#     cut3 = 600
-
-#     if season == 1:
-#         low = offset
-#         high = offset+cut1
-#     elif season == 2:
-#         low = offset+cut1
-#         high = offset+cut2
-#     elif season == 3:
-#         low = offset+cut2
-#         high = offset+cut3
-#     else:
-#         low = offset
-#         high = offset+cut3
+def plot_trajectory_core (ax, hmk, jmh, 
+                          fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1):
+    ''' Plots the trajectory of some star in color-color space.
     
-#     source = source.where(source.MEANMJDOBS < high)
-#     source = source.where(source.MEANMJDOBS > low)
+    Inputs:
+      ax -- a matplotlib Axes object (like a canvas) to draw on
+      hmk -- a color index to plot on the X-axis (e.g. H-K)
+      jmh -- a color index to plot on the Y-axis (e.g. J-H)
+      
+    Optional inputs:
+      fmt -- a matplotlib plot style. Defaults to black dots.
+      ms_hmk -- an array of main sequence colors (e.g. H-K)
+      ms_jmh -- an array of main sequence colors (e.g. J-H)
+      a_k -- the reddening vector to plot parallel lines for
+    '''
+    # First, plot the background main-sequence stuff
+    ax.plot(ms_hmk, ms_jmh, 'k')
 
-#     if flags >= 0:
-#         source = source.where(source.JPPERRBITS <= flags)
-#         source = source.where(source.HPPERRBITS <= flags)
-#         source = source.where(source.KPPERRBITS <= flags)
+    slope = (3.6/2.1)
+    top = np.where( (ms_jmh - slope*ms_hmk) == (ms_jmh - slope*ms_hmk).max())
+    # Dotted reddening lines: 1. from the bottom
+    ax.plot( [ms_hmk[0], ms_hmk[0] + 1.5*a_k], 
+             [ms_jmh[0], ms_jmh[0] + 1.5*slope*a_k], 'k--')
+
+    # 2. from the peak
+    ax.plot( [ms_hmk[top], ms_hmk[top] + a_k], 
+             [ms_jmh[top], ms_jmh[top] + slope*a_k], 'k--')
+
+
+    # Then, plot the actual data we were given
+    ax.plot(hmk, jmh, fmt)
     
-#     return source
+    # We may want to consciously scale the viewable limits in a specific way
+
+    # And label the axes! Wait... I'll leave that to the end-user.
+
+    return
+
+#untested
+def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
+    ''' Takes a source from a table and plots its color-color trajectory.
+
+    Inputs:
+      table -- ATpy time-series photometry table.
+      sid -- WFCAM source ID.
+      
+    Optional inputs:
+      season -- Season 1,2,3 or all.
+      clear -- enter True to make a new figure when this function calls.
+      fmt -- a matplotlib plot style. Defaults to black dots.
+      '''
+    if clear:
+        plt.figure()
+    ax = plt.gca()
+    
+    tcut = data_cut(table, [sid], season)
+    jmh = tcut.JMHPNT
+    hmk = tcut.HMKPNT
+
+    plot_trajectory_core (ax, hmk, jmh, fmt=fmt)
+    plt.show()
+    return
+                         
 
 def plot_jhmk (table,sid, outfile='', sup='', box=True, 
              bands='jhk', season = 123, text=True) :
@@ -366,12 +393,12 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123):
     
 # Functionality to add to plot_5:
 # 1. color-color Trajectory plots (in their own function, to be implemented
-# and incorporated)
-# 2. a map and chip identifier, about the same size as that guy
+# and incorporated) check1[x] check2[ ]
+# 2. a map and chip identifier, about the same size as that guy [ ]
 # note: perhaps make colors and k-dex smaller vertically 
-# to make room for those guys
-# also: rename k-dex to "k excess"
-def plot_5 (table,sid, outfile='', name='?', season = 2) :
+# to make room for those guys [ ]
+# also: rename k-dex to "k excess" [x]
+def plot_5 (table,sid, outfile='', name='?', season = 123) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.
     '''
@@ -405,9 +432,9 @@ def plot_5 (table,sid, outfile='', name='?', season = 2) :
     fig = plt.figure(num=None, figsize=(8.5,11), dpi=80, 
                      facecolor='w', edgecolor='k')
     
-    left = .125
-    width= .775
-    bottom = np.arange(.1, .9, .16)
+    left = .125 # don't touch
+    width= .775 # these two.
+    bottom = np.arange(.1, .9, .16) 
     height = .16
 
     ks = .05 # this is the size of the kdex box
@@ -468,7 +495,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 2) :
     ax_k.set_ylabel( "K mag" )
     ax_jmh.set_ylabel( "J-H color" )
     ax_hmk.set_ylabel( "H-K color" )
-    ax_kdex.set_ylabel( "K dex" )
+    ax_kdex.set_ylabel( "K excess" )
 
     jmean = jcol.mean()
     hmean = hcol.mean()
@@ -597,7 +624,7 @@ def plot_5_ensemble ( correction_table, chip, outfile='', season=2 ) :
     ax_k.set_ylabel( "K mag" )
     ax_jmh.set_ylabel( "J-H color" )
     ax_hmk.set_ylabel( "H-K color" )
-    ax_kdex.set_ylabel( "K dex" )
+    ax_kdex.set_ylabel( "K excess" )
 
     jmean = jcol.mean()
     hmean = hcol.mean()
