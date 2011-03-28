@@ -434,19 +434,25 @@ def plot_5 (table,sid, outfile='', name='?', season = 123) :
     
     left = .125 # don't touch
     width= .775 # these two.
-    bottom = np.arange(.1, .9, .16) 
-    height = .16
+
+    height = (.8 / 6)
+    bottom = np.arange(.1, .9, height) 
+    tri_height = (.8/9)
+    tri_bottom = np.arange(.1, .9, tri_height)
 
     ks = .05 # this is the size of the kdex box
 
-    ax_hmk = fig.add_axes( [left, bottom[0], width, height-ks] )
-    ax_kdex= fig.add_axes( [left, bottom[1]-ks, width, 2*ks] ,sharex=ax_hmk)
-
-    ax_jmh = fig.add_axes( [left, bottom[1]+ks, width, height-ks] ,sharex=ax_hmk)
+    ax_hmk = fig.add_axes( [left, bottom[0], width, tri_height] )
+    ax_kdex= fig.add_axes( [left, tri_bottom[1], width, tri_height] 
+                           ,sharex=ax_hmk)
+    ax_jmh = fig.add_axes( [left, tri_bottom[2], width, tri_height] 
+                           ,sharex=ax_hmk)
     ax_k  =  fig.add_axes( [left, bottom[2], width, height] ,sharex=ax_hmk)
     ax_h  =  fig.add_axes( [left, bottom[3], width, height] ,sharex=ax_hmk)
     ax_j  =  fig.add_axes( [left, bottom[4], width, height] ,sharex=ax_hmk)
     
+    ax_traj = fig.add_subplot(6,2,1)
+    ax_map =  fig.add_subplot(6,2,2)
 
     # Plot J-band:
     ax_j.errorbar( date, jcol, yerr=jerr, fmt='b-o', ecolor='k' )
@@ -478,6 +484,10 @@ def plot_5 (table,sid, outfile='', name='?', season = 123) :
 
     # Plot H-K color:
     ax_hmk.errorbar( date, hmk, yerr=hmkerr, fmt='k-o', ecolor='k' )
+
+    # Plot the trajectory thingy!
+    plot_trajectory_core( ax_traj, hmk, jmh )
+    
 
     # Done plotting.
 
