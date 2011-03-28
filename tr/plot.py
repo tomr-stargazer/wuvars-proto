@@ -451,8 +451,9 @@ def plot_5 (table,sid, outfile='', name='?', season = 123) :
     ax_h  =  fig.add_axes( [left, bottom[3], width, height] ,sharex=ax_hmk)
     ax_j  =  fig.add_axes( [left, bottom[4], width, height] ,sharex=ax_hmk)
     
-    ax_traj = fig.add_subplot(6,2,1)
-    ax_map =  fig.add_subplot(6,2,2)
+    ax_traj = fig.add_subplot(6,3,1)
+    ax_map =  fig.add_subplot(6,3,2)
+    ax_thumb= fig.add_subplot(6,3,3)
 
     # Plot J-band:
     ax_j.errorbar( date, jcol, yerr=jerr, fmt='b-o', ecolor='k' )
@@ -517,9 +518,13 @@ def plot_5 (table,sid, outfile='', name='?', season = 123) :
     sPositionString = sPosition.hmsdms()
     
     # i am aware that the following line is SUCH A MESS
-    ax_j.set_title( ("Object %s.\t" %name)+ (r"$J_{mean} =$ %.2f, $H_{mean} =$ %.2f, $K_{mean} =$ %.2f, " % 
+    big_title = ( ("Object %s.\t" %name)+ (r"$J_{mean} =$ %.2f, $H_{mean} =$ %.2f, $K_{mean} =$ %.2f, " % 
                     (jmean, hmean, kmean) ) + "\nSeason %d \t" % season +
                     r"$J_{RMS} =$ %.3f, $H_{RMS} =$ %.3f, $K_{RMS} =$ %.3f" % (jrms, hrms, krms) )
+    
+    ax_j.annotate( big_title, xy=(0.5, 0.955), fontsize=15,
+                   xycoords='figure fraction',
+                   horizontalalignment='center', verticalalignment='top')
     
     plt.suptitle( "Position: %s,       Source ID %d." % (sPositionString, sid))
 
