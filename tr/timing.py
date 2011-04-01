@@ -22,12 +22,12 @@ Use 13 hours min
 
 upper_f = 1 / (13/24) # 13 hours is the highest frequency (shortest period)
 lower_f = 1 / (500) # 500 days is the lowest frequency (longest period)
-midrange = [ (1/1.05, 1/.95) ] # a list of mid-ranges to exclude
+midrange = [ (1/1.10, 1/.90) ] # a list of mid-ranges to exclude
 
 
 def lsp_mask ( Wk1, Wk2, upper_f=upper_f, lower_f=lower_f, midrange=midrange ):
-    ''' Trims unreliable frequencies from a periodogram and returns the
-    reliably best frequency.
+    ''' Trims unreliable frequencies from a periodogram and returns index of
+    the reliably best frequency.
 
     Inputs:
       Wk1 -- An array of Lomb periodogram frequencies.
@@ -49,8 +49,9 @@ def lsp_mask ( Wk1, Wk2, upper_f=upper_f, lower_f=lower_f, midrange=midrange ):
 
 
     trim = np.where( (Wk1 < upper_f) & (Wk1 > lower_f) &
-                     ( (Wk1 > midrange[0][0]) | (Wk1 < midrange[0][1]) ) )
+                     ( (Wk1 < midrange[0][0]) | (Wk1 > midrange[0][1]) ) )
 
-    Jmax = np.where( Wk2 == Wk2[trim].max() )[0]
+    print "lols qwerty"
+    Jmax = np.where( Wk2 == Wk2[trim].max() )[0][0]
     return Jmax
 

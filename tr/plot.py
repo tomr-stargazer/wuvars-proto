@@ -14,7 +14,9 @@ import coords
 import stetson
 from chi2 import test_analyze
 from scargle import fasper as lsp
+from timing import lsp_mask
 from tr_helpers import season_cut, data_cut, ensemble_cut
+
 
 # Let's define Koornneef's main-sequence colors.
 ms_jmh = np.array(
@@ -250,7 +252,12 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
         b.lsp_freq = b.lsp[0]
         b.lsp_power= b.lsp[1]
         
-        b.lsp_per = 1./ b.lsp[0][b.lsp[3]]
+        Jmax =  lsp_mask( b.lsp_freq, b.lsp_power )
+        b.lsp_per = 1./ b.lsp[0][Jmax]
+        print "actually using timing 2"
+        print b.lsp_per
+        # deprecated:
+        # b.lsp_per = 1./ b.lsp[0][b.lsp[3]]
 
         # c. Fast Chi-squared period for each band
 
@@ -403,7 +410,7 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
     
 # Functionality to add to plot_5:
 # 1. color-color Trajectory plots (in their own function, to be implemented
-# and incorporated) check1[x] check2[ ]
+# and incorporated) check1[x] check2[x]
 # 2. a map and chip identifier, about the same size as that guy [ ]
 # note: perhaps make colors and k-dex smaller vertically 
 # to make room for those guys [ ]
@@ -411,6 +418,8 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
 def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.
+
+    Note: heavy edits have made that not strictly true.
     '''
 
     # Loading up the relevant datapoints to plot (note I set flags to 0)
