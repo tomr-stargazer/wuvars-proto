@@ -64,6 +64,10 @@ def plot_trajectory_core (ax, hmk, jmh,
     ax.plot(hmk, jmh, fmt)
     
     # We may want to consciously scale the viewable limits in a specific way
+    # YES THIS MUST HAPPEN
+    # I propose: bottom-left is fixed, top-right is determined by the input
+    # data and then extend the reddening vectors way out.
+
 
     # And label the axes! Wait... I'll leave that to the end-user.
 
