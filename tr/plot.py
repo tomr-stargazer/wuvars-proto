@@ -33,8 +33,10 @@ ms_hmk = np.array(
       0.16,  0.18,  0.19,  0.21,  0.26,  0.28,  0.29,  0.3 ,  0.31,  0.33] )
 
 
-def plot_trajectory_core (ax, hmk, jmh, 
-                          fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1):
+# Change the colorbar call to the figure method (figure it out) [ ]
+def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
+                          fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1,
+                          ms=True):
     ''' Plots the trajectory of some star in color-color space.
     
     Inputs:
@@ -47,23 +49,30 @@ def plot_trajectory_core (ax, hmk, jmh,
       ms_hmk -- an array of main sequence colors (e.g. H-K)
       ms_jmh -- an array of main sequence colors (e.g. J-H)
       a_k -- the reddening vector to plot parallel lines for
+      ms -- Plot the Main Sequence lines? (defaults to True)
+      
+    Now with color maps! 
     '''
     # First, plot the background main-sequence stuff
-    ax.plot(ms_hmk, ms_jmh, 'k')
+    if ms:
+        ax.plot(ms_hmk, ms_jmh, 'k')
 
-    slope = (3.6/2.1)
-    top = np.where( (ms_jmh - slope*ms_hmk) == (ms_jmh - slope*ms_hmk).max())
+        slope = (3.6/2.1)
+        top = np.where( (ms_jmh-slope*ms_hmk) == (ms_jmh - slope*ms_hmk).max())
     # Dotted reddening lines: 1. from the bottom
-    ax.plot( [ms_hmk[0], ms_hmk[0] + 1.5*a_k], 
-             [ms_jmh[0], ms_jmh[0] + 1.5*slope*a_k], 'k--')
+        ax.plot( [ms_hmk[0], ms_hmk[0] + 1.5*a_k], 
+                 [ms_jmh[0], ms_jmh[0] + 1.5*slope*a_k], 'k--')
 
     # 2. from the peak
-    ax.plot( [ms_hmk[top], ms_hmk[top] + a_k], 
-             [ms_jmh[top], ms_jmh[top] + slope*a_k], 'k--')
+        ax.plot( [ms_hmk[top], ms_hmk[top] + a_k], 
+                 [ms_jmh[top], ms_jmh[top] + slope*a_k], 'k--')
 
 
     # Then, plot the actual data we were given
-    ax.plot(hmk, jmh, fmt)
+    ax.scatter(hmk, jmh, c=c, marker='o', s=10, cmap=cmap, edgecolors='none')
+    cbar = plt.colorbar() # This should really be changed to the method
+    cbar.set_label(label)
+#    ax.plot(hmk, jmh, fmt)
     
     # We may want to consciously scale the viewable limits in a specific way
     # YES THIS MUST HAPPEN
@@ -87,6 +96,8 @@ def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
       season -- Season 1,2,3 or all.
       clear -- enter True to make a new figure when this function calls.
       fmt -- a matplotlib plot style. Defaults to black dots.
+
+    This is a convenience function that tries to be smart.
       '''
     if clear:
         plt.figure()
@@ -95,8 +106,9 @@ def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
     tcut = data_cut(table, [sid], season)
     jmh = tcut.JMHPNT
     hmk = tcut.HMKPNT
+    date= tcut.MEANMJDOBS - 54579
 
-    plot_trajectory_core (ax, hmk, jmh, fmt=fmt)
+    plot_trajectory_core (ax, hmk, jmh, date,  fmt=fmt)
     plt.show()
     return
                          
@@ -415,6 +427,8 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
 # note: perhaps make colors and k-dex smaller vertically 
 # to make room for those guys [ ]
 # also: rename k-dex to "k excess" [x]
+# 3. Since I removed jmh, I should either clean up its commented-out code
+# or make its plottedness dependent on a variable set to False. [ ]
 def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.
@@ -454,9 +468,9 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     left = .125 # don't touch
     width= .775 # these two.
 
-    height = (.8 / 6)
+    height = (.8 / 5)
     bottom = np.arange(.1, .9, height) 
-    tri_height = (.8/9)
+    tri_height = (.8/10)
     tri_bottom = np.arange(.1, .9, tri_height)
 
     ks = .05 # this is the size of the kdex box
@@ -464,15 +478,15 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ax_hmk = fig.add_axes( [left, bottom[0], width, tri_height] )
     ax_kdex= fig.add_axes( [left, tri_bottom[1], width, tri_height] 
                            ,sharex=ax_hmk)
-    ax_jmh = fig.add_axes( [left, tri_bottom[2], width, tri_height] 
-                           ,sharex=ax_hmk)
-    ax_k  =  fig.add_axes( [left, bottom[2], width, height] ,sharex=ax_hmk)
-    ax_h  =  fig.add_axes( [left, bottom[3], width, height] ,sharex=ax_hmk)
-    ax_j  =  fig.add_axes( [left, bottom[4], width, height] ,sharex=ax_hmk)
-    
-    ax_traj = fig.add_subplot(6,3,1)
-    ax_map =  fig.add_subplot(6,3,2)
-    ax_thumb= fig.add_subplot(6,3,3)
+#    ax_jmh = fig.add_axes( [left, tri_bottom[2], width, tri_height] 
+#                           ,sharex=ax_hmk)
+    ax_k  =  fig.add_axes( [left, bottom[1], width, height] ,sharex=ax_hmk)
+    ax_h  =  fig.add_axes( [left, bottom[2], width, height] ,sharex=ax_hmk)
+    ax_j  =  fig.add_axes( [left, bottom[3], width, height] ,sharex=ax_hmk)
+
+    ax_map =  fig.add_subplot(5,2,2)    
+    ax_traj = fig.add_subplot(5,2,1)
+#    ax_thumb= fig.add_subplot(6,3,3)
 
     # Plot J-band:
     ax_j.errorbar( date, jcol, yerr=jerr, fmt='b-o', ecolor='k' )
@@ -488,7 +502,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ax_k.invert_yaxis()
 
     # Plot J-H color:
-    ax_jmh.errorbar( date, jmh, yerr=jmherr, fmt='k-o', ecolor='k' )
+#    ax_jmh.errorbar( date, jmh, yerr=jmherr, fmt='k-o', ecolor='k' )
 
     # Plot K dex:
     ax_kdex.errorbar( date, kdex, yerr=kdexerr, fmt= 'k-o', ecolor='k' )
@@ -506,7 +520,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ax_hmk.errorbar( date, hmk, yerr=hmkerr, fmt='k-o', ecolor='k' )
 
     # Plot the trajectory thingy!
-    plot_trajectory_core( ax_traj, hmk, jmh )
+    plot_trajectory_core( ax_traj, hmk, jmh, date )
     
 
     # Done plotting.
@@ -514,7 +528,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     plt.setp(ax_j.get_xticklabels(), visible=False)
     plt.setp(ax_h.get_xticklabels(), visible=False)
     plt.setp(ax_k.get_xticklabels(), visible=False)
-    plt.setp(ax_jmh.get_xticklabels(), visible=False)
+#    plt.setp(ax_jmh.get_xticklabels(), visible=False)
     plt.setp(ax_kdex.get_xticklabels(), visible=False)
 
     # Now let's create labelling information!
@@ -523,7 +537,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ax_j.set_ylabel( "J mag" )
     ax_h.set_ylabel( "H mag" )
     ax_k.set_ylabel( "K mag" )
-    ax_jmh.set_ylabel( "J-H color" )
+#    ax_jmh.set_ylabel( "J-H color" )
     ax_hmk.set_ylabel( "H-K color" )
     ax_kdex.set_ylabel( "K excess" )
 
