@@ -170,7 +170,8 @@ def plot_jhmk (table,sid, outfile='', sup='', box=True,
 '''
 #/end junk
 
-def plot_page_periods (table, sid, outfile='', name='?', season = 123):
+def plot_page_periods (table, sid, outfile='', name='?', season = 123, 
+                       png_too=False):
     """
     Plot one comprehensive page of periodicity information for one source
     in WFCAM time-series JHK data.
@@ -382,8 +383,13 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123):
     if outfile == '':
         plt.show()
     else:
-        plt.savefig(outfile)
-        plt.close()
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
             
     return 
 
@@ -402,7 +408,7 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123):
 # note: perhaps make colors and k-dex smaller vertically 
 # to make room for those guys [ ]
 # also: rename k-dex to "k excess" [x]
-def plot_5 (table,sid, outfile='', name='?', season = 123) :
+def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.
     '''
@@ -535,8 +541,13 @@ def plot_5 (table,sid, outfile='', name='?', season = 123) :
     if outfile == '':
         plt.show()
     else:
-        plt.savefig(outfile)
-        plt.close()
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
 
 
 
