@@ -69,8 +69,9 @@ def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
 
 
     # Then, plot the actual data we were given
-    ax.scatter(hmk, jmh, c=c, marker='o', s=10, cmap=cmap, edgecolors='none')
-    cbar = plt.colorbar() # This should really be changed to the method
+    sc = ax.scatter(hmk, jmh, c=c, marker='o', s=10, 
+                    cmap=cmap, edgecolors='none')
+    cbar = plt.gcf().colorbar(sc, ax=ax) # This should really be changed to the method
     cbar.set_label(label)
 #    ax.plot(hmk, jmh, fmt)
     
@@ -92,10 +93,9 @@ def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
       table -- ATpy time-series photometry table.
       sid -- WFCAM source ID.
       
-    Optional inputs:
-      season -- Season 1,2,3 or all.
-      clear -- enter True to make a new figure when this function calls.
-      fmt -- a matplotlib plot style. Defaults to black dots.
+    Optional inputs: season -- Season 1,2,3 or all.  clear -- enter
+      True to make a new figure when this function calls.  fmt -- a
+      matplotlib plot style. Defaults to black dots.
 
     This is a convenience function that tries to be smart.
       '''
@@ -484,8 +484,8 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ax_h  =  fig.add_axes( [left, bottom[2], width, height] ,sharex=ax_hmk)
     ax_j  =  fig.add_axes( [left, bottom[3], width, height] ,sharex=ax_hmk)
 
-    ax_map =  fig.add_subplot(5,2,2)    
     ax_traj = fig.add_subplot(5,2,1)
+    ax_small_traj =  fig.add_subplot(5,2,2)    
 #    ax_thumb= fig.add_subplot(6,3,3)
 
     # Plot J-band:
@@ -521,7 +521,7 @@ def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
 
     # Plot the trajectory thingy!
     plot_trajectory_core( ax_traj, hmk, jmh, date )
-    
+    plot_trajectory_core( ax_small_traj, hmk, jmh, date, ms=False )    
 
     # Done plotting.
 

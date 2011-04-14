@@ -8,7 +8,7 @@
 import subprocess
 import numpy
 import tr_plot
-import plot
+#import plot
 #from plot import season_cut
 
 def chi_input_writer (name, t, x, err, outfile):
@@ -117,6 +117,8 @@ def test_analyze (t, x, err):
 def chi_plot (table, sid, band = 'j', outfile='', season=123, harmonic=1) :
     ''' Does everything for one source and plots a phase plot.
     Returns the PERIOD that is plots by. '''
+
+    import plot
 
     f = chi_analyze (table, sid, band, season)
 

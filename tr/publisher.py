@@ -58,7 +58,8 @@ def before_after ( before_table, after_table, lookup_table, savepath,
         tplot.plot_5 ()
         return
 
-
+# Strongly consider producing a "Cover" page [ ]
+# Also consider having this function automate the pdfjoining [ ]
 def book_maker ( data_table, lookup_table, savepath, sort_column, 
                  max_i=-1, reverse=True ):
     ''' A function to make lightcurve-and-period books.
