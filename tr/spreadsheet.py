@@ -22,12 +22,13 @@ def reduced_chisq ( m, sigma_m ):
     if not (m.size == sigma_m.size):
         raise Exception("Array dimensions mismatch")
 
-#    n = m.size
-#    nu = n - 1
+    n = m.size
+    nu = n - 1
+
     if n < 2:
         return 0
 
-    return (1./(m.size - 1)) * np.sum( (m - m.mean())**2 / sigma_m**2 )
+    return (1./nu) * np.sum( (m - m.mean())**2 / sigma_m**2 )
 
 
 
