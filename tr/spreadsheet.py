@@ -11,7 +11,25 @@ from chi2 import test_analyze
 from network2 import get_chip
 
 
-def arraystat_2 (table, sid, per=True) :
+def reduced_chisq ( m, sigma_m ):
+    ''' Calculates the reduced chi-squared.
+
+    Inputs:
+      m -- an array of photometric magnitudes
+      sigma_m -- a corresponding array of photometric uncertainties
+      '''
+
+    if not (m.size == sigma_m.size):
+        raise Exception("Array dimensions mismatch")
+
+#    n = m.size
+#    nu = n - 1
+
+    return (1./(m.size - 1)) * np.sum( (m - m.mean())**2 / sigma_m**2 )
+
+
+
+def arraystat_2 (table, sid, season=0, rob=True, per=True) :
     ''' Calculates a complicated number of parameters for a given star.
 
     Inputs:
@@ -23,7 +41,7 @@ def arraystat_2 (table, sid, per=True) :
 
       '''
     
-    s_table = data_cut( table, [sid], season=0, flags=0 )
+    s_table = data_cut( table, [sid], season=season, flags=0 )
 
     if len(s_table) < 1:
         print "no data for %d!" % sid
@@ -77,6 +95,8 @@ def arraystat_2 (table, sid, per=True) :
     for b in bands:
         # use b.data, b.err
         
+        b.rchi2 = reduced_chisq( b.data, b.err )
+
         b.mean = b.data.mean()
         b.rms = b.data.std()
         b.min = b.data.min()
@@ -86,13 +106,14 @@ def arraystat_2 (table, sid, per=True) :
         b.mean_err = b.err.mean()
 
         # Robust quantifiers simply have an "r" at the end of their names
-        b.datar = rb.removeoutliers(b.data, 3, niter=2)
-        
-        b.meanr = rb.meanr(b.data)
-        b.rmsr = rb.stdr(b.data)
-        b.minr = b.datar.min()
-        b.maxr = b.datar.max()
-        b.peak_troughr = b.maxr - b.minr
+        if rob:
+            b.datar = rb.removeoutliers(b.data, 3, niter=2)
+            
+            b.meanr = rb.meanr(b.data)
+            b.rmsr = rb.stdr(b.data)
+            b.minr = b.datar.min()
+            b.maxr = b.datar.max()
+            b.peak_troughr = b.maxr - b.minr
 
         # Period finding... is a little dodgy still, and might take forever
         if per:
@@ -135,7 +156,8 @@ def base_lookup (table):
     return Lookup
 
 
-def spreadsheet_write (table, lookup, season, outfile, Test=False, per=False):
+def spreadsheet_write (table, lookup, season, outfile, 
+                       Test=False, rob=False, per=False):
     ''' Makes my spreadsheet! Basically with a big forloop.
 
     Inputs:
@@ -175,6 +197,7 @@ def spreadsheet_write (table, lookup, season, outfile, Test=False, per=False):
     for b in bands:
         b.mean = np.ones(l)
         b.rms =  np.ones(l)
+        b.rchi2 =np.ones(l)
         b.min =  np.ones(l)
         b.max =  np.ones(l)
         b.peak_trough =  np.ones(l)
@@ -199,7 +222,7 @@ def spreadsheet_write (table, lookup, season, outfile, Test=False, per=False):
     for sid, i in zip(sidarr, range(len(sidarr)) ):
 
         # v for values
-        v = arraystat_2 (table, sid, per)
+        v = arraystat_2 (table, sid, season, rob, per)
         if v == None:
             #skup assigning anything!
             continue
@@ -227,13 +250,16 @@ def spreadsheet_write (table, lookup, season, outfile, Test=False, per=False):
             b.max[i] = vb.max
             b.peak_trough[i] = vb.peak_trough
 
+            b.rchi2[i] = vb.rchi2
+
 #            b.mean_err[i] = vb.mean_err
             
-            b.meanr[i] = vb.meanr
-            b.rmsr[i] = vb.rmsr
-            b.maxr[i] = vb.maxr
-            b.minr[i] = vb.minr
-            b.peak_troughr[i] = vb.peak_troughr
+            if rob:
+                b.meanr[i] = vb.meanr
+                b.rmsr[i] = vb.rmsr
+                b.maxr[i] = vb.maxr
+                b.minr[i] = vb.minr
+                b.peak_troughr[i] = vb.peak_troughr
 
             if per:
                 b.lsp_per[i] = vb.lsp_per
@@ -270,11 +296,14 @@ def spreadsheet_write (table, lookup, season, outfile, Test=False, per=False):
         Output.add_column(bn+'max', b.max)
         Output.add_column(bn+'peak_trough', b.peak_trough)
 
-        Output.add_column(bn+'meanr', b.meanr)
-        Output.add_column(bn+'rmsr', b.rmsr)
-        Output.add_column(bn+'minr', b.minr)
-        Output.add_column(bn+'maxr', b.maxr)
-        Output.add_column(bn+'peak_troughr', b.peak_troughr)
+        Output.add_column(bn+'rchi2', b.rchi2)
+
+        if rob:
+            Output.add_column(bn+'meanr', b.meanr)
+            Output.add_column(bn+'rmsr', b.rmsr)
+            Output.add_column(bn+'minr', b.minr)
+            Output.add_column(bn+'maxr', b.maxr)
+            Output.add_column(bn+'peak_troughr', b.peak_troughr)
 
         if per:
             Output.add_column(bn+'lsp_per', b.lsp_per)
