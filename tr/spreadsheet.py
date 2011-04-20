@@ -24,6 +24,8 @@ def reduced_chisq ( m, sigma_m ):
 
 #    n = m.size
 #    nu = n - 1
+    if n < 2:
+        return 0
 
     return (1./(m.size - 1)) * np.sum( (m - m.mean())**2 / sigma_m**2 )
 
