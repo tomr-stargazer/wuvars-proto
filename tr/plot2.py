@@ -11,7 +11,7 @@ from tr_helpers import season_cut, data_cut, ensemble_cut
 
 def reddening_vector(x, y, a_v, 
                      shape='full', lw=2, length_includes_head=True,
-                     head_width=.1,**kwargs):
+                     head_width=.05,**kwargs):
     """ Plots a reddening vector in a JHK color-color diagram
     at (x,y) of A_V length.
     
