@@ -121,7 +121,7 @@ def ensemble_cut (corr_table, chip, season, flags=-1) :
 
 
     Arguments:
-      table: an atpy table with CORRECTIONS to time-series photometry
+      corr_table: an atpy table with CORRECTIONS to time-series photometry
       chip: a WFCAM chip (1-16)
       season: Which observing season of our dataset (1,2, or 3)
 

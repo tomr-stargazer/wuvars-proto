@@ -33,6 +33,26 @@ ms_hmk = np.array(
       0.16,  0.18,  0.19,  0.21,  0.26,  0.28,  0.29,  0.3 ,  0.31,  0.33] )
 
 
+def plot_trajectory_vanilla (ax, a_k=1):
+    ''' Does nothing but plots the main sequence, reddening lines.
+    Will be extended to also plot the CTTS locus.'''
+
+    global ms_hmk, ms_jmh
+    ax.plot(ms_hmk, ms_jmh, 'k')
+
+    slope = (3.6/2.1)
+    top = np.where( (ms_jmh-slope*ms_hmk) == (ms_jmh - slope*ms_hmk).max())
+    # Dotted reddening lines: 1. from the bottom
+    ax.plot( [ms_hmk[0], ms_hmk[0] + 1.5*a_k], 
+             [ms_jmh[0], ms_jmh[0] + 1.5*slope*a_k], 'k--')
+
+    # 2. from the peak
+    ax.plot( [ms_hmk[top], ms_hmk[top] + a_k], 
+             [ms_jmh[top], ms_jmh[top] + slope*a_k], 'k--')
+    return
+
+    
+
 # Change the colorbar call to the figure method (figure it out) [ ]
 def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
                           fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1,
@@ -387,7 +407,7 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
 
         plt.text(0.05, 0.05, b.fx2_per_str,
              horizontalalignment='left', verticalalignment='bottom', 
-             bbox=dict(facecolor='white'),transform= b.ax3.transAxes)
+             bbox=dict(facecolor='white',alpha=0.3),transform= b.ax3.transAxes)
 
 
     plt.suptitle( "Position: %s,       Source ID %d." % (sPositionString, sid))
@@ -432,6 +452,17 @@ def plot_page_periods (table, sid, outfile='', name='?', season = 123,
 def plot_5 (table,sid, outfile='', name='?', season = 123, png_too=False) :
     ''' Plots all five lightcurves of one star: J, H, K, J-H, H-K, 
     on one page, for one season.
+
+    Inputs:
+      table -- atpy table with time series photometry
+      sid -- WFCAM source ID of star to plot
+      
+    Optional inputs:
+      outfile -- a place to save the file 
+      name -- a short string to display as a name atop the plot
+      season -- the usual
+      png_too -- if True, saves both a PDF and a PNG of the outfile
+                 (note - iff True, don't give a filename extension)
 
     Note: heavy edits have made that not strictly true.
     '''

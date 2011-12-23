@@ -9,7 +9,7 @@ import subprocess
 import numpy
 import tr_plot
 #import plot
-#from plot import season_cut
+from tr_helpers import season_cut
 
 def chi_input_writer (name, t, x, err, outfile):
     ''' Writes data to a table suitable for runchi2's input. Returns outfile.'''
