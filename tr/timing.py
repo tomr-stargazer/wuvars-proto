@@ -51,7 +51,7 @@ def lsp_mask ( Wk1, Wk2, upper_f=upper_f, lower_f=lower_f, midrange=midrange ):
     trim = np.where( (Wk1 < upper_f) & (Wk1 > lower_f) &
                      ( (Wk1 < midrange[0][0]) | (Wk1 > midrange[0][1]) ) )
 
-    print "lols qwerty"
+    print "LSP mask executed properly."
     Jmax = np.where( Wk2 == Wk2[trim].max() )[0][0]
     return Jmax
 

@@ -424,6 +424,141 @@ def phase (table, sid, period='auto', outfile='', season=123, offset=0):
     return period
 
 
+def lsp_power (table, sid, outfile='', name='', season=123, png_too=False):
+    ''' 
+    Plots J, H, K periodograms for one star.
+
+    Inputs:
+      table -- atpy table with time series photometry
+      sid -- WFCAM source ID of star to plot
+      
+    Optional inputs:
+      outfile -- a place to save the file 
+      name -- a short string to display as a name atop the plot
+      season -- the usual
+      png_too -- if True, saves both a PDF and a PNG of the outfile
+                 (note - iff True, don't give a filename extension)
+                 '''
+    
+    # Loading up the relevant datapoints to plot (note I set flags to 0)
+    s_table = season_cut(table, sid, season, flags=0)
+
+    if len(s_table) < 2:
+        print "no data here"
+        return
+
+    date = s_table.MEANMJDOBS - 54579
+
+    jcol = s_table.JAPERMAG3
+    hcol = s_table.HAPERMAG3
+    kcol = s_table.KAPERMAG3
+#    jmh =  s_table.JMHPNT
+#    hmk =  s_table.HMKPNT
+
+#    jerr = s_table.JAPERMAG3ERR
+#    herr = s_table.HAPERMAG3ERR
+#    kerr = s_table.KAPERMAG3ERR
+#    jmherr=s_table.JMHPNTERR
+#    hmkerr=s_table.HMKPNTERR
+
+    jlsp = lsp(date, jcol, 6., 6.)
+    hlsp = lsp(date, hcol, 6., 6.)
+    klsp = lsp(date, kcol, 6., 6.)
+
+    j_lsp_freq = jlsp[0]
+    h_lsp_freq = hlsp[0]
+    k_lsp_freq = klsp[0]
+
+    j_lsp_power = jlsp[1]
+    h_lsp_power = hlsp[1]
+    k_lsp_power = klsp[1]
+
+    # best periods, filtered by the lsp_mask
+    j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
+    h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
+    k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
+    
+
+    fig = plt.figure(figsize = (10, 6), dpi=80,
+                     facecolor='w', edgecolor='k')
+
+    ax_j = fig.add_subplot(3,1,1)
+    ax_h = fig.add_subplot(3,1,2, sharex=ax_j)
+    ax_k = fig.add_subplot(3,1,3, sharex=ax_j)
+
+    ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
+    ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
+    ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
+    
+    ax_j.set_xscale('log')
+    ax_h.set_xscale('log')
+    ax_k.set_xscale('log')
+
+    ax_j.set_title(name)
+    ax_k.set_xlabel("Period (days)")
+    ax_h.set_ylabel("Periodogram Power")
+
+    # bottom = 0.1
+    # height = .25
+    # left = 0.075
+    # width = 0.5
+
+    # ax_k = fig.add_axes( (left, bottom, width, height) )
+    # ax_h = fig.add_axes( (left, bottom+.3, width, height), sharex=ax_k )
+    # ax_j = fig.add_axes( (left, bottom+.6, width, height), sharex=ax_k )
+    
+    # ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
+    # ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
+
+    # # Plot J-band:
+    # ax_j.errorbar( date, jcol, yerr=jerr, fmt='bo', ecolor='k')
+    # ax_j.invert_yaxis()
+
+    # # Plot H-band:
+    # ax_h.errorbar( date, hcol, yerr=herr, fmt='go', ecolor='k' )
+    # ax_h.invert_yaxis()
+
+    # # Plot K-band:
+    # ax_k.errorbar( date, kcol, yerr=kerr, fmt='ro', ecolor='k' )
+    # ax_k.invert_yaxis()
+
+    # # Plot J-H vs H-K
+    # plot_trajectory_core( ax_jhk, hmk, jmh, date )
+
+    # # Plot K vs H-K
+    # plot_trajectory_core( ax_khk, hmk, kcol, date , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line
+    # ax_khk.invert_yaxis()
+
+    # # Hide the bad labels...
+    # plt.setp(ax_j.get_xticklabels(), visible=False)
+    # plt.setp(ax_h.get_xticklabels(), visible=False)
+
+    # # Label stuff
+    # ax_k.set_xlabel( "Time (JD since 04/23/2008)" )
+
+    # ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
+    # ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
+    # ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
+
+    # ax_jhk.set_xlabel( "H-K" )
+    # ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
+    # ax_khk.set_xlabel( "H-K" )
+    # ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
+
+
 def phase_trajectory (table, sid, period='auto', outfile='', season=123, 
                       offset=0):
     ''' Does just the trajectory window from earlier. '''

@@ -168,6 +168,8 @@ def spreadsheet_write (table, lookup, season, outfile,
       lookup -- an ATpy table of interesting sources and their designations
       season -- the usual
       outfile -- where to put it
+
+      Note: crashes if given any stars with only 1 observation and per=True.
       '''
 
     sidarr = lookup.SOURCEID
@@ -227,7 +229,7 @@ def spreadsheet_write (table, lookup, season, outfile,
         # v for values
         v = arraystat_2 (table, sid, season, rob, per)
         if v == None:
-            #skup assigning anything!
+            #skip assigning anything!
             continue
         vbands = [v.j, v.h, v.k, v.jmh, v.hmk]
         vband_names = ['v.j', 'v.h', 'v.k', 'v.jmh', 'v.hmk']

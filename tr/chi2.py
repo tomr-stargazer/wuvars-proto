@@ -7,7 +7,7 @@
 
 import subprocess
 import numpy
-import tr_plot
+#import tr_plot
 #import plot
 from tr_helpers import season_cut
 
