@@ -348,4 +348,4 @@ def spread_write_test (table, lookup) :
     ''' Tests spreadsheet_write.'''
 
     test_path = '/home/trice/reu/DATA/Merged_Catalogs/spreadsheet/test.fits'
-    spreadsheet_write (table, lookup, 0, test_path, Test=True)
+    spreadsheet_write (table, lookup, -1, test_path, Test=True)
