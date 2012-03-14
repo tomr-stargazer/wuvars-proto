@@ -109,6 +109,9 @@ def season_cut (table, sid, season, flags=-1) :
     elif season == 3:
         low = offset+cut2
         high = offset+cut3
+    elif season == -1:
+        low = 0
+        high = 1e6
     else:
         low = offset
         high = offset+cut3
