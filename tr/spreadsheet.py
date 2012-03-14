@@ -60,7 +60,7 @@ def arraystat_2 (table, sid, season=0, rob=True, per=True) :
 
     date = s_table.MEANMJDOBS 
 
-    messy_table = data_cut( table, [sid], season=0 )
+    messy_table = data_cut( table, [sid], season=-1 )
     jppcol=messy_table.JPPERRBITS
     hppcol=messy_table.HPPERRBITS
     kppcol=messy_table.KPPERRBITS
