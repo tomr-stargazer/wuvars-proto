@@ -21,6 +21,12 @@ def data_cut (table, sid_list, season, flags=-1):
     Optional inputs:
       flags -- whether to remove bad observations (default: no)
                and where to draw the cutoff.
+
+    Note:
+      If "season" is set to "-1", then cut at 0 and 1e6 
+      (i.e., don't cut). This was introduced to make this function
+      compatible with the Orion data, which are not neatly organized 
+      into seasons.
     '''
 
     # First, select these sources' data from the table
