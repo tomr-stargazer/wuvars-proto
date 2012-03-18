@@ -1,4 +1,12 @@
-''' A collection of functions for matching tables based on source positions.'''
+''' A collection of functions for matching tables based on source positions.
+
+Modification History:
+
+June 2010: Created. Tom Rice (t.rice90@gmail.com)
+17 March 2012: Added 'units' keyword to coords_match.
+
+
+'''
 
 import atpy 
 import numpy, math
@@ -157,9 +165,13 @@ def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
     match, min_offset = core_match(radd1,dedd1,radd2,dedd2,max_match,verbose)
     return (match[0], min_offset[0])
 
-def coords_match ( position, table, max_match = 10, verbose=True) :
+def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
     ''' Uses a coords.Position object and a table'''
     ra,dec = position.dd()
-    radd2 = numpy.degrees(table.RA)
-    dedd2 = numpy.degrees(table.DEC)
-    return small_match(ra,dec,radd2,dedd2,max_match,verbose=True)
+    if units=='rad':
+        radd2 = numpy.degrees(table.RA)
+        dedd2 = numpy.degrees(table.DEC)
+    else:
+        radd2 = table.RA
+        dedd2 = table.DEC
+    return small_match(ra,dec,radd2,dedd2,max_match,verbose=verbose)
