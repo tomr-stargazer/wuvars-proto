@@ -10,13 +10,13 @@ June 2010: Created. Tom Rice (t.rice90@gmail.com)
 '''
 
 import atpy 
-import numpy
-import math
+import numpy as np
+#import math
 import matplotlib.pyplot as plt
 import coords
 
-where = numpy.where
-sect = numpy.intersect1d
+where = np.where
+sect = np.intersect1d
 
 v = False
 
@@ -34,11 +34,11 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
     global v
     v = verbose
 
-    delta = math.cos(math.radians(numpy.abs(dedd1).max()))
+    delta = np.cos(np.radians(np.abs(dedd1).max()))
     boxsize = max_match / 3600.
 
-    min_offset = -0.1 * numpy.ones_like(radd1)
-    match      = -1   * numpy.ones_like(radd1).astype(int)
+    min_offset = -0.1 * np.ones_like(radd1)
+    match      = -1   * np.ones_like(radd1).astype(int)
 
     counter = 1
 
@@ -52,10 +52,14 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
         w4 = where(dedd2 > dedd1[s1] - boxsize)[0]
 
         # Let's slice a box around our source
-        box = sect(sect(w1,w2),sect(w3,w4))
+#        box = sect(sect(w1,w2),sect(w3,w4))
+        box = np.array( (radd2 < radd1[s1] + boxsize/delta) and
+                        (radd2 > radd1[s1] - boxsize/delta) and
+                        (dedd2 < dedd1[s1] + boxsize) and
+                        (dedd2 > dedd1[s1] - boxsize))
 
         # And calculate offsets to all sources inside that box
-        offset = -1. * numpy.ones_like(radd2[box])
+        offset = -1. * np.ones_like(radd2[box])
         if offset.size != 0:
             for s2 in range(offset.size):
                 p2 = coords.Position( (radd2[box][s2], dedd2[box][s2]),  units = 'deg')
@@ -100,15 +104,15 @@ def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
         table1.radd = table1.data[ra1]
         table1.dedd = table1.data[dec1]
     elif ('rad' or 'RAD') in table1.columns[ra1].unit:
-        table1.radd = numpy.degrees(table1.data[ra1])
-        table1.dedd = numpy.degrees(table1.data[dec1])
+        table1.radd = np.degrees(table1.data[ra1])
+        table1.dedd = np.degrees(table1.data[dec1])
 
     if ('deg' or 'DEG') in table2.columns[ra2].unit:
         table2.radd = table2.data[ra2]
         table2.dedd = table2.data[dec2]
     elif ('rad' or 'RAD') in table2.columns[ra2].unit:
-        table2.radd = numpy.degrees(table2.data[ra2])
-        table2.dedd = numpy.degrees(table2.data[dec2])
+        table2.radd = np.degrees(table2.data[ra2])
+        table2.dedd = np.degrees(table2.data[dec2])
 
     vprint('Matching two tables: ')
     vprint( table1.columns )
@@ -161,8 +165,8 @@ def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
     Negative return values indicate failure to match.
     '''
 
-    radd1 = numpy.array([ra])
-    dedd1 = numpy.array([dec])
+    radd1 = np.array([ra])
+    dedd1 = np.array([dec])
 
     match, min_offset = core_match(radd1,dedd1,radd2,dedd2,max_match,verbose)
     return (match[0], min_offset[0])
@@ -171,8 +175,8 @@ def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
     ''' Uses a coords.Position object and a table'''
     ra,dec = position.dd()
     if units=='rad':
-        radd2 = numpy.degrees(table.RA)
-        dedd2 = numpy.degrees(table.DEC)
+        radd2 = np.degrees(table.RA)
+        dedd2 = np.degrees(table.DEC)
     else:
         radd2 = table.RA
         dedd2 = table.DEC
