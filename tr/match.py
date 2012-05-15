@@ -1,15 +1,17 @@
-''' A collection of functions for matching tables based on source positions.
+''' 
+A collection of functions for matching tables based on source positions.
 
 Modification History:
 
 June 2010: Created. Tom Rice (t.rice90@gmail.com)
 17 March 2012: Added 'units' keyword to coords_match.
-
+15 May 2012: Updating code.
 
 '''
 
 import atpy 
-import numpy, math
+import numpy
+import math
 import matplotlib.pyplot as plt
 import coords
 
