@@ -95,7 +95,6 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
             # If the closest match is within our matching circle
             if offset.min() < max_match:
                 min_offset[s1] = offset.min()
-                print box[ offset == offset.min() ][0]
                 match[s1] = box[where(offset == offset.min() )][0]
                 vprint( "Source %d: Matched with %f arcsec" \
                         % (counter, offset.min() ) )
