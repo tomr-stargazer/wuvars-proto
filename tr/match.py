@@ -1,11 +1,15 @@
 ''' 
 A collection of functions for matching tables based on source positions.
 
+Available functions:
+
+
 Modification History:
 
 June 2010: Created. Tom Rice (t.rice90@gmail.com)
 17 March 2012: Added 'units' keyword to coords_match.
 15 May 2012: Updating code.
+17 May 2012: Still updating code, mainly by standardizing documentation.
 
 '''
 
@@ -29,6 +33,21 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
     ''' Matches two sets of position arrays and returns (two numpy arrays).
 
     Assumes all positions are decimal degrees.
+
+    Parameters
+    ----------
+    radd1, dedd1 : numpy arrays
+        R.A. and Decl. arrays for the first table. In decimal degrees.
+    radd2, dedd2 : numpy arrays
+        R.A. and Decl. arrays for the second table. In decimal degrees.
+    max_match : float
+        Largest acceptable offset (in arcsec) for two sources to match.
+
+    Returns
+    -------
+    
+    match : 
+    min_offset : 
     '''
     
     global v
@@ -53,9 +72,9 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
 
         # Let's slice a box around our source
 #        box = sect(sect(w1,w2),sect(w3,w4))
-        box = np.array( (radd2 < radd1[s1] + boxsize/delta) and
-                        (radd2 > radd1[s1] - boxsize/delta) and
-                        (dedd2 < dedd1[s1] + boxsize) and
+        box = np.array( (radd2 < radd1[s1] + boxsize/delta) &
+                        (radd2 > radd1[s1] - boxsize/delta) &
+                        (dedd2 < dedd1[s1] + boxsize) &
                         (dedd2 > dedd1[s1] - boxsize))
 
         # And calculate offsets to all sources inside that box
@@ -172,7 +191,27 @@ def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
     return (match[0], min_offset[0])
 
 def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
-    ''' Uses a coords.Position object and a table'''
+    ''' 
+    Matches a coords.Position object to a table with coordinates.
+
+    Parameters
+    ----------
+    position : coords.Position object
+    table : ATpy table 
+        Assumes the table has columns named "RA" and "DEC".
+    max_match : int, optional
+        The upper limit on match size, in arcseconds
+        (defaults to 10).
+    verbose : bool, optional
+        Whether to print internal statements (defaults to True).
+    units : str, optional
+        What units to interpret the input Table in
+        (defaults to 'rad' for radians).
+
+    Returns
+    -------
+
+    '''
     ra,dec = position.dd()
     if units=='rad':
         radd2 = np.degrees(table.RA)
@@ -180,4 +219,6 @@ def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
     else:
         radd2 = table.RA
         dedd2 = table.DEC
+
+        
     return small_match(ra,dec,radd2,dedd2,max_match,verbose=verbose)
