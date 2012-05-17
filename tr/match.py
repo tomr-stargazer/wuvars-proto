@@ -71,11 +71,16 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
         w4 = where(dedd2 > dedd1[s1] - boxsize)[0]
 
         # Let's slice a box around our source
-#        box = sect(sect(w1,w2),sect(w3,w4))
-        box = np.array( (radd2 < radd1[s1] + boxsize/delta) &
-                        (radd2 > radd1[s1] - boxsize/delta) &
-                        (dedd2 < dedd1[s1] + boxsize) &
-                        (dedd2 > dedd1[s1] - boxsize))
+        box = sect(sect(w1,w2),sect(w3,w4))
+
+#       HEY. dear anybody who ever edits this code:
+#       DO NOT change the implementation of how "box" works. It works.
+#       Leave it be. Do not attempt anything silly like the following.
+
+#        box = np.array( (radd2 < radd1[s1] + boxsize/delta) &
+#                        (radd2 > radd1[s1] - boxsize/delta) &
+#                        (dedd2 < dedd1[s1] + boxsize) &
+#                        (dedd2 > dedd1[s1] - boxsize))
 
         # And calculate offsets to all sources inside that box
         offset = -1. * np.ones_like(radd2[box])
@@ -87,7 +92,8 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
             # If the closest match is within our matching circle
             if offset.min() < max_match:
                 min_offset[s1] = offset.min()
-                match[s1] = box[ where(offset == offset.min()) ][0]
+                print box[ offset == offset.min() ][0]
+                match[s1] = box[where(offset == offset.min() )][0]
                 vprint( "Source %d: Matched with %f arcsec" \
                         % (counter, offset.min() ) )
             else:
