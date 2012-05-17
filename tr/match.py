@@ -45,9 +45,12 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
 
     Returns
     -------
-    
-    match : 
-    min_offset : 
+    match : numpy array
+        Gives the index in table 2 corresponding to each item 
+        in table 1. A value of -1 is a failed match.
+    min_offset : numpy array
+        Gives the distance between the best-matched items in 
+        table 1 vs table 2.
     '''
     
     global v
