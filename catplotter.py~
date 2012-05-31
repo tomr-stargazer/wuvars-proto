@@ -1,7 +1,0 @@
-import atpy
-import numpy
-import matplotlib.pyplot as plt
-
-data = '/home/trice/reu/DATA/Merged_Catalogs'
-
-# don't forget: 0 mag is brighter than 30 mag
