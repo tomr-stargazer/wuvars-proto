@@ -290,6 +290,7 @@ def lc (table, sid, outfile='', name='?', season=123, png_too=False):
         if png_too:
             plt.savefig(outfile+".pdf")
             plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
             plt.close()
         else:
             plt.savefig(outfile)
