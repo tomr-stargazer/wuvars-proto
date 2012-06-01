@@ -1,7 +1,11 @@
 '''
-Here's some Helper functions.
+This is a module that contains 'helper' functions that are called 
+by the other packages in wuvars. It does not import any of my other 
+modules, for dependency reasons.
 
-This module does not call any of my other modules, for dependency reasons.
+Useful functions:
+  season_cut - Cuts a table for a selection of sources and seasons
+  data_cut - Also cuts a table for a selection of sources and seasons
 '''
 import atpy
 import numpy as np
