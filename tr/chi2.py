@@ -1,4 +1,12 @@
-''' Functions that interface with Palmer's runchi2 program.'''
+''' 
+This package interfaces with Palmer's runchi2 program, which
+is found at http://public.lanl.gov/palmer/fastchi.html and described in
+2009ApJ...695..496P.
+
+Useful functions:
+  chi_analyze - returns best frequency for one source in a table
+  test_analyze - returns best frequency for raw input arrays t, x, xerr
+'''
 
 # This is the correct one.
 
