@@ -1,0 +1,8 @@
+wuvars-proto
+
+  WUVARS is a set of software tools developed to access,
+  process, analyze, and visualize time-series photometry
+  from UKIRT's WFCAM instrument, after being processed 
+  through the WFCAM Science Archive.
+
+  
