@@ -8,6 +8,19 @@ wuvars-proto
   The primary software modules are located in the tr/ 
   subdirectory.
 
+  A description of the main modules:
+    tr/plot2.py - used to visualize lightcurves
+    tr/scargle.py - performs Lomb-Scargle Periodogram analysis
+    tr/chi2.py - interfaces with Palmer's Fast Chi-Squared 
+                 frequency analysis
+    tr/spreadsheet.py - calculates statistics of photometry &
+    		      	variability for lists of stars
+    tr/stetson.py - calculates the Stetson variability index
+    tr/robust.py - calculates Robust statistics
+    tr/timing.py - implements a filter for periodogram frequencies
+    tr/tr_helpers.py - contains a number of helper functions 
+    		       used in the above packages
+
   WUVARS is written in Python, heavily using the NumPy, 
   Matplotlib, and ATpy packages.
 
