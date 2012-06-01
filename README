@@ -5,4 +5,10 @@ wuvars-proto
   from UKIRT's WFCAM instrument, after being processed 
   through the WFCAM Science Archive.
 
-  
+  The primary software modules are located in the tr/ 
+  subdirectory.
+
+  WUVARS is written in Python, heavily using the NumPy, 
+  Matplotlib, and ATpy packages.
+
+  Created in 2010-2012 by Tom Rice (t.rice90@gmail.com).
