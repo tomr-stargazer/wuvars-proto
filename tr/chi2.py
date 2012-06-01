@@ -122,21 +122,21 @@ def test_analyze (t, x, err):
 
     return parse_chi ( run_chi ( datafile ) )
 
-def chi_plot (table, sid, band = 'j', outfile='', season=123, harmonic=1) :
-    ''' Does everything for one source and plots a phase plot.
-    Returns the PERIOD that is plots by. '''
+# def chi_plot (table, sid, band = 'j', outfile='', season=123, harmonic=1) :
+#     ''' Does everything for one source and plots a phase plot.
+#     Returns the PERIOD that is plots by. '''
 
-    import plot
+#     import plot
 
-    f = chi_analyze (table, sid, band, season)
+#     f = chi_analyze (table, sid, band, season)
 
-    period = 1./f
+#     period = 1./f
     
-    #tr_plot.plot_phase (table, sid, period*harmonic, band, season)
-    plot.plot_phase (table, sid, period*harmonic, outfile=outfile, band=band,
-                     season=season)
+#     #tr_plot.plot_phase (table, sid, period*harmonic, band, season)
+#     plot.plot_phase (table, sid, period*harmonic, outfile=outfile, band=band,
+#                      season=season)
 
-    return period
+#     return period
     
 # Next step... combine stat and chi2 to make a table of best-freq and chi^2 
 # values for every source. I've been assuming that chi^2 can be used as a 
