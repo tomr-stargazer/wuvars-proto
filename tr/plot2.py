@@ -318,7 +318,8 @@ def lc (table, sid, outfile='', name='?', season=123, png_too=False,
             plt.close()
 
 
-def phase (table, sid, period='auto', outfile='', season=123, offset=0):
+def phase (table, sid, period='auto', outfile='', season=123, offset=0, 
+           flags=0):
     ''' 
     Plots J, H, K lightcurves, as well as JHK color-color and color-mag
     trajectories, for one star.
@@ -333,10 +334,14 @@ def phase (table, sid, period='auto', outfile='', season=123, offset=0):
       season -- the usual
       png_too -- if True, saves both a PDF and a PNG of the outfile
                  (note - iff True, don't give a filename extension)
+      flags -- whether to remove bad observations from plotting, 
+               and where to draw the cutoff.
+
                  '''
     
-    # Loading up the relevant datapoints to plot (note I set flags to 0)
-    s_table = season_cut(table, sid, season, flags=0)
+    # Loading up the relevant datapoints to plot 
+    # (note I set 'flags' as a keyword)
+    s_table = season_cut(table, sid, season, flags=flags)
 
     if len(s_table) == 0:
         print "no data here"
