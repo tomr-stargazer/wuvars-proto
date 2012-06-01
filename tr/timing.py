@@ -1,6 +1,9 @@
 '''
-Code to filter out bad periods from the periodograms, 
-and then return the best period!
+This package has code to filter out bad periods from periodogram 
+analysis, and to return the best filtered period.
+
+Useful functions:
+  lsp_mask - Trims unreliable frequencies from a periodogram
 '''
 
 from __future__ import division
