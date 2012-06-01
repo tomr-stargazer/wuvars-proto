@@ -1,6 +1,0 @@
-'''A wrapper module to handle all tr_ objects!'''
-
-from plot import plot_lc, plot_phase
-from stats import *
-from chi2 import *
-from match import *
