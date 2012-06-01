@@ -3,6 +3,39 @@
 *.pyc
 *~
 
+# Local stuff #
+catplotter.py
+catplotter2.py
+catplotter3.py
+final/
+find_brightest.py
+find_constant.py
+find_dimmest_test.py
+lolrus.eps
+lolrus.png
+match_t1.py
+match_t2.py
+match_t3.py
+match_t4.py
+match_t5.py
+match_t6.py
+match_t7.py
+match_t8.py
+more_backups/
+new/
+notes.txt
+plot_brights.py
+plotter.py
+plotter2.py
+plotter3.py
+plotter4.py
+stat_fun1.py
+stat_fun2.py
+stat_fun3.py
+stat_t1.py
+stat_t2.py
+transient_disks.py
+
 # Compiled source #
 ###################
 *.com
