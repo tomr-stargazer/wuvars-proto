@@ -1,3 +1,20 @@
+'''
+This is the primary visualization package within wuvars.
+
+Useful functions:
+ # Primary functions
+ lc - Plots J, H, K lightcurves
+ phase - Plots J, H, K lightcurves folded by some period
+ lsp_power - Plots J, H, K periodograms for one star.
+ 
+ # Helper functions
+ reddening_vector - Plots a reddening vector in a JHK color-color diagram
+ plot_trajectory_vanilla - Plots the main sequence and CTTS locus in JHK
+ plot_trajectory_core - Plots the trajectory of some star in JHK space
+ plot_trajectory - Takes a source from a table and plots its JHK trajectory
+ plot_phase_core - Plots a pretty period-folded lightcurve
+'''
+
 import atpy
 import numpy as np
 import matplotlib.pyplot as plt
