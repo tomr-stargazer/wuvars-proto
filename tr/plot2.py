@@ -18,8 +18,8 @@ Useful functions:
 import atpy
 import numpy as np
 import matplotlib.pyplot as plt
-import coords
-import stetson
+#import coords
+#import stetson
 from chi2 import test_analyze
 from scargle import fasper as lsp
 from timing import lsp_mask
