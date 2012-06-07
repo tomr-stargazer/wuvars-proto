@@ -88,6 +88,7 @@ def do_it_all( table, sid_list, name_list, path ):
             mkdir_p("%sphase/%s/%s"%(path,s,t))
             
     # We should now be done making directories. Let's test this.
+    # Tested! Woo.
 
     return
 
