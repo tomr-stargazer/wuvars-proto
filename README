@@ -20,6 +20,8 @@ wuvars-proto
     tr/timing.py - implements a filter for periodogram frequencies
     tr/tr_helpers.py - contains a number of helper functions 
     		       used in the above packages
+    tr/super.py - a set of magic functions that make very many 
+                  figures and plots simultaneously.
 
   WUVARS is written in Python, heavily using the NumPy, 
   Matplotlib, and ATpy packages.
