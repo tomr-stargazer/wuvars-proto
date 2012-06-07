@@ -113,11 +113,23 @@ def do_it_all( table, sid_list, name_list, path='' ):
         spreadsheet_write(table, lookup, season, tables+ss+'/spreadsheet.fits',
                           per=True)
 
+        # Not yet tested.
+    return
 
     # What command do we want to make plots?
     # Probably plot3.lc and plot3.phase, which are going to be almost 
     # identical to plot2 equivalents except that they can handle missing data 
     # and flags and stuff.
+
+    ## Third, make lightcurves.
+        
+    for season, s in zip([1,2,3,123], ss):
+        for name, sid in zip(name_list, sid_list):
+            # The specific plot command we use here depends a lot
+            # on what functions are available.
+            tplot.lc(table, sid, season=season, name=name, flags=16,
+                     outfile="lc/"+s+"/"+name, png_too=True) #png, eps, pdf
+
 
     return
 
