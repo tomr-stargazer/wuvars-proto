@@ -28,7 +28,7 @@ def mkdir_p(path):
         else: raise
 
 
-def do_it_all( table, sid_list, name_list, path ):
+def do_it_all( table, sid_list, name_list, path='' ):
     """ 
     Does some stuff. Not sure exactly what yet, but I'll 
     want it to make tons of plots and tables for a list of 
@@ -57,6 +57,10 @@ def do_it_all( table, sid_list, name_list, path ):
     The input data must already be cleaned via some other method.
     
     """
+
+    if path=='' or type(path) is not str:
+        print "Path must be a string. Exiting without action."
+        return
     
     # Force `path` to have a trailing forward slash
     path = path.rstrip('/')+'/'
@@ -111,6 +115,9 @@ def do_it_all( table, sid_list, name_list, path ):
 
 
     # What command do we want to make plots?
+    # Probably plot3.lc and plot3.phase, which are going to be almost 
+    # identical to plot2 equivalents except that they can handle missing data 
+    # and flags and stuff.
 
     return
 
