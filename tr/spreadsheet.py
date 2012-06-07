@@ -32,7 +32,7 @@ def reduced_chisq ( m, sigma_m ):
 
 
 
-def arraystat_2 (table, sid, season=0, rob=True, per=True) :
+def arraystat_2 (table, sid, season=0, rob=True, per=True, flags=0) :
     ''' Calculates a complicated number of parameters for a given star.
 
     Inputs:
@@ -40,11 +40,13 @@ def arraystat_2 (table, sid, season=0, rob=True, per=True) :
       sid -- a WFCAM source ID.
       
     Optional inputs:
+      season -- which season to select (1,2,3, or other=All)
+      rob -- also use Robust statistics? (takes longer, default True)
       per -- run period-finding? (takes longer, default True)
-
+      flags -- Maximum ppErrBit quality flags to use (default 0)
       '''
     
-    s_table = data_cut( table, [sid], season=season, flags=0 )
+    s_table = data_cut( table, [sid], season=season, flags=flags )
 
     if len(s_table) < 1:
         print "no data for %d!" % sid
