@@ -12,7 +12,7 @@ Useful functions:
 import atpy
 import numpy as np
 import matplotlib.pyplot as plt
-
+import spreadsheet
 
 import os, errno
 
@@ -110,10 +110,10 @@ def do_it_all( table, sid_list, name_list, path='' ):
     for season, s in zip([1,2,3,123], ss):
         
         # Write the spreadsheet and save it to the relevant directory.
-        spreadsheet_write(table, lookup, season, tables+ss+'/spreadsheet.fits',
-                          per=True)
+        spreadsheet.spreadsheet_write(table, lookup, season, 
+                                      tables+s+'/spreadsheet.fits', per=True)
 
-        # Not yet tested.
+        # Tested!
     return
 
     # What command do we want to make plots?
@@ -122,6 +122,8 @@ def do_it_all( table, sid_list, name_list, path='' ):
     # and flags and stuff.
 
     ## Third, make lightcurves.
+    # And put the gorram Stetson index in the title!
+
         
     for season, s in zip([1,2,3,123], ss):
         for name, sid in zip(name_list, sid_list):
