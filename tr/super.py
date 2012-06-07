@@ -59,7 +59,7 @@ def do_it_all( table, sid_list, name_list, path='' ):
     """
 
     if path=='' or type(path) is not str:
-        print "Path must be a string. Exiting without action."
+        print "`path` must be a string. Exiting without action."
         return
     
     # Force `path` to have a trailing forward slash
