@@ -58,6 +58,9 @@ def do_it_all( table, sid_list, name_list, path ):
     
     """
     
+    # Force `path` to have a trailing forward slash
+    path = path.rstrip('/')+'/'
+    
     # First, make directories for everything (or try, at least).
 
     # Structure of directories:
