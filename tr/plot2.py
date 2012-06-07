@@ -1,4 +1,4 @@
-'''
+"""
 This is the primary visualization package within wuvars.
 
 Useful functions:
@@ -13,7 +13,7 @@ Useful functions:
  plot_trajectory_core - Plots the trajectory of some star in JHK space
  plot_trajectory - Takes a source from a table and plots its JHK trajectory
  plot_phase_core - Plots a pretty period-folded lightcurve
-'''
+"""
 
 import atpy
 import numpy as np
@@ -70,8 +70,8 @@ tt_hmk = np.array([ 0.2,  1. ])
 tt_jmh = np.array([ 0.636,  1.1  ])
 
 def plot_trajectory_vanilla (ax, a_k=1, ctts=True):
-    ''' Does nothing but plots the main sequence, reddening lines.
-    Will be extended to also plot the CTTS locus.'''
+    """ Does nothing but plots the main sequence, reddening lines.
+    Will be extended to also plot the CTTS locus."""
 
     global ms_hmk, ms_jmh, tt_jmh, tt_hmk
     ax.plot(ms_hmk, ms_jmh, 'k')
@@ -101,7 +101,7 @@ def plot_trajectory_vanilla (ax, a_k=1, ctts=True):
 def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
                           fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1,
                           ms=True, ctts=True):
-    ''' Plots the trajectory of some star in color-color space.
+    """ Plots the trajectory of some star in color-color space.
     
     Inputs:
       ax -- a matplotlib Axes object (like a canvas) to draw on
@@ -116,7 +116,7 @@ def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
       ms -- Plot the Main Sequence lines? (defaults to True)
       
     Now with color maps! 
-    '''
+    """
 
     slope = (3.6/2.1)
     # First, plot the background main-sequence stuff
@@ -161,7 +161,7 @@ def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
 
 #untested
 def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
-    ''' Takes a source from a table and plots its color-color trajectory.
+    """ Takes a source from a table and plots its color-color trajectory.
 
     Inputs:
       table -- ATpy time-series photometry table.
@@ -172,7 +172,7 @@ def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
       matplotlib plot style. Defaults to black dots.
 
     This is a convenience function that tries to be smart.
-      '''
+      """
     if clear:
         plt.figure()
     ax = plt.gca()
@@ -188,10 +188,10 @@ def plot_trajectory (table, sid, season=123, clear=True, fmt='k.'):
 
 # 'hide' parameter is hackish.
 def plot_phase_core (ax, t, x, xerr, period, offset=0, color='k', hide=False):
-    ''' Plots a pretty period-folded lightcurve on a given axes object.
+    """ Plots a pretty period-folded lightcurve on a given axes object.
 
     Doesn't assume anything about your data (e.g. that it's in magnitudes)
-    '''
+    """
     # Untested.
     
     phase = ((t % period) / period + offset) % 1.
@@ -214,7 +214,7 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0, color='k', hide=False):
 
 def lc (table, sid, outfile='', name='?', season=123, png_too=False, 
         flags=0):
-    ''' 
+    """ 
     Plots J, H, K lightcurves, as well as JHK color-color and color-mag
     trajectories, for one star.
 
@@ -230,7 +230,7 @@ def lc (table, sid, outfile='', name='?', season=123, png_too=False,
                  (note - iff True, don't give a filename extension)
       flags -- whether to remove bad observations from plotting, 
                and where to draw the cutoff.
-                 '''
+                 """
     
     # Loading up the relevant datapoints to plot 
     # (note I set 'flags' as a keyword)
@@ -320,7 +320,7 @@ def lc (table, sid, outfile='', name='?', season=123, png_too=False,
 
 def phase (table, sid, period='auto', outfile='', season=123, offset=0, 
            flags=0):
-    ''' 
+    """ 
     Plots J, H, K lightcurves, as well as JHK color-color and color-mag
     trajectories, for one star.
 
@@ -337,7 +337,7 @@ def phase (table, sid, period='auto', outfile='', season=123, offset=0,
       flags -- whether to remove bad observations from plotting, 
                and where to draw the cutoff.
 
-                 '''
+                 """
     
     # Loading up the relevant datapoints to plot 
     # (note I set 'flags' as a keyword)
@@ -452,7 +452,7 @@ def phase (table, sid, period='auto', outfile='', season=123, offset=0,
 
 
 def lsp_power (table, sid, outfile='', name='', season=123, png_too=False):
-    ''' 
+    """ 
     Plots J, H, K periodograms for one star.
 
     Inputs:
@@ -465,7 +465,7 @@ def lsp_power (table, sid, outfile='', name='', season=123, png_too=False):
       season -- the usual
       png_too -- if True, saves both a PDF and a PNG of the outfile
                  (note - iff True, don't give a filename extension)
-                 '''
+                 """
     
     # Loading up the relevant datapoints to plot (note I set flags to 0)
     s_table = season_cut(table, sid, season, flags=0)
@@ -588,7 +588,7 @@ def lsp_power (table, sid, outfile='', name='', season=123, png_too=False):
 
 def phase_trajectory (table, sid, period='auto', outfile='', season=123, 
                       offset=0):
-    ''' Does just the trajectory window from earlier. '''
+    """ Does just the trajectory window from earlier. """
     # Loading up the relevant datapoints to plot (note I set flags to 0)
     s_table = season_cut(table, sid, season, flags=0)
 
