@@ -61,7 +61,7 @@ def do_it_all( table, sid_list, name_list, path ):
     # Force `path` to have a trailing forward slash
     path = path.rstrip('/')+'/'
     
-    # First, make directories for everything (or try, at least).
+    ## First, make directories for everything (or try, at least).
 
     # Structure of directories:
     #  path/lc
@@ -89,6 +89,28 @@ def do_it_all( table, sid_list, name_list, path ):
             
     # We should now be done making directories. Let's test this.
     # Tested! Woo.
+
+    ## Second, let's make tables.
+
+    tables = path+"tables/"
+
+    # Make a lookup table. It should have a column with the `name_list`
+    # parameter we fed into this function, as well as a column with the 
+    # SOURCEIDs.
+    # They should be named "SOURCEID" and "Designation", respectively.
+    
+    lookup = atpy.Table()
+    lookup.add_column("SOURCEID", sid_list)
+    lookup.add_column("Designation", name_list)
+
+    for season, s in zip([1,2,3,123], ss):
+        
+        # Write the spreadsheet and save it to the relevant directory.
+        spreadsheet_write(table, lookup, season, tables+ss+'/spreadsheet.fits',
+                          per=True)
+
+
+    # What command do we want to make plots?
 
     return
 
