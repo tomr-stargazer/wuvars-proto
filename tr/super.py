@@ -116,8 +116,9 @@ def do_it_all( table, sid_list, name_list, path='',
         for season, s in zip([1,2,3,123], ss):
             
             # Write the spreadsheet and save it to the relevant directory.
-            spreadsheet.spreadsheet_write(table, lookup, season, 
-                                      tables+s+'/spreadsheet.fits', per=True)
+            spreadsheet.spreadsheet_write(table, lookup, season, flags=16,
+                                          tables+s+'/spreadsheet.fits', 
+                                          per=True)
             
         # Tested!
         return
