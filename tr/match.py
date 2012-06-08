@@ -126,13 +126,17 @@ def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
     global v
     v = verbose
 
-    # Let's cast all position arrays to decimal degrees
+    # Let's cast all position arrays to decimal degrees.
+    # Assume degrees by default.
     if ('deg' or 'DEG') in table1.columns[ra1].unit:
         table1.radd = table1.data[ra1]
         table1.dedd = table1.data[dec1]
     elif ('rad' or 'RAD') in table1.columns[ra1].unit:
         table1.radd = np.degrees(table1.data[ra1])
         table1.dedd = np.degrees(table1.data[dec1])
+    else:
+        table1.radd = table1.data[ra1]
+        table1.dedd = table1.data[dec1]
 
     if ('deg' or 'DEG') in table2.columns[ra2].unit:
         table2.radd = table2.data[ra2]
@@ -140,6 +144,10 @@ def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
     elif ('rad' or 'RAD') in table2.columns[ra2].unit:
         table2.radd = np.degrees(table2.data[ra2])
         table2.dedd = np.degrees(table2.data[dec2])
+    else:
+        table2.radd = table2.data[ra2]
+        table2.dedd = table2.data[dec2]
+
 
     vprint('Matching two tables: ')
     vprint( table1.columns )
