@@ -28,7 +28,8 @@ def mkdir_p(path):
         else: raise
 
 
-def do_it_all( table, sid_list, name_list, path='' ):
+def do_it_all( table, sid_list, name_list, path='', 
+               option=['lc','tables','phase'] ):
     """ 
     Does some stuff. Not sure exactly what yet, but I'll 
     want it to make tons of plots and tables for a list of 
@@ -46,6 +47,9 @@ def do_it_all( table, sid_list, name_list, path='' ):
     path : str
         The parent file path to save the output to. 
         Please make sure it has a "/" at the end of it.
+    option : list of str, optional
+        Which sub-components of this function you'd like to actually
+        call. Default is all (lc, tables, phase).
 
     Returns
     -------
@@ -96,25 +100,27 @@ def do_it_all( table, sid_list, name_list, path='' ):
 
     ## Second, let's make tables.
 
-    tables = path+"tables/"
+    if 'tables' in option:
 
-    # Make a lookup table. It should have a column with the `name_list`
-    # parameter we fed into this function, as well as a column with the 
-    # SOURCEIDs.
-    # They should be named "SOURCEID" and "Designation", respectively.
+        tables = path+"tables/"
+
+        # Make a lookup table. It should have a column with the `name_list`
+        # parameter we fed into this function, as well as a column with the 
+        # SOURCEIDs.
+        # They should be named "SOURCEID" and "Designation", respectively.
     
-    lookup = atpy.Table()
-    lookup.add_column("SOURCEID", sid_list)
-    lookup.add_column("Designation", name_list)
-
-    for season, s in zip([1,2,3,123], ss):
+        lookup = atpy.Table()
+        lookup.add_column("SOURCEID", sid_list)
+        lookup.add_column("Designation", name_list)
         
-        # Write the spreadsheet and save it to the relevant directory.
-        spreadsheet.spreadsheet_write(table, lookup, season, 
+        for season, s in zip([1,2,3,123], ss):
+            
+            # Write the spreadsheet and save it to the relevant directory.
+            spreadsheet.spreadsheet_write(table, lookup, season, 
                                       tables+s+'/spreadsheet.fits', per=True)
-
+            
         # Tested!
-    return
+        return
 
     # What command do we want to make plots?
     # Probably plot3.lc and plot3.phase, which are going to be almost 
