@@ -1,4 +1,10 @@
-''' Make a spreadsheet of lots of data. '''
+""" Make a spreadsheet of lots of data. 
+
+The purpose of this module is to calculate global statistics for 
+the time-series data of many stars, such as mean magnitudes, RMS variability,
+the Stetson variability index, (optionally) best-fit periods, etc,
+and to bundle all of these values up into a spreadsheet. It's really useful!
+"""
 
 import atpy
 import numpy as np
@@ -12,12 +18,12 @@ from network2 import get_chip
 
 
 def reduced_chisq ( m, sigma_m ):
-    ''' Calculates the reduced chi-squared.
+    """ Calculates the reduced chi-squared.
 
     Inputs:
       m -- an array of photometric magnitudes
       sigma_m -- a corresponding array of photometric uncertainties
-      '''
+      """
 
     if not (m.size == sigma_m.size):
         raise Exception("Array dimensions mismatch")
@@ -33,7 +39,7 @@ def reduced_chisq ( m, sigma_m ):
 
 
 def arraystat_2 (table, sid, season=0, rob=True, per=True, flags=0) :
-    ''' Calculates a complicated number of parameters for a given star.
+    """ Calculates a complicated number of parameters for a given star.
 
     Inputs:
       table -- an ATpy table with time-series photometry
@@ -44,7 +50,10 @@ def arraystat_2 (table, sid, season=0, rob=True, per=True, flags=0) :
       rob -- also use Robust statistics? (takes longer, default True)
       per -- run period-finding? (takes longer, default True)
       flags -- Maximum ppErrBit quality flags to use (default 0)
-      '''
+
+    Returns:
+      ret -- a data structure containing the computed values.
+      """
     
     s_table = data_cut( table, [sid], season=season, flags=flags )
 
@@ -143,13 +152,13 @@ def arraystat_2 (table, sid, season=0, rob=True, per=True, flags=0) :
     return ret
 
 def make_sidset ( table ) :
-    ''' Returns an array of unique source IDs.'''
+    """ Returns an array of unique source IDs."""
 
     return np.array(list(set(table.SOURCEID)))
 
     
 def base_lookup (table):
-    ''' makes a really basic lookup table if you're too lazy'''
+    """ makes a really basic lookup table if you're too lazy"""
 
     sidarr = np.array( list( set( table.SOURCEID ) ) )
     names = sidarr - 44027700000000L
@@ -161,18 +170,25 @@ def base_lookup (table):
     return Lookup
 
 
-def spreadsheet_write (table, lookup, season, outfile, 
+def spreadsheet_write (table, lookup, season, outfile, flags=0,
                        Test=False, rob=False, per=False):
-    ''' Makes my spreadsheet! Basically with a big forloop.
+    """ 
+    Makes my spreadsheet! Basically with a big forloop.
 
     Inputs:
       table -- an ATpy table with time-series photometry
       lookup -- an ATpy table of interesting sources and their designations
-      season -- the usual
-      outfile -- where to put it
+      season -- which season to select (1,2,3, or other=All)
+      outfile -- where to save the output table
+      
+    Optional inputs:
+      flags -- Maximum ppErrBit quality flags to use (default 0)
+      Test -- whether to exit after 30 sources (default False)
+      rob -- also use Robust statistics? (takes longer, default False)
+      per -- run period-finding? (takes longer, default False)
 
-      Note: crashes if given any stars with only 1 observation and per=True.
-      '''
+    Note: crashes if given any stars with only 1 observation and per=True.
+    """
 
     sidarr = lookup.SOURCEID
     names = lookup.Designation
@@ -229,7 +245,7 @@ def spreadsheet_write (table, lookup, season, outfile,
     for sid, i in zip(sidarr, range(len(sidarr)) ):
 
         # v for values
-        v = arraystat_2 (table, sid, season, rob, per)
+        v = arraystat_2 (table, sid, season, rob, per, flags=flags)
         if v == None:
             #skip assigning anything!
             continue
@@ -347,7 +363,7 @@ def spreadsheet_write (table, lookup, season, outfile,
     return
 
 def spread_write_test (table, lookup) :
-    ''' Tests spreadsheet_write.'''
+    """ Tests spreadsheet_write."""
 
     test_path = '/home/trice/reu/DATA/Merged_Catalogs/spreadsheet/test.fits'
     spreadsheet_write (table, lookup, -1, test_path, Test=True)
