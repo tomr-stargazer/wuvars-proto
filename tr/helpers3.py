@@ -43,9 +43,9 @@ def data_cut (table, sid_list, season=0):
     """
 
     # 0. make sure input data is a list
-    if type(sid) is not list:
-        sid = [sid]
-
+    if type(sid_list) is not list:
+        sid_list = [sid_list]
+    
     # First, select these sources' data from the table.
     # This code taken from tr_helpers.data_cut.
     source = table.where( 
