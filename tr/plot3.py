@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import atpy
 
 from helpers3 import data_cut, band_cut
-
+from plot2 import plot_trajectory_core
 #import coords
 #import stetson
 #from chi2 import test_analyze
