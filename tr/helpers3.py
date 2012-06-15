@@ -74,4 +74,52 @@ def data_cut (table, sid_list, season=0):
     return cut_table
 
 
+def band_cut (table, band, null=-9.99999e+08): 
+    """
+    Selects data corresponding to a specified filter.
+
+    Returns a subset of `table` containing only data where photometry in 
+    filter `band` is well-defined. Assumes an input table that has already 
+    been processed by data_cut.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        An ATpy Table containing time-series photometry from the 
+        WFCAM Science Archive corresponding to a single source.
+        (i.e., a table that has been processed by data_cut.)
+    band : str ('j'|'h'|'k')
+        Which band to select: J, H, or K.
+    null : float, optional
+        What value to use as a 'null' when filtering data.
+        Default value -9.99999e+08 (as used by WSA).
+
+    Returns
+    -------
+    cut_table : atpy.Table
+        Subset of `table` containing only data where photometry in 
+        filter `band` is well-defined. 
+
+    """
+
+    # Input check.
+    if band.lower() not in ['j', 'h', 'k', 'jmh', 'hmk']:
+        raise Exception(
+            "Invalid `band`: must use 'j', 'h', 'k', 'jmh', or 'hmk'.")
+
+    # Distinguish between magnitude or color.
+    if len(band) == 1:
+        metric = "APERMAG3"
+    else:
+        metric = "PNT"
+
+    band_name = band.upper() + metric
+    banderr_name = band_name + "ERR"
+
+# Not sure if I need this.
+#    pperrbits_name = band.upper() + "PPERRBITS"
+
+    # Now let's select only data where these guys aren't null.
+    
+    pass
     
