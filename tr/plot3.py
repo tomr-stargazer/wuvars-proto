@@ -150,8 +150,8 @@ def lc (table, sid, season=0):
     jcol_info = j_table_info.JAPERMAG3
     hcol_info = h_table_info.HAPERMAG3
     kcol_info = k_table_info.KAPERMAG3
-    jmh =  jmh_table_info.JMHPNT
-    hmk =  hmk_table.HMKPNT
+#    jmh =  jmh_table_info.JMHPNT
+#    hmk =  hmk_table.HMKPNT
     kcol_info2 = k_table_info2.KAPERMAG3 # Needed for the K vs H-K plot
 
     # get a magnitude error (y-error) for each plot
@@ -198,8 +198,8 @@ def lc (table, sid, season=0):
     jcol_warn = j_table_warn.JAPERMAG3
     hcol_warn = h_table_warn.HAPERMAG3
     kcol_warn = k_table_warn.KAPERMAG3
-    jmh =  jmh_table_warn.JMHPNT
-    hmk =  hmk_table.HMKPNT
+#    jmh =  jmh_table_warn.JMHPNT
+#    hmk =  hmk_table.HMKPNT
     kcol_warn2 = k_table_warn2.KAPERMAG3 # Needed for the K vs H-K plot
 
     # get a magnitude error (y-error) for each plot
