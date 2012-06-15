@@ -139,8 +139,8 @@ def band_cut (table, band, min_flag=0, max_flag=2147483648,
     if len(band) == 1:
         cut_table = table.where( (table.data[band_name] != null) &
                                  (table.data[banderr_name] != null) &
-                                 (table.data[pperrbits_name] > min_flag) &
-                                 (table.data[pperrbits_name] < max_flag) )
+                                 (table.data[pperrbits_name] >= min_flag) &
+                                 (table.data[pperrbits_name] <= max_flag) )
     else:
         cut_table = table.where( (table.data[band_name] != null) &
                                  (table.data[banderr_name] != null) )
