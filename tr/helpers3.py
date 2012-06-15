@@ -74,7 +74,7 @@ def data_cut (table, sid_list, season=0):
     return cut_table
 
 
-def band_cut (table, band, null=-9.99999e+08): 
+def band_cut (table, band, null=np.double(-9.99999488e+08)): 
     """
     Selects data corresponding to a specified filter.
 
@@ -121,5 +121,9 @@ def band_cut (table, band, null=-9.99999e+08):
 
     # Now let's select only data where these guys aren't null.
     
-    pass
+    cut_table = table.where( (table.data[band_name] != null) &
+                             (table.data[banderr_name] != null))
+
+    return cut_table
+
     
