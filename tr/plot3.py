@@ -168,6 +168,53 @@ def lc (table, sid, season=0):
     jmhflag = jmh_table_info.JPPERRBITS + jmh_table_info.HPPERRBITS
     hmkflag = hmk_table_info.HPPERRBITS + hmk_table_info.KPPERRBITS
     
+    ## Third: warning
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table_warn = band_cut(s_table, 'j', min_flag=257)
+    h_table_warn = band_cut(s_table, 'h', min_flag=257)
+    k_table_warn = band_cut(s_table, 'k', min_flag=257)
+    hmk_table_warn = band_cut(s_table, 'hmk')    
+    # a quick hack to make JHK color-color/mag plots make sense:
+    # (since J-H data is only ever used when plotted against H-K, 
+    # and we need a second K column to use against H-K)
+    jmh_table_warn = band_cut(hmk_table, 'jmh')
+    k_table_warn2 = band_cut(k_table_warn, 'hmk', min_flag=1, max_flag=256)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate_warn = j_table_warn.MEANMJDOBS - 51544
+    hdate_warn = h_table_warn.MEANMJDOBS - 51544
+    kdate_warn = k_table_warn.MEANMJDOBS - 51544
+    jmhdate_warn = jmh_table_warn.MEANMJDOBS - 51544
+    hmkdate_warn = hmk_table_warn.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol_warn = j_table_warn.JAPERMAG3
+    hcol_warn = h_table_warn.HAPERMAG3
+    kcol_warn = k_table_warn.KAPERMAG3
+    jmh =  jmh_table_warn.JMHPNT
+    hmk =  hmk_table.HMKPNT
+    kcol_warn2 = k_table_warn2.KAPERMAG3 # Needed for the K vs H-K plot
+
+    # get a magnitude error (y-error) for each plot
+    jerr_warn = j_table_warn.JAPERMAG3ERR
+    herr_warn = h_table_warn.HAPERMAG3ERR
+    kerr_warn = k_table_warn.KAPERMAG3ERR
+    jmherr_warn=jmh_table_warn.JMHPNTERR
+    hmkerr_warn=hmk_table_warn.HMKPNTERR
+
+    # get a quality flag for each plot
+    jflag = j_table_warn.JPPERRBITS
+    hflag = h_table_warn.HPPERRBITS
+    kflag = k_table_warn.KPPERRBITS
+    jmhflag = jmh_table_warn.JPPERRBITS + jmh_table_warn.HPPERRBITS
+    hmkflag = hmk_table_warn.HPPERRBITS + hmk_table_warn.KPPERRBITS
 
     
     ## Define the components and parameters of the figure:
@@ -190,7 +237,7 @@ def lc (table, sid, season=0):
     ## Start plotting. 
     
     fmt_info = 'D'
-    fmt_warn = 'k.'
+    fmt_warn = '.'
 
     # Plot J-band:
     if len(jdate) > 0:
@@ -198,6 +245,9 @@ def lc (table, sid, season=0):
     if len(jdate_info) > 0:
         ax_j.errorbar( jdate_info, jcol_info, yerr=jerr_info, 
                        fmt='b'+fmt_info, ms=4, ecolor='k')
+    if len(jdate_warn) > 0:
+        ax_j.errorbar( jdate_warn, jcol_warn, yerr=jerr_warn, 
+                       fmt='k'+fmt_warn, ecolor='k')
     ax_j.invert_yaxis()
 
     # Plot H-band:
@@ -206,6 +256,9 @@ def lc (table, sid, season=0):
     if len(hdate_info) > 0:
         ax_h.errorbar( hdate_info, hcol_info, yerr=herr_info, 
                        fmt='g'+fmt_info, ms=4, ecolor='k')
+    if len(hdate_warn) > 0:
+        ax_h.errorbar( hdate_warn, hcol_warn, yerr=herr_warn, 
+                       fmt='k'+fmt_warn, ecolor='k')
     ax_h.invert_yaxis()
 
     # Plot K-band:
@@ -214,6 +267,9 @@ def lc (table, sid, season=0):
     if len(kdate_info) > 0:
         ax_k.errorbar( kdate_info, kcol_info, yerr=kerr_info, 
                        fmt='r'+fmt_info, ms=4, ecolor='k')
+    if len(kdate_warn) > 0:
+        ax_k.errorbar( kdate_warn, kcol_warn, yerr=kerr_warn, 
+                       fmt='k'+fmt_warn, ecolor='k')
     ax_k.invert_yaxis()
 
     # Plot J-H vs H-K
