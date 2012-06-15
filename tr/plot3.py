@@ -55,7 +55,8 @@ def lc (table, sid, season=0):
 
     Returns
     -------
-    None
+    fig : plt.Figure 
+        The canvas figure that the graphs are plotted onto.
     
     """
 
@@ -73,9 +74,11 @@ def lc (table, sid, season=0):
     k_table = band_cut(s_table, 'k')
 #    jmh_table = band_cut(s_table, 'jmh')
     hmk_table = band_cut(s_table, 'hmk')    
-    # a quick hack to make JHK color-color plots make sense:
-    # (since J-H data is only ever used when plotted against H-K)
+    # a quick hack to make JHK color-color/mag plots make sense:
+    # (since J-H data is only ever used when plotted against H-K, 
+    # and we need a second K column to use against H-K)
     jmh_table = band_cut(hmk_table, 'jmh')
+    k_table2 = band_cut(k_table, 'hmk')
 
 
     # The Julian date for CE  2000 January  1 00:00:00.0 UT is
@@ -88,13 +91,14 @@ def lc (table, sid, season=0):
     kdate = k_table.MEANMJDOBS - 51544
     jmhdate = jmh_table.MEANMJDOBS - 51544
     hmkdate = hmk_table.MEANMJDOBS - 51544
-
+    
     # get a magnitude (y-axis) for each plot
     jcol = j_table.JAPERMAG3
     hcol = h_table.HAPERMAG3
     kcol = k_table.KAPERMAG3
     jmh =  jmh_table.JMHPNT
     hmk =  hmk_table.HMKPNT
+    kcol2 = k_table2.KAPERMAG3 # Needed for the K vs H-K plot
 
     # get a magnitude error (y-error) for each plot
     jerr = j_table.JAPERMAG3ERR
@@ -146,7 +150,7 @@ def lc (table, sid, season=0):
 
     # Plot K vs H-K
     # Note: not sure if this is going to break or not.
-    plot_trajectory_core( ax_khk, hmk, kcol, hmkdate , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line?
+    plot_trajectory_core( ax_khk, hmk, kcol2, hmkdate , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line?
     ax_khk.invert_yaxis()
 
     # Hide the bad labels...
@@ -165,4 +169,4 @@ def lc (table, sid, season=0):
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
 
-    return
+    return fig
