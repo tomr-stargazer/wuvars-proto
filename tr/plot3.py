@@ -1,6 +1,6 @@
 """
 
-NOTHING BELOW THIS IS USEFUL!!! 
+DOCSTRING INCOMPLETE / OUT OF DATE
 
 This is the primary visualization package within wuvars.
 
