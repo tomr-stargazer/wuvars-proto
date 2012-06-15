@@ -78,13 +78,20 @@ def data_cut (table, sid_list, season=0):
     return cut_table
 
 
-def band_cut (table, band, null=np.double(-9.99999488e+08)): 
+def band_cut (table, band, min_flag=0, max_flag=2147483648,
+              null=np.double(-9.99999488e+08)): 
     """
     Selects data corresponding to a specified filter.
 
     Returns a subset of `table` containing only data where photometry in 
-    filter `band` is well-defined. Assumes an input table that has already 
-    been processed by data_cut.
+    filter `band` is well-defined and the ppErrBits are between `min_flag`
+    and `max_flag`. Assumes an input table that has already 
+    been processed by data_cut().
+    
+    Note that `min_flag` and `max_flag` do NOTHING currently if `band` is 
+    'jmh' or 'hmk', because the colors don't have their own flags.
+    (The right solution is probably to take the relevant J and H or H and K
+    flags and, say, add them, but that's extra work.)
 
     Parameters
     ----------
@@ -94,6 +101,10 @@ def band_cut (table, band, null=np.double(-9.99999488e+08)):
         (i.e., a table that has been processed by data_cut.)
     band : str ('j'|'h'|'k')
         Which band to select: J, H, or K.
+    min_flag : int, optional
+        The lowest ppErrBits flag to accept. Default 0.
+    max_flag : int, optional
+        The highest ppErrBits flag to accept. Default 2147483648 (2**31).
     null : float, optional
         What value to use as a 'null' when filtering data.
         Default value -9.99999e+08 (as used by WSA).
@@ -119,14 +130,21 @@ def band_cut (table, band, null=np.double(-9.99999488e+08)):
 
     band_name = band.upper() + metric
     banderr_name = band_name + "ERR"
+    pperrbits_name = band.upper() + "PPERRBITS"
 
-# Not sure if I need this.
-#    pperrbits_name = band.upper() + "PPERRBITS"
-
-    # Now let's select only data where these guys aren't null.
+    # Now let's select only data where these guys aren't null
+    # and the ppErrBits flags are within the acceptable range.
+    # (The ppErrBits part is only currently applicable to J, H, or K.)
     
-    cut_table = table.where( (table.data[band_name] != null) &
-                             (table.data[banderr_name] != null))
+    if len(band) == 1:
+        cut_table = table.where( (table.data[band_name] != null) &
+                                 (table.data[banderr_name] != null) &
+                                 (table.data[pperrbits_name] > min_flag) &
+                                 (table.data[pperrbits_name] < max_flag) )
+    else:
+        cut_table = table.where( (table.data[band_name] != null) &
+                                 (table.data[banderr_name] != null) )
+        
 
     return cut_table
 
