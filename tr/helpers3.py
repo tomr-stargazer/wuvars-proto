@@ -12,7 +12,37 @@ Useful functions:
 import numpy as np
 import atpy
 
-def data_cut (table, sid_list, season=0, null=-9.99999e+08):
+def data_cut (table, sid_list, season=0):
+    """
+    Selects data corresponding to specified source(s).
 
-    pass
+    Returns a subset of `table` containing only data for sources
+    specified in `sid_list`, for dates within `season`.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        An ATpy Table with time-series photometry from the WFCAM 
+        Science Archive. It does not need to necessarily have 
+        well-defined J,H,K data for each timestamp (unlike tables 
+        fed into tr_helpers.data_cut, a similar function).
+    sid_list : array_like
+        A list of 13-digit WFCAM Source IDs whose data to extract.
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+
+    Returns
+    -------
+    cut_table : atpy.Table
+        Subset of `table` containing only data for sources
+        specified in `sid_list`, for dates within `season`.
+
+    """
+
+    
+    
+
     
