@@ -25,7 +25,7 @@ def data_cut (table, sid_list, season=0):
         An ATpy Table with time-series photometry from the WFCAM 
         Science Archive. It does not need to necessarily have 
         well-defined J,H,K data for each timestamp (unlike tables 
-        fed into tr_helpers.data_cut, a similar function).
+        fed into tr_helpers.data_cut(), a similar function).
     sid_list : array_like
         A list of 13-digit WFCAM Source IDs whose data to extract.
     season : int, optional
@@ -42,7 +42,36 @@ def data_cut (table, sid_list, season=0):
 
     """
 
+    # First, select these sources' data from the table.
+    # This code taken from tr_helpers.data_cut.
+    source = table.where( 
+        np.array( [sid in sid_list for sid in table.SOURCEID] )
+        )
     
+    # Second, slice the data by season.
+    # These seasons defined by the Cyg OB7 variability study.
+    offset = 54579
+    cut1 = 100
+    cut2 = 300
+    cut3 = 600
+
+    if season == 1:
+        low = offset
+        high = offset+cut1
+    elif season == 2:
+        low = offset+cut1
+        high = offset+cut2
+    elif season == 3:
+        low = offset+cut2
+        high = offset+cut3
+    else:
+        low = 0
+        high = 1e6
     
+    cut_table = source.where( (source.MEANMJDOBS < high) & 
+                              (source.MEANMJDOBS > low))
+    
+    return cut_table
+
 
     
