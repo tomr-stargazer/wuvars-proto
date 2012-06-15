@@ -274,7 +274,10 @@ def lc (table, sid, season=0):
 
     # Plot J-H vs H-K
     # Note: we use `jmhdate` because of how jmh_table was defined.
-    plot_trajectory_core( ax_jhk, hmk, jmh, jmhdate )
+    try:
+        plot_trajectory_core( ax_jhk, hmk, jmh, jmhdate )
+    except:
+        pass
 
     # Plot K vs H-K
     # Note: not sure if this is going to break or not.
@@ -282,7 +285,7 @@ def lc (table, sid, season=0):
         plot_trajectory_core( ax_khk, hmk, kcol2, hmkdate , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line?
     except:
         pass
-        ax_khk.invert_yaxis()
+    ax_khk.invert_yaxis()
 
     # Hide the bad labels...
     plt.setp(ax_j.get_xticklabels(), visible=False)
