@@ -66,14 +66,18 @@ def lc (table, sid, season=0):
         print "no data here"
         return
 
-    # Use band_cut to get relevant thingies
+    # Use band_cut to get relevant data chunks.
     
     j_table = band_cut(s_table, 'j')
     h_table = band_cut(s_table, 'h')
     k_table = band_cut(s_table, 'k')
-    jmh_table = band_cut(s_table, 'jmh')
-    hmk_table = band_cut(s_table, 'hmk')
-    
+#    jmh_table = band_cut(s_table, 'jmh')
+    hmk_table = band_cut(s_table, 'hmk')    
+    # a quick hack to make JHK color-color plots make sense:
+    # (since J-H data is only ever used when plotted against H-K)
+    jmh_table = band_cut(hmk_table, 'jmh')
+
+
     # The Julian date for CE  2000 January  1 00:00:00.0 UT is
     # JD 2451544.500000
     # (i.e. MJD 51544.0)
@@ -107,7 +111,7 @@ def lc (table, sid, season=0):
     hmkflag = hmk_table.HPPERRBITS + hmk_table.KPPERRBITS
     
     
-    ## Define the components of the figure:
+    ## Define the components and parameters of the figure:
     
     fig = plt.figure(figsize = (10, 6), dpi=80,
                      facecolor='w', edgecolor='k')
@@ -124,3 +128,41 @@ def lc (table, sid, season=0):
     ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
     ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
 
+    # Plot J-band:
+    ax_j.errorbar( jdate, jcol, yerr=jerr, fmt='bo', ecolor='k')
+    ax_j.invert_yaxis()
+
+    # Plot H-band:
+    ax_h.errorbar( hdate, hcol, yerr=herr, fmt='go', ecolor='k' )
+    ax_h.invert_yaxis()
+
+    # Plot K-band:
+    ax_k.errorbar( kdate, kcol, yerr=kerr, fmt='ro', ecolor='k' )
+    ax_k.invert_yaxis()
+
+    # Plot J-H vs H-K
+    # Note: we use `jmhdate` because of how jmh_table was defined.
+    plot_trajectory_core( ax_jhk, hmk, jmh, jmhdate )
+
+    # Plot K vs H-K
+    # Note: not sure if this is going to break or not.
+    plot_trajectory_core( ax_khk, hmk, kcol, hmkdate , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line?
+    ax_khk.invert_yaxis()
+
+    # Hide the bad labels...
+    plt.setp(ax_j.get_xticklabels(), visible=False)
+    plt.setp(ax_h.get_xticklabels(), visible=False)
+
+    # Label stuff
+    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+
+    ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
+
+    ax_jhk.set_xlabel( "H-K" )
+    ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
+    ax_khk.set_xlabel( "H-K" )
+    ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    return
