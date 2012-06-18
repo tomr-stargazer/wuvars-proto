@@ -37,7 +37,7 @@ from timing import lsp_mask
 
 
 
-def lc (table, sid, season=0, outfile='', png_too=False):
+def lc (table, sid, season=0, outfile='', name='', png_too=False):
     """ 
     Plots J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -61,6 +61,8 @@ def lc (table, sid, season=0, outfile='', png_too=False):
         What filename to save plot to. Default behavior (when 
         `outfile` is an empty string) is to display plot on-screen
         and *not* save to file.
+    name : str, optional
+        A string to use as a plot header.
     png_too : bool, optional (default: False)
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
@@ -298,6 +300,9 @@ def lc (table, sid, season=0, outfile='', png_too=False):
     ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    if name != '':
+        plt.title(name)
 
     if outfile == '':
         plt.show()
