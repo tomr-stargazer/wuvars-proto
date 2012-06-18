@@ -29,10 +29,13 @@ def data_cut (table, sid_list, season=0):
     sid_list : array_like
         A list of 13-digit WFCAM Source IDs whose data to extract.
     season : int, optional
-        Which observing season of our dataset (1, 2, 3, or all).
-        Any value that is not the integers (1, 2, or 3) will be 
+        Which observing season of our dataset (1, 2, 3, 123, or all).
+        Any value that is not the integers (1, 2, 3, or 123) will be 
         treated as "no season", and no time-cut will be made.
         Note that this is the default behavior.
+        Entering "123" will make a time-cut at the beginning of season
+        1 and at the end of season 3, excluding any prior or latter 
+        observations.
 
     Returns
     -------
@@ -67,6 +70,9 @@ def data_cut (table, sid_list, season=0):
         high = offset+cut2
     elif season == 3:
         low = offset+cut2
+        high = offset+cut3
+    elif season == 123:
+        low = offset
         high = offset+cut3
     else:
         low = 0
