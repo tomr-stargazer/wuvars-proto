@@ -335,6 +335,11 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
         Default 'k'. (black)
     ms : float
         Default 6.
+        
+    Returns
+    -------
+    period : float
+        The input period.
     
     """
     
@@ -355,3 +360,47 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
     return period
 
 
+def phase (table, sid, period='auto', season=0, outfile='', png_too=False):
+    """ 
+    Plots folded J, H, K lightcurves, plus color-color and color-mag
+    trajectories, for one star.
+
+    Will display "lonely" datapoints (i.e. not all JHK mags are 
+    well-defined), and plots error-flagged data as different symbols.
+    Compare to plot2.phase() which does neither.
+
+    If no period is provided, phase() will compute its own guess 
+    using the K-band lightcurve.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with time-series photometry
+    sid : int
+        13-digit WFCAM source ID of star to plot
+    period : {'auto', 'lsp', float}, optional
+        What period to fold the lightcurves by.
+        If 'auto' is provided (default), the fast-chi-squared 
+        period of the K-band data will be used.
+        If 'lsp' is provided, the Lomb-Scargle Periodogram period
+        of the K-band data will be used.
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    outfile : str, optional
+        What filename to save plot to. Default behavior (when 
+        `outfile` is an empty string) is to display plot on-screen
+        and *not* save to file.
+    png_too : bool, optional (default: False)
+        If `png_too` is True (and `outfile` is not ''), then 
+        save the plot in 3 file formats: PDF, PNG, and EPS.
+        Do not specify a file extension in `outfile`.
+
+    Returns
+    -------
+    fig : plt.Figure 
+        The canvas figure that the graphs are plotted onto.
+    
+    """
