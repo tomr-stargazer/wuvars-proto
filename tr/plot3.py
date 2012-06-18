@@ -743,42 +743,7 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         print "no data here"
         return
 
-    # do some band_cutting, with flags = 256 like usual
-
-    j_table = band_cut(s_table, 'j', max_flag=256)
-    h_table = band_cut(s_table, 'h', max_flag=256)
-    k_table = band_cut(s_table, 'k', max_flag=256)
-
-    jdate = j_table.MEANMJDOBS - 51544
-    hdate = h_table.MEANMJDOBS - 51544
-    kdate = k_table.MEANMJDOBS - 51544
-    
-    # get a magnitude (y-axis) for each plot
-    jcol = j_table.JAPERMAG3
-    hcol = h_table.HAPERMAG3
-    kcol = k_table.KAPERMAG3
-
-
-    ## Calculate periodograms
-
-    jlsp = lsp(jdate, jcol, 6., 6.)
-    hlsp = lsp(hdate, hcol, 6., 6.)
-    klsp = lsp(kdate, kcol, 6., 6.)
-
-    j_lsp_freq = jlsp[0]
-    h_lsp_freq = hlsp[0]
-    k_lsp_freq = klsp[0]
-
-    j_lsp_power = jlsp[1]
-    h_lsp_power = hlsp[1]
-    k_lsp_power = klsp[1]
-
-    # best periods, filtered by the lsp_mask
-    j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
-    h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
-    k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
-
-    ## Plot things
+    ## Set up plot
 
     fig = plt.figure(figsize = (10, 6), dpi=80,
                      facecolor='w', edgecolor='k')
@@ -787,9 +752,62 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
     ax_h = fig.add_subplot(3,1,2, sharex=ax_j)
     ax_k = fig.add_subplot(3,1,3, sharex=ax_j)
 
-    ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
-    ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
-    ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
+    ## J
+    try:
+    # do some band_cutting, with flags = 256 like usual
+        j_table = band_cut(s_table, 'j', max_flag=256)
+        jdate = j_table.MEANMJDOBS - 51544
+
+    # get a magnitude (y-axis) for each plot
+        jcol = j_table.JAPERMAG3
+
+    ## Calculate periodograms
+        jlsp = lsp(jdate, jcol, 6., 6.)
+        j_lsp_freq = jlsp[0]
+        j_lsp_power = jlsp[1]
+        
+    # best periods, filtered by the lsp_mask
+        j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
+
+    ## Plot things
+
+        ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
+    except Exception:
+        pass
+
+    ## H
+    try:
+        h_table = band_cut(s_table, 'h', max_flag=256)
+        hdate = h_table.MEANMJDOBS - 51544
+        hcol = h_table.HAPERMAG3
+        
+        hlsp = lsp(hdate, hcol, 6., 6.)
+        h_lsp_freq = hlsp[0]
+        h_lsp_power = hlsp[1]
+        
+        h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
+        
+        ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
+        
+    except Exception:
+        pass
+
+
+    ## K
+    try:
+        k_table = band_cut(s_table, 'k', max_flag=256)
+        kdate = k_table.MEANMJDOBS - 51544
+        kcol = k_table.KAPERMAG3
+        
+        klsp = lsp(kdate, kcol, 6., 6.)
+        k_lsp_freq = klsp[0]
+        k_lsp_power = klsp[1]
+        
+        k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
+
+        ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
+    except Exception:
+        pass
     
     ax_j.set_xscale('log')
     ax_h.set_xscale('log')
