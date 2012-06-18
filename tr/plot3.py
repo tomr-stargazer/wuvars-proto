@@ -830,6 +830,7 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         if png_too:
             plt.savefig(outfile+".pdf")
             plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
             plt.close()
         else:
             plt.savefig(outfile)
