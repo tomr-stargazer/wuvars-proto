@@ -368,7 +368,7 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
 
 
 def phase (table, sid, period='auto', season=0, offset=0, 
-           outfile='', png_too=False):
+           outfile='', name='', png_too=False):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -403,6 +403,8 @@ def phase (table, sid, period='auto', season=0, offset=0,
         What filename to save plot to. Default behavior (when 
         `outfile` is an empty string) is to display plot on-screen
         and *not* save to file.
+    name : str, optional
+        A string to use as a plot header.
     png_too : bool, optional (default: False)
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
@@ -695,6 +697,9 @@ def phase (table, sid, period='auto', season=0, offset=0,
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
 
+    if name != '':
+        plt.title(name)
+        
     if outfile == '':
         plt.show()
     else:
