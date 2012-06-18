@@ -35,10 +35,14 @@ from plot2 import plot_trajectory_core
 
 
 
-def lc (table, sid, season=0):
+def lc (table, sid, season=0, outfile='', png_too=False):
     """ 
     Plots J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
+
+    Will display "lonely" datapoints (i.e. not all JHK mags are 
+    well-defined), and plots error-flagged data as different symbols.
+    Compare to plot2.lc() which does neither.
 
     Parameters
     ----------
@@ -51,7 +55,14 @@ def lc (table, sid, season=0):
         Any value that is not the integers (1, 2, or 3) will be 
         treated as "no season", and no time-cut will be made.
         Note that this is the default behavior.
-
+    outfile : str, optional
+        What filename to save plot to. Default behavior (when 
+        `outfile` is an empty string) is to display plot on-screen
+        and *not* save to file.
+    png_too : bool, optional (default: False)
+        If `png_too` is True (and `outfile` is not ''), then 
+        save the plot in 3 file formats: PDF, PNG, and EPS.
+        Do not specify a file extension in `outfile`.
 
     Returns
     -------
@@ -302,5 +313,18 @@ def lc (table, sid, season=0):
     ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
 
     return fig
