@@ -704,3 +704,112 @@ def phase (table, sid, period='auto', season=0, offset=0,
 
 
     return fig
+
+def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
+    """ 
+    Plots J, H, K periodograms for one star.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with time-series photometry
+    sid : int
+        13-digit WFCAM source ID of star to plot
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    outfile : str, optional
+        What filename to save plot to. Default behavior (when 
+        `outfile` is an empty string) is to display plot on-screen
+        and *not* save to file.
+    png_too : bool, optional (default: False)
+        If `png_too` is True (and `outfile` is not ''), then 
+        save the plot in 3 file formats: PDF, PNG, and EPS.
+        Do not specify a file extension in `outfile`.
+        
+    Returns
+    -------
+    fig : plt.Figure 
+        The canvas figure that the graphs are plotted onto.
+    
+    """
+
+    ## Loading data
+    s_table = data_cut (table, sid, season)
+
+    if len(s_table) < 2:
+        print "no data here"
+        return
+
+    # do some band_cutting, with flags = 256 like usual
+
+    j_table = band_cut(s_table, 'j', max_flag=256)
+    h_table = band_cut(s_table, 'h', max_flag=256)
+    k_table = band_cut(s_table, 'k', max_flag=256)
+
+    jdate = j_table.MEANMJDOBS - 51544
+    hdate = h_table.MEANMJDOBS - 51544
+    kdate = k_table.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol = j_table.JAPERMAG3
+    hcol = h_table.HAPERMAG3
+    kcol = k_table.KAPERMAG3
+
+
+    ## Calculate periodograms
+
+    jlsp = lsp(jdate, jcol, 6., 6.)
+    hlsp = lsp(hdate, hcol, 6., 6.)
+    klsp = lsp(kdate, kcol, 6., 6.)
+
+    j_lsp_freq = jlsp[0]
+    h_lsp_freq = hlsp[0]
+    k_lsp_freq = klsp[0]
+
+    j_lsp_power = jlsp[1]
+    h_lsp_power = hlsp[1]
+    k_lsp_power = klsp[1]
+
+    # best periods, filtered by the lsp_mask
+    j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
+    h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
+    k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
+
+    ## Plot things
+
+    fig = plt.figure(figsize = (10, 6), dpi=80,
+                     facecolor='w', edgecolor='k')
+
+    ax_j = fig.add_subplot(3,1,1)
+    ax_h = fig.add_subplot(3,1,2, sharex=ax_j)
+    ax_k = fig.add_subplot(3,1,3, sharex=ax_j)
+
+    ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
+    ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
+    ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
+    
+    ax_j.set_xscale('log')
+    ax_h.set_xscale('log')
+    ax_k.set_xscale('log')
+
+    ax_j.set_title(name)
+    ax_k.set_xlabel("Period (days)")
+    ax_h.set_ylabel("Periodogram Power")
+
+    ## Save things
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
+    return fig
