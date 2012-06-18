@@ -26,6 +26,9 @@ import atpy
 
 from helpers3 import data_cut, band_cut
 from plot2 import plot_trajectory_core
+from chi2 import test_analyze
+from scargle import fasper as lsp
+
 #import coords
 #import stetson
 #from chi2 import test_analyze
@@ -360,7 +363,8 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
     return period
 
 
-def phase (table, sid, period='auto', season=0, outfile='', png_too=False):
+def phase (table, sid, period='auto', season=0, offset=0, 
+           outfile='', png_too=False):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -389,6 +393,8 @@ def phase (table, sid, period='auto', season=0, outfile='', png_too=False):
         Any value that is not the integers (1, 2, or 3) will be 
         treated as "no season", and no time-cut will be made.
         Note that this is the default behavior.
+    offset : float, optional
+        How much to shift the phase by. Default is zero.
     outfile : str, optional
         What filename to save plot to. Default behavior (when 
         `outfile` is an empty string) is to display plot on-screen
