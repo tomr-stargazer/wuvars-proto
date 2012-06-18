@@ -242,81 +242,39 @@ def lc (table, sid, season=0, outfile='', png_too=False):
     ax_k.invert_yaxis()
 
     ## Now let's do the 2 color-mag/color-color plots.
-    # The following code was moved from an earlier section.
 
-    hmk_table = band_cut(s_table, 'hmk')    
-    # a quick hack to make JHK color-color/mag plots make sense:
-    # (since J-H data is only ever used when plotted against H-K, 
-    # and we need a second K column to use against H-K)
-    jmh_table = band_cut(hmk_table, 'jmh')
-    k_table2 = band_cut(k_table, 'hmk')
+    # We'll use different data-cuts for the two different plots.
+    
+    # In the color-mag plot, we need data where H and K are defined 
+    # everywhere. That's two cuts.
+    khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
+                          'h', max_flag=256)
 
-    jmhdate = jmh_table.MEANMJDOBS - 51544
-    hmkdate = hmk_table.MEANMJDOBS - 51544
+    khkdate = khk_table.MEANMJDOBS - 51544
+    k_khk = khk_table.KAPERMAG3
+    hmk_khk = khk_table.HMKPNT
 
-    jmh =  jmh_table.JMHPNT
-    hmk =  hmk_table.HMKPNT
-    kcol2 = k_table2.KAPERMAG3 # Needed for the K vs H-K plot
+    # In the color-color plot, we need data where J, H, and K are
+    # defined everywhere. That's one more cut.
+    jhk_table = band_cut(khk_table, 'j', max_flag=256)
 
-    jmherr=jmh_table.JMHPNTERR
-    hmkerr=hmk_table.HMKPNTERR
+    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jmh_jhk = jhk_table.JMHPNT
+    hmk_jhk = jhk_table.HMKPNT
 
-    jmhflag = jmh_table.JPPERRBITS + jmh_table.HPPERRBITS
-    hmkflag = hmk_table.HPPERRBITS + hmk_table.KPPERRBITS
-
-    hmk_table_info = band_cut(s_table, 'hmk')    
-    # a quick hack to make JHK color-color/mag plots make sense:
-    # (since J-H data is only ever used when plotted against H-K, 
-    # and we need a second K column to use against H-K)
-    jmh_table_info = band_cut(hmk_table, 'jmh')
-    k_table_info2 = band_cut(k_table_info, 'hmk', min_flag=1, max_flag=256)
-
-    jmhdate_info = jmh_table_info.MEANMJDOBS - 51544
-    hmkdate_info = hmk_table_info.MEANMJDOBS - 51544
-
-#    jmh =  jmh_table_info.JMHPNT
-#    hmk =  hmk_table.HMKPNT
-    kcol_info2 = k_table_info2.KAPERMAG3 # Needed for the K vs H-K plot
-    jmherr_info=jmh_table_info.JMHPNTERR
-    hmkerr_info=hmk_table_info.HMKPNTERR
-
-    jmhflag = jmh_table_info.JPPERRBITS + jmh_table_info.HPPERRBITS
-    hmkflag = hmk_table_info.HPPERRBITS + hmk_table_info.KPPERRBITS
-
-    hmk_table_warn = band_cut(s_table, 'hmk')    
-    # a quick hack to make JHK color-color/mag plots make sense:
-    # (since J-H data is only ever used when plotted against H-K, 
-    # and we need a second K column to use against H-K)
-    jmh_table_warn = band_cut(hmk_table, 'jmh')
-    k_table_warn2 = band_cut(k_table_warn, 'hmk', min_flag=1, max_flag=256)
-
-    jmhdate_warn = jmh_table_warn.MEANMJDOBS - 51544
-    hmkdate_warn = hmk_table_warn.MEANMJDOBS - 51544
-#    jmh =  jmh_table_warn.JMHPNT
-#    hmk =  hmk_table.HMKPNT
-    kcol_warn2 = k_table_warn2.KAPERMAG3 # Needed for the K vs H-K plot
-
-    jmherr_warn=jmh_table_warn.JMHPNTERR
-    hmkerr_warn=hmk_table_warn.HMKPNTERR
-
-    jmhflag = jmh_table_warn.JPPERRBITS + jmh_table_warn.HPPERRBITS
-    hmkflag = hmk_table_warn.HPPERRBITS + hmk_table_warn.KPPERRBITS
-
-
-
-
-    # Plot J-H vs H-K
-    # Note: we use `jmhdate` because of how jmh_table was defined.
+    # Plot J-H vs H-K using the "jhk_" variables.
     try:
-        plot_trajectory_core( ax_jhk, hmk, jmh, jmhdate )
-    except:
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate )
+    except Exception:
+        print "JHK plot broke!"
         pass
 
-    # Plot K vs H-K
-    # Note: not sure if this is going to break or not.
+    # Plot K vs H-K using the "khk_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk, kcol2, hmkdate , ms=False, ctts=False) # gonna update this so that it properly uses K-band main sequence line?
-    except:
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate, 
+                              ms=False, ctts=False) 
+    except Exception:
+        print "KHK plot broke!"
         pass
     ax_khk.invert_yaxis()
 
