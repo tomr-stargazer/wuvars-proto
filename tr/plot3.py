@@ -531,30 +531,32 @@ def phase (table, sid, period='auto', season=0, offset=0,
     hflag = h_table_warn.HPPERRBITS
     kflag = k_table_warn.KPPERRBITS
 
-
+    try:
     ## Let's figure out the period.
-    if period == 'auto':
-        kper_table = band_cut(s_table, 'k', max_flag=256)
-        kperdate = kper_table.MEANMJDOBS
-        kpercol = kper_table.KAPERMAG3
-        kpererr = kper_table.KAPERMAG3ERR
-
-        period = 1./test_analyze(kperdate, kpercol, kpererr)
-        print period
-    elif period == 'lsp':
-        kper_table = band_cut(s_table, 'k', max_flag=256)
-        kperdate = kper_table.MEANMJDOBS
-        kpercol = kper_table.KAPERMAG3
-        kpererr = kper_table.KAPERMAG3ERR
-
-        lomb = lsp(kperdate,kpercol,6.,6.)
-        lsp_freq = lomb[0]
-        lsp_power= lomb[1]
-        Jmax = lsp_mask( lsp_freq, lsp_power)
-        lsp_per = 1./ lomb[0][Jmax]
-        period = lsp_per
-        print period
-        
+        if period == 'auto':
+            kper_table = band_cut(s_table, 'k', max_flag=256)
+            kperdate = kper_table.MEANMJDOBS
+            kpercol = kper_table.KAPERMAG3
+            kpererr = kper_table.KAPERMAG3ERR
+            
+            period = 1./test_analyze(kperdate, kpercol, kpererr)
+            print period
+        elif period == 'lsp':
+            kper_table = band_cut(s_table, 'k', max_flag=256)
+            kperdate = kper_table.MEANMJDOBS
+            kpercol = kper_table.KAPERMAG3
+            kpererr = kper_table.KAPERMAG3ERR
+            
+            lomb = lsp(kperdate,kpercol,6.,6.)
+            lsp_freq = lomb[0]
+            lsp_power= lomb[1]
+            Jmax = lsp_mask( lsp_freq, lsp_power)
+            lsp_per = 1./ lomb[0][Jmax]
+            period = lsp_per
+            print period
+    except Exception:
+        print 'period-finding failed! returning'
+        return
 
     if period < 1:
         period_string = "%f hours" % (period*24)
