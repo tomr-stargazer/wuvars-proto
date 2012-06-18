@@ -13,6 +13,7 @@ import atpy
 import numpy as np
 import matplotlib.pyplot as plt
 import spreadsheet
+import plot2 as tplot
 
 import os, errno
 
@@ -116,12 +117,12 @@ def do_it_all( table, sid_list, name_list, path='',
         for season, s in zip([1,2,3,123], ss):
             
             # Write the spreadsheet and save it to the relevant directory.
-            spreadsheet.spreadsheet_write(table, lookup, season, flags=16,
+            spreadsheet.spreadsheet_write(table, lookup, season, 
                                           tables+s+'/spreadsheet.fits', 
-                                          per=True)
+                                          flags=16, per=True)
             
         # Tested!
-        return
+        #return
 
     # What command do we want to make plots?
     # Probably plot3.lc and plot3.phase, which are going to be almost 
