@@ -28,12 +28,13 @@ from helpers3 import data_cut, band_cut
 from plot2 import plot_trajectory_core
 from chi2 import test_analyze
 from scargle import fasper as lsp
+from timing import lsp_mask
 
 #import coords
 #import stetson
 #from chi2 import test_analyze
 #from scargle import fasper as lsp
-#from timing import lsp_mask
+
 #from tr_helpers import season_cut, data_cut, ensemble_cut
 
 
@@ -528,10 +529,20 @@ def phase (table, sid, period='auto', season=0, offset=0,
 
     ## Let's figure out the period.
     if period == 'auto':
-        period = 1./test_analyze(kdate, kcol, kerr)
+        kper_table = band_cut(s_table, 'k', max_flag=256)
+        kperdate = kper_table.MEANMJDOBS
+        kpercol = kper_table.KAPERMAG3
+        kpererr = kper_table.KAPERMAG3ERR
+
+        period = 1./test_analyze(kperdate, kpercol, kpererr)
         print period
     elif period == 'lsp':
-        lomb = lsp(kdate,kcol,6.,6.)
+        kper_table = band_cut(s_table, 'k', max_flag=256)
+        kperdate = kper_table.MEANMJDOBS
+        kpercol = kper_table.KAPERMAG3
+        kpererr = kper_table.KAPERMAG3ERR
+
+        lomb = lsp(kperdate,kpercol,6.,6.)
         lsp_freq = lomb[0]
         lsp_power= lomb[1]
         Jmax = lsp_mask( lsp_freq, lsp_power)
