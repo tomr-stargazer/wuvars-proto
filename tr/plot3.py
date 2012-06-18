@@ -404,3 +404,288 @@ def phase (table, sid, period='auto', season=0, outfile='', png_too=False):
         The canvas figure that the graphs are plotted onto.
     
     """
+
+    # Loading data
+    s_table = data_cut (table, sid, season)
+
+    if len(s_table) == 0:
+        print "no data here"
+        return
+
+    ## Let's do the 3 lightcurve bands.
+
+    ### Initializing variables. Most of the following are done thrice:
+    # Once with no errors (normal),
+    # once with small errors (info),
+    # once with large errors (warning).
+
+    ## First: normal
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table = band_cut(s_table, 'j', max_flag=0)
+    h_table = band_cut(s_table, 'h', max_flag=0)
+    k_table = band_cut(s_table, 'k', max_flag=0)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate = j_table.MEANMJDOBS - 51544
+    hdate = h_table.MEANMJDOBS - 51544
+    kdate = k_table.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol = j_table.JAPERMAG3
+    hcol = h_table.HAPERMAG3
+    kcol = k_table.KAPERMAG3
+
+    # get a magnitude error (y-error) for each plot
+    jerr = j_table.JAPERMAG3ERR
+    herr = h_table.HAPERMAG3ERR
+    kerr = k_table.KAPERMAG3ERR
+
+    # get a quality flag for each plot
+    # (aftercomment: not sure we're going to ever use these)
+    jflag = j_table.JPPERRBITS
+    hflag = h_table.HPPERRBITS
+    kflag = k_table.KPPERRBITS
+
+    ## Second: info
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table_info = band_cut(s_table, 'j', min_flag=1, max_flag=256)
+    h_table_info = band_cut(s_table, 'h', min_flag=1, max_flag=256)
+    k_table_info = band_cut(s_table, 'k', min_flag=1, max_flag=256)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate_info = j_table_info.MEANMJDOBS - 51544
+    hdate_info = h_table_info.MEANMJDOBS - 51544
+    kdate_info = k_table_info.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol_info = j_table_info.JAPERMAG3
+    hcol_info = h_table_info.HAPERMAG3
+    kcol_info = k_table_info.KAPERMAG3
+
+    # get a magnitude error (y-error) for each plot
+    jerr_info = j_table_info.JAPERMAG3ERR
+    herr_info = h_table_info.HAPERMAG3ERR
+    kerr_info = k_table_info.KAPERMAG3ERR
+
+    # get a quality flag for each plot
+    jflag = j_table_info.JPPERRBITS
+    hflag = h_table_info.HPPERRBITS
+    kflag = k_table_info.KPPERRBITS
+    
+    ## Third: warning
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table_warn = band_cut(s_table, 'j', min_flag=257)
+    h_table_warn = band_cut(s_table, 'h', min_flag=257)
+    k_table_warn = band_cut(s_table, 'k', min_flag=257)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate_warn = j_table_warn.MEANMJDOBS - 51544
+    hdate_warn = h_table_warn.MEANMJDOBS - 51544
+    kdate_warn = k_table_warn.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol_warn = j_table_warn.JAPERMAG3
+    hcol_warn = h_table_warn.HAPERMAG3
+    kcol_warn = k_table_warn.KAPERMAG3
+
+    # get a magnitude error (y-error) for each plot
+    jerr_warn = j_table_warn.JAPERMAG3ERR
+    herr_warn = h_table_warn.HAPERMAG3ERR
+    kerr_warn = k_table_warn.KAPERMAG3ERR
+
+    # get a quality flag for each plot
+    jflag = j_table_warn.JPPERRBITS
+    hflag = h_table_warn.HPPERRBITS
+    kflag = k_table_warn.KPPERRBITS
+
+
+    ## Let's figure out the period.
+    if period == 'auto':
+        period = 1./test_analyze(kdate, kcol, kerr)
+        print period
+    elif period == 'lsp':
+        lomb = lsp(kdate,kcol,6.,6.)
+        lsp_freq = lomb[0]
+        lsp_power= lomb[1]
+        Jmax = lsp_mask( lsp_freq, lsp_power)
+        lsp_per = 1./ lomb[0][Jmax]
+        period = lsp_per
+        print period
+        
+
+    if period < 1:
+        period_string = "%f hours" % (period*24)
+        print period_string
+    else:
+        period_string = "%f days" % period
+
+    ## Define the components and parameters of the figure:
+    
+    fig = plt.figure(figsize = (10, 6), dpi=80,
+                     facecolor='w', edgecolor='k')
+
+    bottom = 0.1
+    height = .25
+    left = 0.075
+    width = 0.5
+
+    ax_k = fig.add_axes( (left, bottom, width, height) )
+    ax_h = fig.add_axes( (left, bottom+.3, width, height), sharex=ax_k )
+    ax_j = fig.add_axes( (left, bottom+.6, width, height), sharex=ax_k )
+    
+    ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
+    ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
+
+    ## Start plotting. 
+    
+    fmt_info = 'D'
+    fmt_warn = '.'
+
+    # Plot J-band:
+    if len(jdate) > 0:
+#        ax_j.errorbar( jdate, jcol, yerr=jerr, fmt='bo', ecolor='k')
+        plot_phase_core( ax_j, jdate, jcol, jerr, period, offset=offset,
+                         color='b')
+    if len(jdate_info) > 0:
+#        ax_j.errorbar( jdate_info, jcol_info, yerr=jerr_info, 
+#                       fmt='b'+fmt_info, ms=4, ecolor='k')
+        plot_phase_core( ax_j, jdate_info, jcol_info, jerr_info, period, 
+                         offset=offset, color='b', sym=fmt_info, ms=4)
+    if len(jdate_warn) > 0:
+#        ax_j.errorbar( jdate_warn, jcol_warn, yerr=jerr_warn, 
+#                       fmt='k'+fmt_warn, ecolor='k')
+        plot_phase_core( ax_j, jdate_warn, jcol_warn, jerr_warn, period,
+                         offset=offset, sym=fmt_warn)
+    ax_j.invert_yaxis()
+
+    # Plot H-band:
+    if len(hdate) > 0:
+#        ax_h.errorbar( hdate, hcol, yerr=herr, fmt='go', ecolor='k' )
+        plot_phase_core( ax_h, hdate, hcol, herr, period, offset=offset,
+                         color='g')
+    if len(hdate_info) > 0:
+#        ax_h.errorbar( hdate_info, hcol_info, yerr=herr_info, 
+#                       fmt='g'+fmt_info, ms=4, ecolor='k')
+        plot_phase_core( ax_h, hdate_info, hcol_info, herr_info, period, 
+                         offset=offset, color='g', sym=fmt_info, ms=4)
+    if len(hdate_warn) > 0:
+#        ax_h.errorbar( hdate_warn, hcol_warn, yerr=herr_warn, 
+#                       fmt='k'+fmt_warn, ecolor='k')
+        plot_phase_core( ax_h, hdate_warn, hcol_warn, herr_warn, period,
+                         offset=offset, sym=fmt_warn)
+    ax_h.invert_yaxis()
+
+    # Plot K-band:
+    if len(kdate) > 0:
+#        ax_k.errorbar( kdate, kcol, yerr=kerr, fmt='ro', ecolor='k' )
+        plot_phase_core( ax_k, kdate, kcol, kerr, period, offset=offset,
+                         color='r')
+
+    if len(kdate_info) > 0:
+#        ax_k.errorbar( kdate_info, kcol_info, yerr=kerr_info, 
+#                       fmt='r'+fmt_info, ms=4, ecolor='k')
+        plot_phase_core( ax_k, kdate_info, kcol_info, kerr_info, period, 
+                         offset=offset, color='r', sym=fmt_info, ms=4)
+    if len(kdate_warn) > 0:
+#        ax_k.errorbar( kdate_warn, kcol_warn, yerr=kerr_warn, 
+#                       fmt='k'+fmt_warn, ecolor='k')
+        plot_phase_core( ax_k, kdate_warn, kcol_warn, kerr_warn, period,
+                         offset=offset, sym=fmt_warn)
+    ax_k.invert_yaxis()
+
+    ## Now let's do the 2 color-mag/color-color plots.
+
+    # We'll use different data-cuts for the two different plots.
+    # Relevant comment: I made an executive call to include only
+    # 'normal' and 'info'-flagged data in the C-C and C-M plots
+    # (i.e. max_flag=256 in all relevant bands).
+    
+    # In the color-mag plot, we need data where H and K are defined 
+    # everywhere. That's two cuts.
+    khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
+                          'h', max_flag=256)
+
+    khkdate = khk_table.MEANMJDOBS - 51544
+    k_khk = khk_table.KAPERMAG3
+    hmk_khk = khk_table.HMKPNT
+
+    khkphase = ((khkdate % period) / period + offset) % 1.
+
+    # In the color-color plot, we need data where J, H, and K are
+    # defined everywhere. That's one more cut.
+    jhk_table = band_cut(khk_table, 'j', max_flag=256)
+
+    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jmh_jhk = jhk_table.JMHPNT
+    hmk_jhk = jhk_table.HMKPNT
+
+    jhkphase = ((jhkdate % period) / period + offset) % 1.
+
+    # Plot J-H vs H-K using the "jhk_" variables.
+    try:
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkphase )
+    except Exception:
+        print "JHK plot broke!"
+        pass
+
+    # Plot K vs H-K using the "khk_" variables.
+    try:
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkphase, 
+                              ms=False, ctts=False) 
+    except Exception:
+        print "KHK plot broke!"
+        pass
+    ax_khk.invert_yaxis()
+
+
+    # Hide the bad labels...
+    plt.setp(ax_j.get_xticklabels(), visible=False)
+    plt.setp(ax_h.get_xticklabels(), visible=False)
+
+    # Label stuff
+    ax_k.set_xlabel( "Phase (Period = %s)" % period_string )
+
+    ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
+
+    ax_jhk.set_xlabel( "H-K" )
+    ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
+    ax_khk.set_xlabel( "H-K" )
+    ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
+
+    return fig
