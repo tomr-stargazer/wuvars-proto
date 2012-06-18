@@ -32,8 +32,6 @@ from timing import lsp_mask
 
 #import coords
 #import stetson
-#from chi2 import test_analyze
-#from scargle import fasper as lsp
 
 #from tr_helpers import season_cut, data_cut, ensemble_cut
 
