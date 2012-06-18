@@ -244,6 +244,9 @@ def lc (table, sid, season=0, outfile='', png_too=False):
     ## Now let's do the 2 color-mag/color-color plots.
 
     # We'll use different data-cuts for the two different plots.
+    # Relevant comment: I made an executive call to include only
+    # 'normal' and 'info'-flagged data in the C-C and C-M plots
+    # (i.e. max_flag=256 in all relevant bands).
     
     # In the color-mag plot, we need data where H and K are defined 
     # everywhere. That's two cuts.
@@ -308,3 +311,47 @@ def lc (table, sid, season=0, outfile='', png_too=False):
 
 
     return fig
+
+
+
+# 'hide' parameter is hackish.
+def plot_phase_core (ax, t, x, xerr, period, offset=0, 
+                     sym='o', color='k', ms=6, hide=False):
+    """ 
+    Plots a pretty period-folded lightcurve on a given axes object.
+
+    Doesn't assume anything about your data (e.g., that it's in magnitudes)
+    
+    Parameters
+    ----------
+    ax : plt.Axes
+    t, x, xerr : array_like
+    period : float
+    offset : float, optional
+        How much to shift the phase by. Default is zero.
+    sym : str, optional
+        Default 'o'. (circles)
+    color : str, optional
+        Default 'k'. (black)
+    ms : float
+        Default 6.
+    
+    """
+    
+    phase = ((t % period) / period + offset) % 1.
+
+
+    if not hide:    ax.errorbar(phase, x, yerr=xerr, fmt= color+sym, ms=ms)
+    ax.errorbar(phase-1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
+                 ecolor='0.7', ms=ms)
+    ax.errorbar(phase+1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
+                 ecolor='0.7', ms=ms)
+    
+    ax.set_xticks( [0, 0.5, 1] )
+    ax.set_xticks( np.arange(-.5,1.5,.1), minor=True)
+
+    ax.set_xlim(-0.25, 1.25)
+
+    return period
+
+
