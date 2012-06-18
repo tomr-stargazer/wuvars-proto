@@ -13,7 +13,7 @@ import atpy
 import numpy as np
 import matplotlib.pyplot as plt
 import spreadsheet
-import plot2 as tplot
+import plot3 as tplot
 
 import os, errno
 
@@ -137,8 +137,29 @@ def do_it_all( table, sid_list, name_list, path='',
         for name, sid in zip(name_list, sid_list):
             # The specific plot command we use here depends a lot
             # on what functions are available.
-            tplot.lc(table, sid, season=season, name=name, flags=16,
-                     outfile="lc/"+s+"/"+name, png_too=True) #png, eps, pdf
+            tplot.lc(table, sid, season=season, name=name, #flags=16,
+                     outfile=path+"lc/"+s+"/"+name, png_too=True) #png, eps, pdf
+
+
+        # A bunch of the following code will be substantially rewritten
+        # once "spread3" is functional.
+            for t in types:
+                if t == 'lsp_power':
+                    tplot.lsp_power(table, sid, season=season, name=name,
+                                    outfile=path+"phase/"+s+"/lsp_power/"+name, 
+                                    png_too=True) 
+                elif t == 'k_fx2':
+                    tplot.phase(table, sid, season=season, name=name,
+                                outfile=path+"phase/"+s+"/k_fx2/"+name, 
+                                png_too=True) 
+                elif t == 'k_lsp':
+                    tplot.phase(table, sid, season=season, name=name,
+                                period='lsp',
+                                outfile=path+"phase/"+s+"/k_lsp/"+name, 
+                                png_too=True) 
+
+                else:
+                    pass
 
 
     return
