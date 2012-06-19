@@ -9,7 +9,7 @@ wuvars-proto
   subdirectory.
 
   A description of the main modules:
-    tr/plot2.py - used to visualize lightcurves
+    tr/plot2.py, tr/plot3.py - used to visualize lightcurves	
     tr/scargle.py - performs Lomb-Scargle Periodogram analysis
     tr/chi2.py - interfaces with Palmer's Fast Chi-Squared 
                  frequency analysis
@@ -19,7 +19,7 @@ wuvars-proto
     tr/robust.py - calculates Robust statistics
     tr/timing.py - implements a filter for periodogram frequencies
     tr/tr_helpers.py - contains a number of helper functions 
-    		       used in the above packages
+    		       used in the above packages (also see tr/helpers3.py)
     tr/super.py - a set of magic functions that make very many 
                   figures and plots simultaneously.
 
@@ -27,3 +27,5 @@ wuvars-proto
   Matplotlib, and ATpy packages.
 
   Created in 2010-2012 by Tom Rice (t.rice90@gmail.com).
+  
+  README last updated 19 June 2012.
