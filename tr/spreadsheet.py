@@ -216,7 +216,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
     bands = [ j, h, k, jmh, hmk ]
     band_names = ['j', 'h', 'k', 'jmh', 'hmk']
-    
+   
     for b in bands:
         b.mean = np.ones(l)
         b.rms =  np.ones(l)
