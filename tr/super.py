@@ -12,7 +12,7 @@ Useful functions:
 import atpy
 import numpy as np
 import matplotlib.pyplot as plt
-import spreadsheet
+import spread3
 import plot3 as tplot
 
 import os, errno
@@ -117,9 +117,9 @@ def do_it_all( table, sid_list, name_list, path='',
         for season, s in zip([1,2,3,123], ss):
             
             # Write the spreadsheet and save it to the relevant directory.
-            spreadsheet.spreadsheet_write(table, lookup, season, 
+            spread3.spreadsheet_write(table, lookup, season, 
                                           tables+s+'/spreadsheet.fits', 
-                                          flags=16, per=True)
+                                          flags=256, per=True)
             
         # Tested!
         #return

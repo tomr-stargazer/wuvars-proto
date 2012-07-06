@@ -329,8 +329,8 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
             b.ranger = b.maxr - b.minr
 
         # Period finding... is a little dodgy still, and might take forever
-        if per:
-            
+        if per==True and b.N > 2:
+
             b.lsp = lsp(b.date, b.data, 6., 6.) # apologies if this is cluttered
             Jmax = lsp_mask(b.lsp[0], b.lsp[1])
             b.lsp_per = 1./ b.lsp[0][Jmax]
@@ -515,7 +515,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
                 b.minr[i] = vb.minr
                 b.ranger[i] = vb.ranger
 
-            if per:
+            if per and vb.N > 2:
                 b.lsp_per[i] = vb.lsp_per
                 b.lsp_pow[i] = vb.lsp_pow
                 b.fx2_per[i] = vb.fx2_per
