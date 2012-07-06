@@ -89,7 +89,7 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
 
     return s
 
-def S_sid (table, sid, season=123) :
+def S_sid (table, sid, season=123, flags=0) :
     """ Calculates the Stetson J index for a given source.
 
     Inputs:
@@ -99,7 +99,7 @@ def S_sid (table, sid, season=123) :
     """
     from tr_helpers import season_cut
 
-    s_table = season_cut(table, sid, season, flags=0)
+    s_table = season_cut(table, sid, season, flags=flags)
     jcol = s_table.JAPERMAG3
     hcol = s_table.HAPERMAG3
     kcol = s_table.KAPERMAG3
