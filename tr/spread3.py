@@ -27,7 +27,7 @@ import atpy
 import numpy as np
 import stetson
 import robust as rb
-from helpers3 import data_cut
+from helpers3 import data_cut, band_cut
 from scargle import fasper as lsp
 from timing import lsp_mask
 from chi2 import test_analyze
@@ -113,7 +113,8 @@ def Stetson_machine ( s_table, flags=0) :
         kcol = jhk_table.KAPERMAG3; kerr = jhk_table.KAPERMAG3ERR
 
         Stetson = stetson.S(jcol, jerr, hcol, herr, kcol, kerr)
- 
+
+        stetson_nights = jhk_len 
     else:
         if hk_len == max_len:
             choice = 'hk'
@@ -135,7 +136,7 @@ def Stetson_machine ( s_table, flags=0) :
 
         Stetson = stetson.I(bcol, berr, vcol, verr)
 
-    stetson_nights = max_len
+        stetson_nights = max_len
 
     # Finally, return S, the band choice, and how many nights 
     # are going into the Stetson calculation for that choice.
@@ -212,8 +213,8 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     jdate = j_table.MEANMJDOBS
     hdate = h_table.MEANMJDOBS
     kdate = k_table.MEANMJDOBS
-    jmh_date = jmh_table.MEANMJDOBS
-    hmk_date = hmk_table.MEANMJDOBS
+    jmhdate = jmh_table.MEANMJDOBS
+    hmkdate = hmk_table.MEANMJDOBS
 #    date = s_table.MEANMJDOBS 
     
     # get a magnitude and magnitude error for each band
@@ -260,11 +261,12 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
 
 
     # Create parallel data structures for each band, so we can iterate
-    ret.j = Empty();   ret.j.data = jcol;   ret.j.err = jerr
-    ret.h = Empty();   ret.h.data = hcol;   ret.h.err = herr
-    ret.k = Empty();   ret.k.data = kcol;   ret.k.err = kerr
-    ret.jmh = Empty(); ret.jmh.data=jmhcol; ret.jmh.err = jmherr
+    ret.j = Empty(); ret.j.data = jcol; ret.j.err = jerr; ret.j.date = jdate   
+    ret.h = Empty(); ret.h.data = hcol; ret.h.err = herr; ret.h.date = hdate
+    ret.k = Empty(); ret.k.data = kcol; ret.k.err = kerr; ret.k.date = kdate
+    ret.jmh = Empty(); ret.jmh.data=jmhcol; ret.jmh.err = jmherr 
     ret.hmk = Empty(); ret.hmk.data=hmkcol; ret.hmk.err = hmkerr
+    ret.jmh.date = jmhdate; ret.hmk.date = hmkdate
 
 
     bands = [ ret.j, ret.h, ret.k, ret.jmh, ret.hmk ]
@@ -295,11 +297,11 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
         # Period finding... is a little dodgy still, and might take forever
         if per:
             
-            b.lsp = lsp(date, b.data, 6., 6.) # apologies if this is cluttered
+            b.lsp = lsp(b.date, b.data, 6., 6.) # apologies if this is cluttered
             Jmax = lsp_mask(b.lsp[0], b.lsp[1])
             b.lsp_per = 1./ b.lsp[0][Jmax]
             b.lsp_pow = b.lsp[1][Jmax]
-            b.fx2_per = 1./ test_analyze( date, b.data, b.err )
+            b.fx2_per = 1./ test_analyze( b.date, b.data, b.err )
 
     
     # and the pp_max, using the messy table
