@@ -1,16 +1,33 @@
-""" Make a spreadsheet of lots of data. 
+""" 
+spread3.py
+
+This is the primary statistics-making package within wuvars, 
+for "generation 3" of data-handling (i.e. deals with missing 
+or error-flagged data sophisticatedly).
+
+Make a spreadsheet of lots of data. 
 
 The purpose of this module is to calculate global statistics for 
 the time-series data of many stars, such as mean magnitudes, RMS variability,
 the Stetson variability index, (optionally) best-fit periods, etc,
 and to bundle all of these values up into a spreadsheet. It's really useful!
+
+Useful functions:
+  spread_write - 
+  
+
+Helper functions:
+  statcruncher - calculates a large number of stats for one star
+                 (formerly arraystat_2)
+  
+
 """
 
 import atpy
 import numpy as np
 import stetson
 import robust as rb
-from tr_helpers import data_cut
+from helpers3 import data_cut
 from scargle import fasper as lsp
 from timing import lsp_mask
 from chi2 import test_analyze
