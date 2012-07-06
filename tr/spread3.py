@@ -57,6 +57,9 @@ def reduced_chisq ( m, sigma_m ):
 def Stetson_machine ( s_table, flags=0) :
     """
     Computes the Stetson index on the best combination of bands.
+
+    There's a lot of internal logic here on how to exactly accomplish
+    that, and especially which version of the Stetson index to even use.
     
     Parameters
     ----------
@@ -376,7 +379,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     lookup : atpy.Table
         Table of interesting sources and their names
         (must contain columns "SOURCEID" and "Designation")
-    season : int, optional
+    season : int
         Which observing season of our dataset (1, 2, 3, or all).
         Any value that is not the integers (1, 2, or 3) will be 
         treated as "no season", and no time-cut will be made.
