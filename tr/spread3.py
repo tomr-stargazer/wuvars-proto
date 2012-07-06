@@ -13,7 +13,7 @@ the Stetson variability index, (optionally) best-fit periods, etc,
 and to bundle all of these values up into a spreadsheet. It's really useful!
 
 Useful functions:
-  spread_write - 
+  spreadsheet_write - 
   
 
 Helper functions:
@@ -278,7 +278,7 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
         b.rms = b.data.std()
         b.min = b.data.min()
         b.max = b.data.max()
-        b.peak_trough = b.max - b.min
+        b.range = b.max - b.min
 
         b.mean_err = b.err.mean()
 
@@ -290,7 +290,7 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
             b.rmsr = rb.stdr(b.data)
             b.minr = b.datar.min()
             b.maxr = b.datar.max()
-            b.peak_troughr = b.maxr - b.minr
+            b.ranger = b.maxr - b.minr
 
         # Period finding... is a little dodgy still, and might take forever
         if per:
@@ -408,14 +408,14 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.rchi2 =np.ones(l)
         b.min =  np.ones(l)
         b.max =  np.ones(l)
-        b.peak_trough =  np.ones(l)
+        b.range =  np.ones(l)
  
         # rob:
         b.meanr =  np.ones(l)
         b.rmsr =  np.ones(l)
         b.minr =  np.ones(l)
         b.maxr =  np.ones(l)
-        b.peak_troughr =  np.ones(l)
+        b.ranger =  np.ones(l)
         
         # per:
         b.lsp_per =  np.ones(l)
@@ -462,7 +462,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             b.rms[i] = vb.rms
             b.min[i] = vb.min
             b.max[i] = vb.max
-            b.peak_trough[i] = vb.peak_trough
+            b.range[i] = vb.range
 
             b.rchi2[i] = vb.rchi2
 
@@ -473,7 +473,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
                 b.rmsr[i] = vb.rmsr
                 b.maxr[i] = vb.maxr
                 b.minr[i] = vb.minr
-                b.peak_troughr[i] = vb.peak_troughr
+                b.ranger[i] = vb.ranger
 
             if per:
                 b.lsp_per[i] = vb.lsp_per
@@ -513,7 +513,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         Output.add_column(bn+'rms', b.rms)
         Output.add_column(bn+'min', b.min)
         Output.add_column(bn+'max', b.max)
-        Output.add_column(bn+'peak_trough', b.peak_trough)
+        Output.add_column(bn+'range', b.range)
 
         Output.add_column(bn+'rchi2', b.rchi2)
 
@@ -522,7 +522,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             Output.add_column(bn+'rmsr', b.rmsr)
             Output.add_column(bn+'minr', b.minr)
             Output.add_column(bn+'maxr', b.maxr)
-            Output.add_column(bn+'peak_troughr', b.peak_troughr)
+            Output.add_column(bn+'ranger', b.ranger)
 
         if per:
             Output.add_column(bn+'lsp_per', b.lsp_per)
