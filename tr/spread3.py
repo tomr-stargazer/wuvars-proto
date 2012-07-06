@@ -229,12 +229,12 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     decol= s_table.DEC[(s_table.DEC > -4) & (s_table.DEC < 4)]
 
     # Now let's get some ability to track errorful data.
-    messy_table_j = band_cut( s_table, 'j')
-    messy_table_h = band_cut( s_table, 'h')
-    messy_table_k = band_cut( s_table, 'k')
-    jppcol = messy_table_j.JPPERRBITS
-    hppcol = messy_table_h.HPPERRBITS
-    kppcol = messy_table_k.KPPERRBITS
+    # messy_table_j = band_cut( s_table, 'j')
+    # messy_table_h = band_cut( s_table, 'h')
+    # messy_table_k = band_cut( s_table, 'k')
+    # jppcol = messy_table_j.JPPERRBITS
+    # hppcol = messy_table_h.HPPERRBITS
+    # kppcol = messy_table_k.KPPERRBITS
 
     # make an empty data structure and just assign it information, then return 
     # the object itself! then there's no more worrying about indices.
@@ -268,12 +268,17 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     ret.hmk = Empty(); ret.hmk.data=hmkcol; ret.hmk.err = hmkerr
     ret.jmh.date = jmhdate; ret.hmk.date = hmkdate
 
+    ret.j.N = ret.N_j ; ret.h.N = ret.N_h ; ret.k.N = ret.N_k
+    ret.jmh.N = len(jmh_table) ; ret.hmk.N = len(hmk_table)
 
     bands = [ ret.j, ret.h, ret.k, ret.jmh, ret.hmk ]
 
     for b in bands:
         # use b.data, b.err
         
+        # if this band is empty, don't try to do the following assignments
+        if b.N == 0: continue
+
         b.rchi2 = reduced_chisq( b.data, b.err )
 
         b.mean = b.data.mean()
@@ -306,9 +311,9 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     
     # and the pp_max, using the messy table
     # (slated for a re-implementation)
-    ret.jpp_max = jppcol.max()
-    ret.hpp_max = hppcol.max()
-    ret.kpp_max = kppcol.max()
+    # ret.jpp_max = jppcol.max()
+    # ret.hpp_max = hppcol.max()
+    # ret.kpp_max = kppcol.max()
 
     return ret
 
@@ -425,9 +430,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.fx2_per =  np.ones(l)
     
 #    color_slope =  np.ones(l)
-    jpp_max = np.ones_like(sidarr)
-    hpp_max = np.ones_like(sidarr)
-    kpp_max = np.ones_like(sidarr)
+    # jpp_max = np.ones_like(sidarr)
+    # hpp_max = np.ones_like(sidarr)
+    # kpp_max = np.ones_like(sidarr)
         
 
     for sid, i in zip(sidarr, range(len(sidarr)) ):
@@ -483,9 +488,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
                 b.fx2_per[i] = vb.fx2_per
     
 #        color_slope[i] = v.color_slope
-        jpp_max[i] = v.jpp_max
-        hpp_max[i] = v.hpp_max
-        kpp_max[i] = v.kpp_max
+        # jpp_max[i] = v.jpp_max
+        # hpp_max[i] = v.hpp_max
+        # kpp_max[i] = v.kpp_max
             
 
         if (i > 30 and Test): 
@@ -533,17 +538,17 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
             
 #    Output.add_column('color_slope', color_slope)
-    Output.add_column('jpp_max', jpp_max)
-    Output.add_column('hpp_max', hpp_max)
-    Output.add_column('kpp_max', kpp_max)
+    # Output.add_column('jpp_max', jpp_max)
+    # Output.add_column('hpp_max', hpp_max)
+    # Output.add_column('kpp_max', kpp_max)
 
     Output.write(outfile, overwrite=True)
     print "Wrote output to %s" % outfile
 
     return
 
-def spread_write_test (table, lookup) :
+def spread_write_test (table, lookup, flags=0) :
     """ Tests spreadsheet_write."""
 
     test_path = '/home/trice/reu/DATA/Merged_Catalogs/spreadsheet/test.fits'
-    spreadsheet_write (table, lookup, -1, test_path, Test=True)
+    spreadsheet_write (table, lookup, -1, test_path, flags=flags, Test=True)
