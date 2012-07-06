@@ -54,6 +54,82 @@ def reduced_chisq ( m, sigma_m ):
     return (1./nu) * np.sum( (m - m.mean())**2 / sigma_m**2 )
 
 
+def Stetson_chooser ( s_table, flags=0) :
+    """
+    A helper function to choose the best combination of 
+    bands to get the most reliable Stetson index from.
+
+    Parameters
+    ----------
+    s_table : atpy.Table
+        Table with time-series photometry of one star
+    flags : int, optional 
+        Maximum ppErrBit quality flags to use (default 0)    
+    
+    Returns
+    -------
+    choice : str {'jhk', 'hk', 'jh', 'jk'}
+        Which combination of bands is optimal.
+    stetson_nights : int 
+        How many nights have all of the optimal combination
+        (and therefore, how many nights' worth of data is going into
+        the Stetson calculation)
+
+    """
+    
+    # First, slice the data to find how many nights have
+    # a given combination of bands.
+
+    j_table = band_cut( s_table, 'j', max_flag=flags)
+    h_table = band_cut( s_table, 'h', max_flag=flags)
+    
+    jh_table = band_cut( j_table, 'h', max_flag=flags)
+    hk_table = band_cut( h_table, 'k', max_flag=flags)
+    jk_table = band_cut( j_table, 'k', max_flag=flags)
+
+    jhk_table = band_cut( jh_table, 'k', max_flag=flags)
+
+    # Then we'll measure how many nights are in each combination.
+
+    jh_len = len(jh_table)
+    hk_len = len(hk_table)
+    jk_len = len(jk_table)
+    jhk_len = len(jhk_table)
+
+    # The combination with the most nights (weighted by value^{1})
+    # will win. Ties are determined in order: JHK, HK, JH, JK
+
+    max_len = max(jh_len, hk_len, jk_len, jhk_len*2)
+
+    if 2*jhk_len == max_len:
+        choice = 'jhk'
+    elif hk_len == max_len:
+        choice = 'hk'
+    elif jh_len == max_len:
+        choice = 'jh'
+    elif jk_len == max_len:
+        choice = 'jk'
+
+    stetson_nights = max_len
+
+    # Finally, return the choice, plus how many nights are going into
+    # the Stetson calculation for that choice.
+
+    return (choice, stetson_nights)
+
+
+    # {1}. From Stetson, P. 1996PASP..108..851S, p. 853
+    # "... if more than two observations are all obtained 
+    # within a time span << the shortest periodicity being 
+    # sought, individual observations may be included in 
+    # more than one pair. For instance, three closely spaced 
+    # observations 'abc' may be distributed into the three 
+    # pairs 'ab', 'bc' and 'ac', with two-thirds weight 
+    # being assigned to each pair so that in aggregate they 
+    # contribute double weight (as a variance determined 
+    # from three observations carries twice the weight of a 
+    # variance estimated from only two)."  
+
 
 def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     """ Calculates several statistical properties for a given star.
@@ -84,13 +160,27 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     -------
     ret : data structure 
        Contains the computed values.
-      """
+
+       """
     
-    s_table = data_cut( table, [sid], season=season, flags=flags )
+    s_table = data_cut ( table, sid, season=season, flags=flags )
 
     if len(s_table) < 1:
         print "no data for %d!" % sid
         return None
+
+    # First, let's compute single-band statistics. This will require
+    # separate data_cuts on each band.
+
+    j_table = band_cut(s_table, 'j', max_flag=flags)
+    h_table = band_cut(s_table, 'h', max_flag=flags)
+    k_table = band_cut(s_table, 'k', max_flag=flags)
+
+    # get a date (x-axis) for each plot
+    jdate = j_table.MEANMJDOBS
+    hdate = h_table.MEANMJDOBS
+    kdate = k_table.MEANMJDOBS
+#    date = s_table.MEANMJDOBS 
     
     jcol = s_table.JAPERMAG3; jerr = s_table.JAPERMAG3ERR
     hcol = s_table.HAPERMAG3; herr = s_table.HAPERMAG3ERR
@@ -100,7 +190,7 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     racol= s_table.RA
     decol= s_table.DEC
 
-    date = s_table.MEANMJDOBS 
+
 
     messy_table = data_cut( table, [sid], season=-1 )
     jppcol=messy_table.JPPERRBITS
