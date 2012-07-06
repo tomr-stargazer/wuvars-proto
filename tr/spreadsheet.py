@@ -187,6 +187,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
       rob -- also use Robust statistics? (takes longer, default False)
       per -- run period-finding? (takes longer, default False)
 
+    Returns:
+      None (but writes an output file to `outfile`)
+
     Note: crashes if given any stars with only 1 observation and per=True.
     """
 
