@@ -4,6 +4,19 @@ The purpose of this module is to calculate global statistics for
 the time-series data of many stars, such as mean magnitudes, RMS variability,
 the Stetson variability index, (optionally) best-fit periods, etc,
 and to bundle all of these values up into a spreadsheet. It's really useful!
+
+Useful functions:
+  spreadsheet_write - Creates a statistics spreadsheet of many stars
+  spread_write_test - a testing function for spreadsheet_write; useful
+                      for quantifying the performance of spreadsheet_write
+  base_lookup - creates a simple lookup table.
+
+Helper functions:
+  arraystat_2 - calculates a large number of stats for one star
+  reduced_chisq - calculates the reduced chi-square for an array and its 
+                  errors
+  make_sidset - takes a table with repeated IDs and gives a list of unique IDs
+                contained therein
 """
 
 import atpy
