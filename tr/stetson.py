@@ -99,6 +99,29 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
 
     return s
 
+def S_singleton (v, sigma_v):
+    """
+    Computes the 'Stetson' index for a star that has no simultaneous 
+    observations (i.e., only observed in a single color).
+    """
+
+    n = v.size
+    
+    # Perhaps hackish
+    if n < 2:
+        return 0
+
+    d_v = delta(v, sigma_v, v.mean(), n)
+
+    P_i = np.array( [d_v**2 - 1] )
+
+    # Stolen from S(). The sum may be completely unneccessary?
+    s = np.sum( np.sign( P_i ) * np.sqrt( np.abs( P_i ))) /(n*1.)
+
+    return s
+
+
+
 def S_sid (table, sid, season=123, flags=0) :
     """ Calculates the Stetson J index for a given source.
 

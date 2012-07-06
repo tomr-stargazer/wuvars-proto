@@ -84,6 +84,7 @@ def Stetson_machine ( s_table, flags=0) :
 
     j_table = band_cut( s_table, 'j', max_flag=flags)
     h_table = band_cut( s_table, 'h', max_flag=flags)
+    k_table = band_cut( s_table, 'k', max_flag=flags)
     
     jh_table = band_cut( j_table, 'h', max_flag=flags)
     hk_table = band_cut( h_table, 'k', max_flag=flags)
@@ -105,7 +106,32 @@ def Stetson_machine ( s_table, flags=0) :
 
     # Now note the winning choice, and compute the relevant index.
 
-    if 2*jhk_len == max_len:
+    # If there are no simultaneous observations, choose the most-observed band
+    # and do a singleband 'Stetson'.
+
+    if max_len == 0:
+        j_len = len(j_table)
+        h_len = len(h_table)
+        k_len = len(k_table)
+        max_len_single = max(j_len, h_len, k_len)
+        
+        if k_len == max_len_single:
+            choice = 'k'
+            vcol = k_table.KAPERMAG3
+            verr = k_table.KAPERMAG3ERR
+        elif h_len == max_len_single:
+            choice = 'h'
+            vcol = h_table.HAPERMAG3
+            verr = h_table.HAPERMAG3ERR
+        else:
+            choice = 'j'
+            vcol = j_table.JAPERMAG3
+            verr = j_table.JAPERMAG3ERR
+
+        Stetson = stetson.S_singleton(vcol, verr)
+        stetson_nights = max_len_single
+
+    elif 2*jhk_len == max_len:
         choice = 'jhk'
         
         jcol = jhk_table.JAPERMAG3; jerr = jhk_table.JAPERMAG3ERR
@@ -378,6 +404,8 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     
     """
 
+    null=np.double(-9.99999488e+08)
+
     sidarr = lookup.SOURCEID
     names = lookup.Designation
     l = sidarr.size
@@ -410,24 +438,24 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     band_names = ['j', 'h', 'k', 'jmh', 'hmk']
    
     for b in bands:
-        b.mean = np.ones(l)
-        b.rms =  np.ones(l)
-        b.rchi2 =np.ones(l)
-        b.min =  np.ones(l)
-        b.max =  np.ones(l)
-        b.range =  np.ones(l)
+        b.mean = np.ones(l) * null
+        b.rms =  np.ones(l) * null
+        b.rchi2 =np.ones(l) * null
+        b.min =  np.ones(l) * null
+        b.max =  np.ones(l) * null
+        b.range =  np.ones(l) * null
  
         # rob:
-        b.meanr =  np.ones(l)
-        b.rmsr =  np.ones(l)
-        b.minr =  np.ones(l)
-        b.maxr =  np.ones(l)
-        b.ranger =  np.ones(l)
+        b.meanr =  np.ones(l) * null
+        b.rmsr =  np.ones(l) * null
+        b.minr =  np.ones(l) * null
+        b.maxr =  np.ones(l) * null
+        b.ranger =  np.ones(l) * null
         
         # per:
-        b.lsp_per =  np.ones(l)
-        b.lsp_pow =  np.ones(l)
-        b.fx2_per =  np.ones(l)
+        b.lsp_per =  np.ones(l) * null
+        b.lsp_pow =  np.ones(l) * null
+        b.fx2_per =  np.ones(l) * null
     
 #    color_slope =  np.ones(l)
     # jpp_max = np.ones_like(sidarr)
@@ -461,6 +489,8 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             
 #            print "writing into band " + repr(b) + " with band " + str(vb)
 #            print "writing into band %s with band %s" % (bn, vbn)
+            
+            if vb.N == 0: continue
 
             b.mean[i] = vb.mean
 #            print "mean: " + str(vb.mean)
