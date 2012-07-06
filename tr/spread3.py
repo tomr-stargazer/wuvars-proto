@@ -152,7 +152,8 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
         Use robust statistics, in addition to normal ones?
         (takes longer, default True)
     per : bool, optional 
-        Run period-finding? (takes longer, default True)
+        Run period-finding? Uses fast chi-squared and lomb-scargle.
+        (takes longer, default True)
     flags : int, optional 
         Maximum ppErrBit quality flags to use (default 0)
 
@@ -163,7 +164,7 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
 
        """
     
-    s_table = data_cut ( table, sid, season=season, flags=flags )
+    s_table = data_cut ( table, sid, season=season)
 
     if len(s_table) < 1:
         print "no data for %d!" % sid
@@ -176,35 +177,47 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     h_table = band_cut(s_table, 'h', max_flag=flags)
     k_table = band_cut(s_table, 'k', max_flag=flags)
 
-    # get a date (x-axis) for each plot
+    jmh_table = band_cut(j_table, 'h', max_flag=flags)
+    hmk_table = band_cut(h_table, 'k', max_flag=flags)
+
+    # get a date (x-axis) for each 
     jdate = j_table.MEANMJDOBS
     hdate = h_table.MEANMJDOBS
     kdate = k_table.MEANMJDOBS
+    jmh_date = jmh_table.MEANMJDOBS
+    hmk_date = hmk_table.MEANMJDOBS
 #    date = s_table.MEANMJDOBS 
     
-    jcol = s_table.JAPERMAG3; jerr = s_table.JAPERMAG3ERR
-    hcol = s_table.HAPERMAG3; herr = s_table.HAPERMAG3ERR
-    kcol = s_table.KAPERMAG3; kerr = s_table.KAPERMAG3ERR
-    jmhcol=s_table.JMHPNT   ; jmherr = s_table.JMHPNTERR
-    hmkcol=s_table.HMKPNT   ; hmkerr = s_table.HMKPNTERR
-    racol= s_table.RA
-    decol= s_table.DEC
+
+    # get a magnitude and magnitude error for each band
+    jcol = j_table.JAPERMAG3; jerr = j_table.JAPERMAG3ERR
+    hcol = h_table.HAPERMAG3; herr = h_table.HAPERMAG3ERR
+    kcol = k_table.KAPERMAG3; kerr = k_table.KAPERMAG3ERR
+    jmhcol=jmh_table.JMHPNT ; jmherr = jmh_table.JMHPNTERR
+    hmkcol=hmk_table.HMKPNT ; hmkerr = hmk_table.HMKPNTERR
+
+    # get the RA and DEC columns, checking for sensible values
+    racol= s_table.RA[(s_table.RA > 0) & (s_table.RA < 7)]
+    decol= s_table.DEC[(s_table.DEC > -4) & (s_table.DEC < 4)]
 
 
 
-    messy_table = data_cut( table, [sid], season=-1 )
+    messy_table = s_table 
     jppcol=messy_table.JPPERRBITS
     hppcol=messy_table.HPPERRBITS
     kppcol=messy_table.KPPERRBITS
 
     # make an empty data structure and just assign it information, then return 
-    # the object itself!!! then there's no more worrying about indices.
+    # the object itself! then there's no more worrying about indices.
     class Empty():
         pass
 
     ret = Empty()
     
-    ret.N = len(s_table)
+    ret.N_j = len(j_table)
+    ret.N_h = len(h_table)
+    ret.N_k = len(k_table)
+
     ret.RA = racol.mean()
     ret.DEC = decol.mean()
     
