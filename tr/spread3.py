@@ -55,21 +55,35 @@ def reduced_chisq ( m, sigma_m ):
 
 
 
-def arraystat_2 (table, sid, season=0, rob=True, per=True, flags=0) :
-    """ Calculates a complicated number of parameters for a given star.
+def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
+    """ Calculates several statistical properties for a given star.
 
-    Inputs:
-      table -- an ATpy table with time-series photometry
-      sid -- a WFCAM source ID.
-      
-    Optional inputs:
-      season -- which season to select (1,2,3, or other=All)
-      rob -- also use Robust statistics? (takes longer, default True)
-      per -- run period-finding? (takes longer, default True)
-      flags -- Maximum ppErrBit quality flags to use (default 0)
+    Will work with "lonely" datapoints (i.e. not all JHK mags are 
+    well-defined). 
 
-    Returns:
-      ret -- a data structure containing the computed values.
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with time-series photometry
+    sid : int
+        13-digit WFCAM source ID of star to plot
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    rob : bool, optional 
+        Use robust statistics, in addition to normal ones?
+        (takes longer, default True)
+    per : bool, optional 
+        Run period-finding? (takes longer, default True)
+    flags : int, optional 
+        Maximum ppErrBit quality flags to use (default 0)
+
+    Returns
+    -------
+    ret : data structure 
+       Contains the computed values.
       """
     
     s_table = data_cut( table, [sid], season=season, flags=flags )
