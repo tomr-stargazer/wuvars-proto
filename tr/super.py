@@ -121,8 +121,6 @@ def do_it_all( table, sid_list, name_list, path='',
                                           tables+s+'/spreadsheet.fits', 
                                           flags=256, per=True)
             
-        # Tested!
-        #return
 
     # What command do we want to make plots?
     # Probably plot3.lc and plot3.phase, which are going to be almost 
@@ -134,6 +132,9 @@ def do_it_all( table, sid_list, name_list, path='',
 
         
     for season, s in zip([1,2,3,123], ss):
+
+        s_stats = atpy.Table(tables+s+'/spreadsheet.fits')
+
         for name, sid in zip(name_list, sid_list):
             # The specific plot command we use here depends a lot
             # on what functions are available.
@@ -141,25 +142,37 @@ def do_it_all( table, sid_list, name_list, path='',
                      outfile=path+"lc/"+s+"/"+name, png_too=True) #png, eps, pdf
 
 
+
+
         # A bunch of the following code will be substantially rewritten
         # once "spread3" is functional.
+
+        # Well... spread3 is now functional!
             for t in types:
                 if t == 'lsp_power':
                     tplot.lsp_power(table, sid, season=season, name=name,
                                     outfile=path+"phase/"+s+"/lsp_power/"+name, 
                                     png_too=True) 
-                elif t == 'k_fx2':
-                    tplot.phase(table, sid, season=season, name=name,
-                                outfile=path+"phase/"+s+"/k_fx2/"+name, 
-                                png_too=True) 
-                elif t == 'k_lsp':
-                    tplot.phase(table, sid, season=season, name=name,
-                                period='lsp',
-                                outfile=path+"phase/"+s+"/k_lsp/"+name, 
-                                png_too=True) 
 
                 else:
-                    pass
+                    per = s_stats.data[t+"_per"][s_stats.SOURCEID == sid]
+                    tplot.phase(table, sid, period=per, season=season, 
+                                name=name,
+                                outfile=path+"phase/"+s+"/"+t+"/"+name, 
+                                png_too=True) 
+
+                # elif t == 'k_fx2':
+                #     tplot.phase(table, sid, season=season, name=name,
+                #                 outfile=path+"phase/"+s+"/k_fx2/"+name, 
+                #                 png_too=True) 
+                # elif t == 'k_lsp':
+                #     tplot.phase(table, sid, season=season, name=name,
+                #                 period='lsp',
+                #                 outfile=path+"phase/"+s+"/k_lsp/"+name, 
+                #                 png_too=True) 
+
+                # else:
+                #     pass
 
 
     return
