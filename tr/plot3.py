@@ -374,7 +374,7 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
 
 
 def phase (table, sid, period='auto', season=0, offset=0, 
-           outfile='', name='', png_too=False):
+           outfile='', name='', stetson=True, png_too=False):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -564,7 +564,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
         print 'period-finding failed! returning'
         return
 
-    if period < 1:
+    if np.abs(period) < 1:
         period_string = "%f hours" % (period*24)
         print period_string
     else:
@@ -706,7 +706,12 @@ def phase (table, sid, period='auto', season=0, offset=0,
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
 
     if name != '':
-        plt.title(name)
+        ax_j.set_title(name)
+
+    if stetson == True:
+        S, choice, n = Stetson_machine( s_table, flags=256 )
+        stet_string = "S = %.2f" % S
+        ax_khk.set_title(stet_string)
         
     if outfile == '':
         plt.show()
