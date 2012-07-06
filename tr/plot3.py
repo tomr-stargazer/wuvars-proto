@@ -566,7 +566,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
 
     if np.abs(period) < 1:
         period_string = "%f hours" % (period*24)
-        print period_string
+#        print period_string
     else:
         period_string = "%f days" % period
 
