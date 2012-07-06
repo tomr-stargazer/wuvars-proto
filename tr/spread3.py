@@ -188,24 +188,24 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     hmk_date = hmk_table.MEANMJDOBS
 #    date = s_table.MEANMJDOBS 
     
-
     # get a magnitude and magnitude error for each band
     jcol = j_table.JAPERMAG3; jerr = j_table.JAPERMAG3ERR
     hcol = h_table.HAPERMAG3; herr = h_table.HAPERMAG3ERR
     kcol = k_table.KAPERMAG3; kerr = k_table.KAPERMAG3ERR
-    jmhcol=jmh_table.JMHPNT ; jmherr = jmh_table.JMHPNTERR
-    hmkcol=hmk_table.HMKPNT ; hmkerr = hmk_table.HMKPNTERR
+    jmhcol= jmh_table.JMHPNT; jmherr = jmh_table.JMHPNTERR
+    hmkcol= hmk_table.HMKPNT; hmkerr = hmk_table.HMKPNTERR
 
     # get the RA and DEC columns, checking for sensible values
     racol= s_table.RA[(s_table.RA > 0) & (s_table.RA < 7)]
     decol= s_table.DEC[(s_table.DEC > -4) & (s_table.DEC < 4)]
 
-
-
-    messy_table = s_table 
-    jppcol=messy_table.JPPERRBITS
-    hppcol=messy_table.HPPERRBITS
-    kppcol=messy_table.KPPERRBITS
+    # Now let's get some ability to track errorful data.
+    messy_table_j = band_cut( s_table, 'j')
+    messy_table_h = band_cut( s_table, 'h')
+    messy_table_k = band_cut( s_table, 'k')
+    jppcol=messy_table_j.JPPERRBITS
+    hppcol=messy_table_h.HPPERRBITS
+    kppcol=messy_table_k.KPPERRBITS
 
     # make an empty data structure and just assign it information, then return 
     # the object itself! then there's no more worrying about indices.
