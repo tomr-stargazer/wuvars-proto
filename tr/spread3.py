@@ -54,11 +54,10 @@ def reduced_chisq ( m, sigma_m ):
     return (1./nu) * np.sum( (m - m.mean())**2 / sigma_m**2 )
 
 
-def Stetson_chooser ( s_table, flags=0) :
+def Stetson_machine ( s_table, flags=0) :
     """
-    A helper function to choose the best combination of 
-    bands to get the most reliable Stetson index from.
-
+    Computes the Stetson index on the best combination of bands.
+    
     Parameters
     ----------
     s_table : atpy.Table
@@ -68,6 +67,9 @@ def Stetson_chooser ( s_table, flags=0) :
     
     Returns
     -------
+    Stetson : float
+        The Stetson variability index (either "I" or "J" depending 
+        on whether 2 or 3 bands were used).
     choice : str {'jhk', 'hk', 'jh', 'jk'}
         Which combination of bands is optimal.
     stetson_nights : int 
@@ -101,21 +103,44 @@ def Stetson_chooser ( s_table, flags=0) :
 
     max_len = max(jh_len, hk_len, jk_len, jhk_len*2)
 
+    # Now note the winning choice, and compute the relevant index.
+
     if 2*jhk_len == max_len:
         choice = 'jhk'
-    elif hk_len == max_len:
-        choice = 'hk'
-    elif jh_len == max_len:
-        choice = 'jh'
-    elif jk_len == max_len:
-        choice = 'jk'
+        
+        jcol = jhk_table.JAPERMAG3; jerr = jhk_table.JAPERMAG3ERR
+        hcol = jhk_table.HAPERMAG3; herr = jhk_table.HAPERMAG3ERR
+        kcol = jhk_table.KAPERMAG3; kerr = jhk_table.KAPERMAG3ERR
+
+        Stetson = stetson.S(jcol, jerr, hcol, herr, kcol, kerr)
+ 
+    else:
+        if hk_len == max_len:
+            choice = 'hk'
+            
+            bcol = hk_table.HAPERMAG3; berr = hk_table.HAPERMAG3ERR
+            vcol = hk_table.KAPERMAG3; verr = hk_table.KAPERMAG3ERR
+
+        elif jh_len == max_len:
+            choice = 'jh'
+
+            bcol = jh_table.JAPERMAG3; berr = jh_table.JAPERMAG3ERR
+            vcol = jh_table.HAPERMAG3; verr = jh_table.HAPERMAG3ERR
+
+        elif jk_len == max_len:
+            choice = 'jk'
+
+            bcol = jk_table.JAPERMAG3; berr = jk_table.JAPERMAG3ERR
+            vcol = jk_table.KAPERMAG3; verr = jk_table.KAPERMAG3ERR
+
+        Stetson = stetson.I(bcol, berr, vcol, verr)
 
     stetson_nights = max_len
 
     # Finally, return the choice, plus how many nights are going into
     # the Stetson calculation for that choice.
 
-    return (choice, stetson_nights)
+    return (Stetson, choice, stetson_nights)
 
 
     # {1}. From Stetson, P. 1996PASP..108..851S, p. 853
@@ -221,22 +246,33 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     ret.RA = racol.mean()
     ret.DEC = decol.mean()
     
-    ret.chip = get_chip(date[0], np.degrees(racol[0]), np.degrees(decol[0]))
-    if ret.N > 4:
-        ret.one_chip = ( get_chip(date[0], racol[0], decol[0]) ==
-                         get_chip(date[1], racol[1], decol[1]) ==
-                         get_chip(date[2], racol[2], decol[2]) ==
-                         get_chip(date[3], racol[3], decol[3]) )
-    else:
-        ret.one_chip = True
+#    ret.chip = get_chip(date[0], np.degrees(racol[0]), np.degrees(decol[0]))
+#    if ret.N > 4:
+#        ret.one_chip = ( get_chip(date[0], racol[0], decol[0]) ==
+#                         get_chip(date[1], racol[1], decol[1]) ==
+#                         get_chip(date[2], racol[2], decol[2]) ==
+#                         get_chip(date[3], racol[3], decol[3]) )
+#    else:
+#        ret.one_chip = True
+
+
+    # Calculate the Stetson index...
     
-    ret.Stetson = stetson.S(jcol, jerr, hcol, herr, kcol, kerr)
+    S, choice, stetson_nights = Stetson_machine (s_table, flags)
+    
+    ret.Stetson = S
+    ret.Stetson_choice = choice
+    ret.Stetson_N = stetson_nights
+
+
+    # Create parallel data structures for each band, so we can iterate
     
     ret.j = Empty();   ret.j.data = jcol;   ret.j.err = jerr
     ret.h = Empty();   ret.h.data = hcol;   ret.h.err = herr
     ret.k = Empty();   ret.k.data = kcol;   ret.k.err = kerr
     ret.jmh = Empty(); ret.jmh.data=jmhcol; ret.jmh.err = jmherr
     ret.hmk = Empty(); ret.hmk.data=hmkcol; ret.hmk.err = hmkerr
+
 
     bands = [ ret.j, ret.h, ret.k, ret.jmh, ret.hmk ]
 
