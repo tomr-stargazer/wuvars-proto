@@ -1,19 +1,29 @@
-''' An implementation of Peter Stetson's variability index; see
+""" An implementation of Peter Stetson's variability index; see
 'On the Automatic Determination of Light-Curve Parameters for Cepheid
 Variables', Stetson 1996, PASP.
 
-'''
+"""
 
 import numpy as np
 
 
 def I(b, sigma_b, v, sigma_v):
-    '''The Welch/Stetson variability index I.
+    """The Welch/Stetson variability index I.
     Calculates variability index given two magnitude bands and uncertainties.
 
-    Inputs: two arrays of magnitudes and two arrays of associated sigmas.
-    Returns a number.
-    '''
+    Parameters
+    ----------
+    b, v : array_like
+        Two arrays of magnitude values
+    sigma_b, sigma_v : array_like
+        Two corresponding arrays of uncertainty values.
+
+    Returns
+    -------
+    I : float
+        The Stetson index "I" over the input arrays.
+
+    """
 
     if not (b.size == sigma_b.size == v.size == sigma_v.size):
         raise Exception("Array dimensions mismatch")
