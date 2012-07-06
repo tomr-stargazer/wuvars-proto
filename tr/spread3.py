@@ -378,13 +378,17 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
     Output = atpy.Table()
 
-    N = np.ones_like(sidarr)
+    N_j = np.ones_like(sidarr)
+    N_h = np.copy(N_j)
+    N_k = np.copy(N_j)
     RA = np.ones(l)
     DEC= np.ones(l)
-    chip = np.ones_like(sidarr)
-    one_chip = np.ones_like(sidarr==sidarr)
+#    chip = np.ones_like(sidarr)
+#    one_chip = np.ones_like(sidarr==sidarr)
     
     Stetson = np.ones(l)
+    Stetson_choice = np.zeros(l, dtype='|S4')
+    Stetson_N = np.ones(l, dtype='int')
     
     class Band:
         pass
@@ -405,7 +409,8 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.min =  np.ones(l)
         b.max =  np.ones(l)
         b.peak_trough =  np.ones(l)
-        
+ 
+        # rob:
         b.meanr =  np.ones(l)
         b.rmsr =  np.ones(l)
         b.minr =  np.ones(l)
@@ -417,7 +422,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.lsp_pow =  np.ones(l)
         b.fx2_per =  np.ones(l)
     
-    color_slope =  np.ones(l)
+#    color_slope =  np.ones(l)
     jpp_max = np.ones_like(sidarr)
     hpp_max = np.ones_like(sidarr)
     kpp_max = np.ones_like(sidarr)
@@ -426,19 +431,24 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     for sid, i in zip(sidarr, range(len(sidarr)) ):
 
         # v for values
-        v = arraystat_2 (table, sid, season, rob, per, flags=flags)
+        v = statcruncher (table, sid, season, rob, per, flags=flags)
         if v == None:
             #skip assigning anything!
             continue
         vbands = [v.j, v.h, v.k, v.jmh, v.hmk]
         vband_names = ['v.j', 'v.h', 'v.k', 'v.jmh', 'v.hmk']
 
-        N[i] = v.N
+        N_j[i] = v.N_j
+        N_h[i] = v.N_h
+        N_k[i] = v.N_k
+
         RA[i] = v.RA
         DEC[i] = v.DEC
-        chip[i] = v.chip
-        one_chip[i] = v.one_chip
+#        chip[i] = v.chip
+#        one_chip[i] = v.one_chip
         Stetson[i] = v.Stetson
+        Stetson_choice[i] = v.Stetson_choice
+        Stetson_N[i] = v.Stetson_N
 
         for b, bn, vb, vbn in zip(bands, band_names, vbands, vband_names):
             
@@ -470,7 +480,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
                 b.lsp_pow[i] = vb.lsp_pow
                 b.fx2_per[i] = vb.fx2_per
     
-        color_slope[i] = v.color_slope
+#        color_slope[i] = v.color_slope
         jpp_max[i] = v.jpp_max
         hpp_max[i] = v.hpp_max
         kpp_max[i] = v.kpp_max
@@ -485,11 +495,16 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     Output.add_column('Name',names)
     Output.add_column('RA', RA, unit='RADIANS')
     Output.add_column('DEC', DEC, unit='RADIANS')
-    Output.add_column('N', N)
-    Output.add_column('chip', chip)
-    Output.add_column('one_chip', one_chip)
+    Output.add_column('N_j', N_j)
+    Output.add_column('N_h', N_h)
+    Output.add_column('N_k', N_k)
+
+#    Output.add_column('chip', chip)
+#    Output.add_column('one_chip', one_chip)
 
     Output.add_column('Stetson', Stetson)
+    Output.add_column('Stetson_choice', Stetson_choice)
+    Output.add_column('Stetson_N', Stetson_N)
 
     for b, band_name in zip(bands, band_names):
         bn = band_name + '_'
@@ -515,7 +530,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             Output.add_column(bn+'fx2_per', b.fx2_per)
 
             
-    Output.add_column('color_slope', color_slope)
+#    Output.add_column('color_slope', color_slope)
     Output.add_column('jpp_max', jpp_max)
     Output.add_column('hpp_max', hpp_max)
     Output.add_column('kpp_max', kpp_max)
