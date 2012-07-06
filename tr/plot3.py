@@ -29,6 +29,7 @@ from plot2 import plot_trajectory_core
 from chi2 import test_analyze
 from scargle import fasper as lsp
 from timing import lsp_mask
+from spread3 import Stetson_machine
 
 #import coords
 #import stetson
@@ -37,7 +38,7 @@ from timing import lsp_mask
 
 
 
-def lc (table, sid, season=0, outfile='', name='', png_too=False):
+def lc (table, sid, season=0, outfile='', name='', stetson=True, png_too=False):
     """ 
     Plots J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -302,7 +303,12 @@ def lc (table, sid, season=0, outfile='', name='', png_too=False):
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
 
     if name != '':
-        plt.title(name)
+        ax_j.set_title(name)
+
+    if stetson == True:
+        S, choice, n = Stetson_machine( s_table, flags=256 )
+        stet_string = "S = %.2f" % S
+        ax_khk.set_title(stet_string)
 
     if outfile == '':
         plt.show()
