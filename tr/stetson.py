@@ -31,6 +31,10 @@ def I(b, sigma_b, v, sigma_v):
 
     n = b.size
 
+    # Perhaps hackish
+    if n < 2:
+        return 0
+
     s = np.sum( (b - b.mean())/sigma_b * (v - v.mean())/sigma_v )
 
     I = np.sqrt(1. / (n*(n-1))) * s
