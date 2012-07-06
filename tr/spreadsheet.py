@@ -342,24 +342,6 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     Output.add_column('hpp_max', hpp_max)
     Output.add_column('kpp_max', kpp_max)
 
-
-    # Output.add_column('j_min', j_min)
-    # Output.add_column('j_max', j_max)
-    # Output.add_column('j_mean', j_mean)
-    # Output.add_column('j_rms', j_std)
-    # Output.add_column('h_min', h_min)
-    # Output.add_column('h_max', h_max)
-    # Output.add_column('h_mean', h_mean)
-    # Output.add_column('h_rms', h_std)
-    # Output.add_column('k_min', k_min)
-    # Output.add_column('k_max', k_max)
-    # Output.add_column('k_mean', k_mean)
-    # Output.add_column('k_rms', k_std)
-    # Output.add_column('jpp_max', jpp_max)
-    # Output.add_column('hpp_max', hpp_max)
-    # Output.add_column('kpp_max', kpp_max)
-            
-
     Output.write(outfile, overwrite=True)
     print "Wrote output to %s" % outfile
 
