@@ -137,8 +137,8 @@ def Stetson_machine ( s_table, flags=0) :
 
     stetson_nights = max_len
 
-    # Finally, return the choice, plus how many nights are going into
-    # the Stetson calculation for that choice.
+    # Finally, return S, the band choice, and how many nights 
+    # are going into the Stetson calculation for that choice.
 
     return (Stetson, choice, stetson_nights)
 
@@ -186,6 +186,8 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     -------
     ret : data structure 
        Contains the computed values.
+       They can be accessed as attributes 
+       (e.g., "ret.j_mean" or "ret.Stetson").
 
        """
     
@@ -228,9 +230,9 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     messy_table_j = band_cut( s_table, 'j')
     messy_table_h = band_cut( s_table, 'h')
     messy_table_k = band_cut( s_table, 'k')
-    jppcol=messy_table_j.JPPERRBITS
-    hppcol=messy_table_h.HPPERRBITS
-    kppcol=messy_table_k.KPPERRBITS
+    jppcol = messy_table_j.JPPERRBITS
+    hppcol = messy_table_h.HPPERRBITS
+    kppcol = messy_table_k.KPPERRBITS
 
     # make an empty data structure and just assign it information, then return 
     # the object itself! then there's no more worrying about indices.
@@ -239,25 +241,16 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
 
     ret = Empty()
     
+    # How many nights have observations in each band?
     ret.N_j = len(j_table)
     ret.N_h = len(h_table)
     ret.N_k = len(k_table)
 
+    # Mean position of this source
     ret.RA = racol.mean()
     ret.DEC = decol.mean()
     
-#    ret.chip = get_chip(date[0], np.degrees(racol[0]), np.degrees(decol[0]))
-#    if ret.N > 4:
-#        ret.one_chip = ( get_chip(date[0], racol[0], decol[0]) ==
-#                         get_chip(date[1], racol[1], decol[1]) ==
-#                         get_chip(date[2], racol[2], decol[2]) ==
-#                         get_chip(date[3], racol[3], decol[3]) )
-#    else:
-#        ret.one_chip = True
-
-
     # Calculate the Stetson index...
-    
     S, choice, stetson_nights = Stetson_machine (s_table, flags)
     
     ret.Stetson = S
@@ -266,7 +259,6 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
 
 
     # Create parallel data structures for each band, so we can iterate
-    
     ret.j = Empty();   ret.j.data = jcol;   ret.j.err = jerr
     ret.h = Empty();   ret.h.data = hcol;   ret.h.err = herr
     ret.k = Empty();   ret.k.data = kcol;   ret.k.err = kerr
@@ -308,13 +300,9 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
             b.lsp_pow = b.lsp[1][Jmax]
             b.fx2_per = 1./ test_analyze( date, b.data, b.err )
 
-    # Finally we'll want to do the whole slope, distance on the JMH graph
-    # (until I get the fitting done, we'll have to use hmk and jmh naively)
-    ret.color_slope = (ret.jmh.peak_trough / ret.hmk.peak_trough)
     
-
-
     # and the pp_max, using the messy table
+    # (slated for a re-implementation)
     ret.jpp_max = jppcol.max()
     ret.hpp_max = hppcol.max()
     ret.kpp_max = kppcol.max()
