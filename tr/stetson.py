@@ -1,6 +1,6 @@
 """ An implementation of Peter Stetson's variability index; see
 'On the Automatic Determination of Light-Curve Parameters for Cepheid
-Variables', Stetson 1996, PASP.
+Variables', Stetson 1996, PASP..108..851S
 
 """
 
