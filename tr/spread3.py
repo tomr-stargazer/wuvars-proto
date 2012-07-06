@@ -157,7 +157,8 @@ def Stetson_machine ( s_table, flags=0) :
 
 
 def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
-    """ Calculates several statistical properties for a given star.
+    """ 
+    Calculates several statistical properties for a given star.
 
     Will work with "lonely" datapoints (i.e. not all JHK mags are 
     well-defined). 
@@ -185,11 +186,11 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     Returns
     -------
     ret : data structure 
-       Contains the computed values.
-       They can be accessed as attributes 
-       (e.g., "ret.j_mean" or "ret.Stetson").
+        Contains the computed values.
+        They can be accessed as attributes 
+        (e.g., "ret.j_mean" or "ret.Stetson").
 
-       """
+    """
     
     s_table = data_cut ( table, sid, season=season)
 
@@ -333,22 +334,41 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     """ 
     Makes my spreadsheet! Basically with a big forloop.
 
-    Inputs:
-      table -- an ATpy table with time-series photometry
-      lookup -- an ATpy table of interesting sources and their designations
-      season -- which season to select (1,2,3, or other=All)
-      outfile -- where to save the output table
+    Expect this guy to take a long time.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with time-series photometry
+    lookup : atpy.Table
+        Table of interesting sources and their names
+        (must contain columns "SOURCEID" and "Designation")
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    outfile : str
+        What filename to save spreadsheet to.
+    flags : int, optional 
+        Maximum ppErrBit quality flags to use (default 0)
+    Test : bool, optional
+        Whether to exit after 30 sources and save to a dummy location
+        (default False). Useful for performance/sanity testing.
+    rob : bool, optional 
+        Use robust statistics, in addition to normal ones?
+        (takes longer, default False)
+    per : bool, optional 
+        Run period-finding? Uses fast chi-squared and lomb-scargle.
+        (takes longer, default False)
       
-    Optional inputs:
-      flags -- Maximum ppErrBit quality flags to use (default 0)
-      Test -- whether to exit after 30 sources (default False)
-      rob -- also use Robust statistics? (takes longer, default False)
-      per -- run period-finding? (takes longer, default False)
+    Returns
+    -------
+    None (but writes an output file to `outfile`)
 
-    Returns:
-      None (but writes an output file to `outfile`)
-
-    Note: crashes if given any stars with only 1 observation and per=True.
+    Note: possibly crashes if given any stars with only 
+    1 observation and per=True.
+    
     """
 
     sidarr = lookup.SOURCEID
