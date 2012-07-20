@@ -3,6 +3,8 @@ This is the package with super-functions to generate
 hundreds of figures at a time.
 It calls upon most of the other wuvars packages.
 
+THIS IS A SPECIAL VERSION. IT DOUBLES PERIODS OF "var" STARS.
+
 Useful functions:
  # Primary functions
  
@@ -13,7 +15,7 @@ import atpy
 import numpy as np
 import matplotlib.pyplot as plt
 import spread3
-import plot3 as tplot
+import plot2 as tplot
 
 import os, errno
 
@@ -101,11 +103,11 @@ def do_it_all( table, sid_list, name_list, path='',
 
     ## Second, let's make tables.
 
+    tables = path+"tables/"
+
     if 'tables' in option:
 
-        tables = path+"tables/"
-
-        # Make a lookup table. It should have a column with the `name_list`
+         # Make a lookup table. It should have a column with the `name_list`
         # parameter we fed into this function, as well as a column with the 
         # SOURCEIDs.
         # They should be named "SOURCEID" and "Designation", respectively.
@@ -114,7 +116,7 @@ def do_it_all( table, sid_list, name_list, path='',
         lookup.add_column("SOURCEID", sid_list)
         lookup.add_column("Designation", name_list)
         
-        for season, s in zip([1,2,3,123], ss):
+        for season, s in zip([123], [ss[-1]]):
             
             # Write the spreadsheet and save it to the relevant directory.
             spread3.spreadsheet_write(table, lookup, season, 
@@ -131,15 +133,16 @@ def do_it_all( table, sid_list, name_list, path='',
     # And put the gorram Stetson index in the title!
 
         
-    for season, s in zip([1,2,3,123], ss):
+#    for season, s in zip([1,2,3,123], ss):
+    for season, s in zip([123], [ss[-1]]):
 
         s_stats = atpy.Table(tables+s+'/spreadsheet.fits')
 
         for name, sid in zip(name_list, sid_list):
             # The specific plot command we use here depends a lot
             # on what functions are available.
-            tplot.lc(table, sid, season=season, name=name, #flags=16,
-                     outfile=path+"lc/"+s+"/"+name, png_too=True) #png, eps, pdf
+#            tplot.lc(table, sid, season=season, name=name, #flags=16,
+#                     outfile=path+"lc/"+s+"/"+name, png_too=True) #png, eps, pdf
 
 
 
@@ -150,16 +153,17 @@ def do_it_all( table, sid_list, name_list, path='',
         # Well... spread3 is now functional!
             for t in types:
                 if t == 'lsp_power':
-                    tplot.lsp_power(table, sid, season=season, name=name,
-                                    outfile=path+"phase/"+s+"/lsp_power/"+name, 
-                                    png_too=True) 
+#                    tplot.lsp_power(table, sid, season=season, name=name,
+#                                    outfile=path+"phase/"+s+"/lsp_power/"+name, 
+#                                    png_too=True) 
+                    pass
 
                 else:
                     per = s_stats.data[t+"_per"][s_stats.SOURCEID == sid]
-                    tplot.phase(table, sid, period=per, season=season, 
-                                name=name,
-                                outfile=path+"phase/"+s+"/"+t+"/"+name, 
-                                png_too=True) 
+                    tplot.phase(table, sid, period=per*2, season=season, 
+#                                name=name,
+                                outfile=path+"phase/"+s+"/"+t+"/"+name+".eps", 
+                                png_too=False) 
 
                 # elif t == 'k_fx2':
                 #     tplot.phase(table, sid, season=season, name=name,

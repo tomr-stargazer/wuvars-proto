@@ -319,7 +319,7 @@ def lc (table, sid, outfile='', name='?', season=123, png_too=False,
 
 
 def phase (table, sid, period='auto', outfile='', season=123, offset=0, 
-           flags=0):
+           flags=0, png_too=False):
     """ 
     Plots J, H, K lightcurves, as well as JHK color-color and color-mag
     trajectories, for one star.
@@ -443,6 +443,7 @@ def phase (table, sid, period='auto', outfile='', season=123, offset=0,
         if png_too:
             plt.savefig(outfile+".pdf")
             plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
             plt.close()
         else:
             plt.savefig(outfile)
