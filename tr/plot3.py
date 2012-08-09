@@ -934,7 +934,8 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
 
 
 def graded_lc (table, sid, season=0, outfile='', name='', 
-               stetson=True, png_too=False):
+               stetson=True, png_too=False, 
+               d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}):
     """ 
     Plots JHK lightcurves of a star, with datapoints colored by grade.
 
@@ -968,6 +969,13 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    d_cmap : dict or str or tuple
+        Which colormaps to use for J, H, and K. If a single string 
+        (rather than a dict) is given, all 3 bands will use the 
+        same colormap. If a tuple is given, J:0, H:1, K:2.
+        Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
+   
+        
 
     Returns
     -------
@@ -1092,7 +1100,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
-    d_cmap = {'j': 'jet', 'h': 'jet', 'k': 'jet'}
+    
+    if type(d_cmap) is str:
+        d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
+    elif type(d_cmap) is not dict:
+        d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
@@ -1224,7 +1236,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
 
 def graded_phase (table, sid, period='auto', season=0, offset=0, 
-                  outfile='', name='', stetson=True, png_too=False):
+                  outfile='', name='', stetson=True, png_too=False,
+                  d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}):
                   
     """ 
     Plots folded lightcurves of a star, with datapoints colored by grade.
@@ -1270,6 +1283,12 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    d_cmap : dict or str or tuple
+        Which colormaps to use for J, H, and K. If a single string 
+        (rather than a dict) is given, all 3 bands will use the 
+        same colormap. If a tuple is given, J:0, H:1, K:2.
+        Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
+
 
     Returns
     -------
@@ -1428,6 +1447,10 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
+    if type(d_cmap) is str:
+        d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
+    elif type(d_cmap) is not dict:
+        d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
     d_cmap = {'j': 'jet', 'h': 'jet', 'k': 'jet'}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
