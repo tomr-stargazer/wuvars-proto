@@ -1159,3 +1159,304 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     fig.ax_khk = ax_khk
 
     return fig
+
+
+def graded_phase (table, sid, period='auto', season=0, offset=0, 
+                  outfile='', name='', stetson=True, png_too=False):
+                  
+    """ 
+    Plots folded lightcurves of a star, with datapoints colored by grade.
+
+    Also plots color-color and color-mag trajectories, colored by phase.
+
+    Will display "lonely" datapoints (i.e. not all JHK mags are 
+    well-defined), and plots error-flagged data as different symbols.
+    Compare to plot2.phase() which does neither, and to plot3.phase() which 
+    is unaware of grades.
+
+    If no period is provided, phase() will compute its own guess 
+    using the K-band lightcurve.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with time-series photometry and grade columns. 
+        "JGRADE", "HGRADE", "KGRADE" must be bestowed by 
+        night_cleanser.null_cleanser_grader().
+    sid : int
+        13-digit WFCAM source ID of star to plot
+    period : {'auto', 'lsp', float}, optional
+        What period to fold the lightcurves by.
+        If 'auto' is provided (default), the fast-chi-squared 
+        period of the K-band data will be used.
+        If 'lsp' is provided, the Lomb-Scargle Periodogram period
+        of the K-band data will be used.
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, or 3) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    offset : float, optional
+        How much to shift the phase by. Default is zero.
+    outfile : str, optional
+        What filename to save plot to. Default behavior (when 
+        `outfile` is an empty string) is to display plot on-screen
+        and *not* save to file.
+    name : str, optional
+        A string to use as a plot header.
+    png_too : bool, optional (default: False)
+        If `png_too` is True (and `outfile` is not ''), then 
+        save the plot in 3 file formats: PDF, PNG, and EPS.
+        Do not specify a file extension in `outfile`.
+
+    Returns
+    -------
+    fig : plt.Figure 
+        The canvas figure that the graphs are plotted onto.
+    
+    """
+
+    # Loading data
+    s_table = data_cut (table, sid, season)
+
+    if len(s_table) == 0:
+        print "no data here"
+        return
+
+    ## Let's do the 3 lightcurve bands.
+
+    ### Initializing variables. Most of the following are done twice:
+    # Once with no errors (normal),
+    # once with small errors (info).
+
+    ## First: normal
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table = band_cut(s_table, 'j', max_flag=0)
+    h_table = band_cut(s_table, 'h', max_flag=0)
+    k_table = band_cut(s_table, 'k', max_flag=0)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate = j_table.MEANMJDOBS - 51544
+    hdate = h_table.MEANMJDOBS - 51544
+    kdate = k_table.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol = j_table.JAPERMAG3
+    hcol = h_table.HAPERMAG3
+    kcol = k_table.KAPERMAG3
+
+    # get a magnitude error (y-error) for each plot
+    jerr = j_table.JAPERMAG3ERR
+    herr = h_table.HAPERMAG3ERR
+    kerr = k_table.KAPERMAG3ERR
+
+    # get a quality flag for each plot
+    # (aftercomment: not sure we're going to ever use these)
+    jflag = j_table.JPPERRBITS
+    hflag = h_table.HPPERRBITS
+    kflag = k_table.KPPERRBITS
+
+    # Get the grade
+    jgrade = j_table.JGRADE
+    hgrade = h_table.HGRADE
+    kgrade = k_table.KGRADE
+
+    ## Second: info
+
+    # Use band_cut to get relevant data chunks.
+
+    j_table_info = band_cut(s_table, 'j', min_flag=1, max_flag=256)
+    h_table_info = band_cut(s_table, 'h', min_flag=1, max_flag=256)
+    k_table_info = band_cut(s_table, 'k', min_flag=1, max_flag=256)
+
+
+    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
+    # JD 2451544.500000
+    # (i.e. MJD 51544.0)
+
+    # get a date (x-axis) for each plot
+    jdate_info = j_table_info.MEANMJDOBS - 51544
+    hdate_info = h_table_info.MEANMJDOBS - 51544
+    kdate_info = k_table_info.MEANMJDOBS - 51544
+    
+    # get a magnitude (y-axis) for each plot
+    jcol_info = j_table_info.JAPERMAG3
+    hcol_info = h_table_info.HAPERMAG3
+    kcol_info = k_table_info.KAPERMAG3
+
+    # get a magnitude error (y-error) for each plot
+    jerr_info = j_table_info.JAPERMAG3ERR
+    herr_info = h_table_info.HAPERMAG3ERR
+    kerr_info = k_table_info.KAPERMAG3ERR
+
+    # get a quality flag for each plot
+    jflag = j_table_info.JPPERRBITS
+    hflag = h_table_info.HPPERRBITS
+    kflag = k_table_info.KPPERRBITS
+
+    # Get the grade
+    jgrade_info = j_table_info.JGRADE
+    hgrade_info = h_table_info.HGRADE
+    kgrade_info = k_table_info.KGRADE
+
+    
+    ## Define the components and parameters of the figure:
+    
+    fig = plt.figure(figsize = (10, 6), dpi=80,
+                     facecolor='w', edgecolor='k')
+
+    bottom = 0.1
+    height = .25
+    left = 0.075
+    width = 0.5
+
+    ax_k = fig.add_axes( (left, bottom, width, height) )
+    ax_h = fig.add_axes( (left, bottom+.3, width, height), sharex=ax_k )
+    ax_j = fig.add_axes( (left, bottom+.6, width, height), sharex=ax_k )
+    
+    ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
+    ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
+
+    ## Start plotting. 
+    # Every band will take two steps: putting the errorbars
+    
+    fmt_info = 'D'
+#    fmt_warn = '.'
+
+    # Let's define dictionaries
+    d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
+    d_cmap = {'j': 'Blues', 'h': 'Greens', 'k': 'Reds'}
+    d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
+    d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
+
+    d_date = {'j': jdate, 'h': hdate, 'k': kdate}
+    d_col = {'j': jcol, 'h': hcol, 'k': kcol}
+    d_err = {'j': jerr, 'h': herr, 'k': kerr}
+    d_grade = {'j': jgrade, 'h': hgrade, 'k': kgrade}
+
+    d_date_info = {'j': jdate_info, 'h': hdate_info, 'k': kdate_info}
+    d_col_info = {'j': jcol_info, 'h': hcol_info, 'k': kcol_info}
+    d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
+    d_grade_info = {'j': jgrade_info, 'h': hgrade_info, 'k': kgrade_info}
+
+
+    for band in ['j', 'h', 'k']:
+
+        # Plot a generic band and reduce the size of the code!
+
+        if len(d_date[band]) > 0:
+            # First, plot the errorbars, with no markers, in the background:
+            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
+                                 yerr=d_err[band], fmt=None, ecolor='k',
+                                 zorder=0)
+            
+            # Next, scatter the points themselves, colored re:grade :
+            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
+                                c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
+            
+
+        if len(d_date_info[band]) > 0:
+            # First, plot the errorbars, with no markers, in the background:
+            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
+                                 yerr=d_err_info[band], marker=None,
+                                 fmt=None, ecolor='k', zorder=0)
+
+            # Next, scatter the points themselves, colored re:grade :
+            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
+                                marker=fmt_info, s=4,
+                                c=d_grade_info[band], cmap=d_cmap[band], 
+                                vmin=0.8, vmax=1, zorder=100)
+
+        # Finally, flip it (magnitudes are backwards).
+        d_ax[band].invert_yaxis()
+
+    ## Now let's do the 2 color-mag/color-color plots.
+
+    # We'll use different data-cuts for the two different plots.
+    # Relevant comment: I made an executive call to include only
+    # 'normal' and 'info'-flagged data in the C-C and C-M plots
+    # (i.e. max_flag=256 in all relevant bands).
+    
+    # In the color-mag plot, we need data where H and K are defined 
+    # everywhere. That's two cuts.
+    khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
+                          'h', max_flag=256)
+
+    khkdate = khk_table.MEANMJDOBS - 51544
+    k_khk = khk_table.KAPERMAG3
+    hmk_khk = khk_table.HMKPNT
+
+    # In the color-color plot, we need data where J, H, and K are
+    # defined everywhere. That's one more cut.
+    jhk_table = band_cut(khk_table, 'j', max_flag=256)
+
+    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jmh_jhk = jhk_table.JMHPNT
+    hmk_jhk = jhk_table.HMKPNT
+
+    # Plot J-H vs H-K using the "jhk_" variables.
+    try:
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate )
+    except Exception:
+        print "JHK plot broke!"
+        pass
+
+    # Plot K vs H-K using the "khk_" variables.
+    try:
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate, 
+                              ms=False, ctts=False) 
+    except Exception:
+        print "KHK plot broke!"
+        pass
+    ax_khk.invert_yaxis()
+
+    # Hide the bad labels...
+    plt.setp(ax_j.get_xticklabels(), visible=False)
+    plt.setp(ax_h.get_xticklabels(), visible=False)
+
+    # Label stuff
+    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+
+    ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
+
+    ax_jhk.set_xlabel( "H-K" )
+    ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
+    ax_khk.set_xlabel( "H-K" )
+    ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    if name != '':
+        ax_j.set_title(name)
+
+    if stetson == True:
+        S, choice, n = Stetson_machine( s_table, flags=256 )
+        stet_string = "S = %.2f" % S
+        ax_khk.set_title(stet_string)
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+    fig.ax_jhk = ax_jhk
+    fig.ax_khk = ax_khk
+
+    return fig
