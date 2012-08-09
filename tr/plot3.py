@@ -323,6 +323,12 @@ def lc (table, sid, season=0, outfile='', name='', stetson=True, png_too=False):
             plt.close()
 
 
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+    fig.ax_jhk = ax_jhk
+    fig.ax_khk = ax_khk
+
     return fig
 
 
@@ -725,6 +731,11 @@ def phase (table, sid, period='auto', season=0, offset=0,
             plt.savefig(outfile)
             plt.close()
 
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+    fig.ax_jhk = ax_jhk
+    fig.ax_khk = ax_khk
 
     return fig
 
@@ -853,6 +864,10 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         else:
             plt.savefig(outfile)
             plt.close()
+
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
 
     return fig
 
@@ -1122,5 +1137,10 @@ def graded_lc (table, sid, season=0, outfile='', name='',
             plt.savefig(outfile)
             plt.close()
 
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+    fig.ax_jhk = ax_jhk
+    fig.ax_khk = ax_khk
 
     return fig
