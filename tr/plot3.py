@@ -1024,9 +1024,39 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
 
     ## Start plotting. 
+    # Every band will take two steps: putting the errorbars
     
     fmt_info = 'D'
-    fmt_warn = '.'
+#    fmt_warn = '.'
+
+    # Let's define dictionaries
+    d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
+    d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
+    d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
+
+    d_date = {'j': jdate, 'h': hdate, 'k': kdate}
+    d_col = {'j': jcol, 'h': hcol, 'k': kcol}
+    d_err = {'j': jerr, 'h': herr, 'k': kerr}
+
+    d_date_info = {'j': jdate_info, 'h': hdate_info, 'k': kdate_info}
+    d_col_info = {'j': jcol_info, 'h': hcol_info, 'k': kcol_info}
+    d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
+
+
+    for band in ['j', 'h', 'k']:
+
+        # Plot a generic band and reduce the size of the code!
+        # Plot J-band:
+        if len(d_date[band]) > 0:
+            d_ax[band].errorbar( d_date[band], d_col[band], 
+                                 yerr=d_err[band], fmt=d_fmt[band], ecolor='k')
+        if len(d_date_info[band]) > 0:
+            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
+                                 yerr=d_err_info[band], 
+                                 fmt=d_fmt_info[band], ms=4, ecolor='k')
+
+        d_ax[band].invert_yaxis()
+
 
     # Plot J-band:
     if len(jdate) > 0:
