@@ -1031,22 +1031,25 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
+    d_cmap = {'j': 'Blues', 'h': 'Greens', 'k': 'Reds'}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
     d_date = {'j': jdate, 'h': hdate, 'k': kdate}
     d_col = {'j': jcol, 'h': hcol, 'k': kcol}
     d_err = {'j': jerr, 'h': herr, 'k': kerr}
+    d_grade = {'j': jgrade, 'h': hgrade, 'k': kgrade}
 
     d_date_info = {'j': jdate_info, 'h': hdate_info, 'k': kdate_info}
     d_col_info = {'j': jcol_info, 'h': hcol_info, 'k': kcol_info}
     d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
+    d_grade_info = {'j': jgrade_info, 'h': hgrade_info, 'k': kgrade_info}
 
 
     for band in ['j', 'h', 'k']:
 
         # Plot a generic band and reduce the size of the code!
-        # Plot J-band:
+
         if len(d_date[band]) > 0:
             d_ax[band].errorbar( d_date[band], d_col[band], 
                                  yerr=d_err[band], fmt=d_fmt[band], ecolor='k')
