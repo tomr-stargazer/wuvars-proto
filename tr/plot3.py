@@ -1306,7 +1306,41 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     hgrade_info = h_table_info.HGRADE
     kgrade_info = k_table_info.KGRADE
 
-    
+    try:
+    ## Let's figure out the period.
+        if period == 'auto':
+            kper_table = band_cut(s_table, 'k', max_flag=256)
+            kperdate = kper_table.MEANMJDOBS
+            kpercol = kper_table.KAPERMAG3
+            kpererr = kper_table.KAPERMAG3ERR
+            
+            period = 1./test_analyze(kperdate, kpercol, kpererr)
+            print period
+        elif period == 'lsp':
+            kper_table = band_cut(s_table, 'k', max_flag=256)
+            kperdate = kper_table.MEANMJDOBS
+            kpercol = kper_table.KAPERMAG3
+            kpererr = kper_table.KAPERMAG3ERR
+            
+            lomb = lsp(kperdate,kpercol,6.,6.)
+            lsp_freq = lomb[0]
+            lsp_power= lomb[1]
+            Jmax = lsp_mask( lsp_freq, lsp_power)
+            lsp_per = 1./ lomb[0][Jmax]
+            period = lsp_per
+            print period
+    except Exception:
+        print 'period-finding failed! returning'
+        return
+
+    if np.abs(period) < 1:
+        period_string = "%f hours" % (period*24)
+#        print period_string
+    else:
+        period_string = "%f days" % period
+
+
+
     ## Define the components and parameters of the figure:
     
     fig = plt.figure(figsize = (10, 6), dpi=80,
