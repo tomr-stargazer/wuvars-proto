@@ -922,7 +922,7 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
         # errorbars in the background
         ax.errorbar(phase, x, yerr=xerr, fmt= None, zorder=0)
         # scatter in the foreground
-        ax.scatter(phase, x, **kwargs)
+        ax.scatter(phase, x, zorder=100, **kwargs)
         
     ax.set_xticks( [0, 0.5, 1] )
     ax.set_xticks( np.arange(-.5,1.5,.1), minor=True)
@@ -1113,6 +1113,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
         if len(d_date[band]) > 0:
             # First, plot the errorbars, with no markers, in the background:
+
             d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
                                  yerr=d_err[band], fmt=None, ecolor='k',
                                  zorder=0)
@@ -1447,27 +1448,37 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         # Plot a generic band and reduce the size of the code!
 
         if len(d_date[band]) > 0:
+            scatter_phase_core( d_ax[band], d_date[band], d_col[band],
+                                d_err[band], period, c=d_grade[band],
+                                cmap=d_cmap[band], vmin=0.8, vmax=1 )
+
             # First, plot the errorbars, with no markers, in the background:
-            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
-                                 yerr=d_err[band], fmt=None, ecolor='k',
-                                 zorder=0)
+#            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
+#                                 yerr=d_err[band], fmt=None, ecolor='k',
+#                                 zorder=0)
             
             # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
-                                c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
+#            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
+#                                c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
             
 
         if len(d_date_info[band]) > 0:
+
+            scatter_phase_core( d_ax[band], d_date_info[band], d_col_info[band],
+                                d_err_info[band], period, c=d_grade_info[band],
+                                cmap=d_cmap[band], vmin=0.8, vmax=1, 
+                                marker=fmt_info )
+
             # First, plot the errorbars, with no markers, in the background:
-            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
-                                 yerr=d_err_info[band], marker=None,
-                                 fmt=None, ecolor='k', zorder=0)
+#            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
+#                                 yerr=d_err_info[band], marker=None,
+#                                 fmt=None, ecolor='k', zorder=0)
 
             # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
-                                marker=fmt_info, s=4,
-                                c=d_grade_info[band], cmap=d_cmap[band], 
-                                vmin=0.8, vmax=1, zorder=100)
+#            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
+#                                marker=fmt_info, s=4,
+#                                c=d_grade_info[band], cmap=d_cmap[band], 
+#                                vmin=0.8, vmax=1, zorder=100)
 
         # Finally, flip it (magnitudes are backwards).
         d_ax[band].invert_yaxis()
@@ -1488,6 +1499,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
 
+    khkphase = ((khkdate % period) / period + offset) % 1.
+
     # In the color-color plot, we need data where J, H, and K are
     # defined everywhere. That's one more cut.
     jhk_table = band_cut(khk_table, 'j', max_flag=256)
@@ -1496,16 +1509,18 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
 
+    jhkphase = ((jhkdate % period) / period + offset) % 1.
+
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
-        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate )
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkphase )
     except Exception:
         print "JHK plot broke!"
         pass
 
     # Plot K vs H-K using the "khk_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate, 
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkphase, 
                               ms=False, ctts=False) 
     except Exception:
         print "KHK plot broke!"
@@ -1517,7 +1532,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     plt.setp(ax_h.get_xticklabels(), visible=False)
 
     # Label stuff
-    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+    ax_k.set_xlabel( "Phase (Period = %s)" % period_string )
 
     ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
