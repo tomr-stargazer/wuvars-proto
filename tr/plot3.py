@@ -1051,48 +1051,30 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         # Plot a generic band and reduce the size of the code!
 
         if len(d_date[band]) > 0:
-            d_ax[band].errorbar( d_date[band], d_col[band], 
-                                 yerr=d_err[band], fmt=d_fmt[band], ecolor='k')
+            # First, plot the errorbars, with no markers, in the background:
+            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
+                                 yerr=d_err[band], fmt=None, ecolor='k',
+                                 zorder=0)
+            
+            # Next, scatter the points themselves, colored re:grade :
+            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
+                                c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
+            
+
         if len(d_date_info[band]) > 0:
+            # First, plot the errorbars, with no markers, in the background:
             d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
-                                 yerr=d_err_info[band], 
-                                 fmt=d_fmt_info[band], ms=4, ecolor='k')
+                                 yerr=d_err_info[band], marker=None,
+                                 fmt=None, ecolor='k', zorder=0)
 
+            # Next, scatter the points themselves, colored re:grade :
+            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
+                                marker=fmt_info, s=4,
+                                c=d_grade_info[band], cmap=d_cmap[band], 
+                                vmin=0.8, vmax=1, zorder=100)
+
+        # Finally, flip it (magnitudes are backwards).
         d_ax[band].invert_yaxis()
-
-
-    # Plot J-band:
-    if len(jdate) > 0:
-        ax_j.errorbar( jdate, jcol, yerr=jerr, fmt='bo', ecolor='k')
-    if len(jdate_info) > 0:
-        ax_j.errorbar( jdate_info, jcol_info, yerr=jerr_info, 
-                       fmt='b'+fmt_info, ms=4, ecolor='k')
-    if len(jdate_warn) > 0:
-        ax_j.errorbar( jdate_warn, jcol_warn, yerr=jerr_warn, 
-                       fmt='k'+fmt_warn, ecolor='k')
-    ax_j.invert_yaxis()
-
-    # Plot H-band:
-    if len(hdate) > 0:
-        ax_h.errorbar( hdate, hcol, yerr=herr, fmt='go', ecolor='k' )
-    if len(hdate_info) > 0:
-        ax_h.errorbar( hdate_info, hcol_info, yerr=herr_info, 
-                       fmt='g'+fmt_info, ms=4, ecolor='k')
-    if len(hdate_warn) > 0:
-        ax_h.errorbar( hdate_warn, hcol_warn, yerr=herr_warn, 
-                       fmt='k'+fmt_warn, ecolor='k')
-    ax_h.invert_yaxis()
-
-    # Plot K-band:
-    if len(kdate) > 0:
-        ax_k.errorbar( kdate, kcol, yerr=kerr, fmt='ro', ecolor='k' )
-    if len(kdate_info) > 0:
-        ax_k.errorbar( kdate_info, kcol_info, yerr=kerr_info, 
-                       fmt='r'+fmt_info, ms=4, ecolor='k')
-    if len(kdate_warn) > 0:
-        ax_k.errorbar( kdate_warn, kcol_warn, yerr=kerr_warn, 
-                       fmt='k'+fmt_warn, ecolor='k')
-    ax_k.invert_yaxis()
 
     ## Now let's do the 2 color-mag/color-color plots.
 
