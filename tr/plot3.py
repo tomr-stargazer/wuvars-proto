@@ -1451,7 +1451,6 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
-    d_cmap = {'j': 'jet', 'h': 'jet', 'k': 'jet'}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
