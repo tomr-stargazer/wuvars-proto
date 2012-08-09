@@ -1092,7 +1092,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
-    d_cmap = {'j': 'Blues', 'h': 'Greens', 'k': 'Reds'}
+    d_cmap = {'j': 'jet', 'h': 'jet', 'k': 'jet'}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
@@ -1428,7 +1428,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
-    d_cmap = {'j': 'Blues', 'h': 'Greens', 'k': 'Reds'}
+    d_cmap = {'j': 'jet', 'h': 'jet', 'k': 'jet'}
     d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
     d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
