@@ -860,17 +860,21 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
 def graded_lc (table, sid, season=0, outfile='', name='', 
                stetson=True, png_too=False):
     """ 
-    Plots J, H, K lightcurves, plus color-color and color-mag
-    trajectories, for one star.
+    Plots JHK lightcurves of a star, with datapoints colored by grade.
+
+    Also plots color-color and color-mag trajectories, colored by time.
 
     Will display "lonely" datapoints (i.e. not all JHK mags are 
     well-defined), and plots error-flagged data as different symbols.
-    Compare to plot2.lc() which does neither.
+    Compare to plot2.lc() which does neither, and to plot3.lc() which 
+    is unaware of grades.
 
     Parameters
     ----------
     table : atpy.Table
-        Table with time-series photometry
+        Table with time-series photometry and grade columns. 
+        "JGRADE", "HGRADE", "KGRADE" must be bestowed by 
+        night_cleanser.null_cleanser_grader().
     sid : int
         13-digit WFCAM source ID of star to plot
     season : int, optional
@@ -905,10 +909,9 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     ## Let's do the 3 lightcurve bands.
 
-    ### Initializing variables. Most of the following are done thrice:
+    ### Initializing variables. Most of the following are done twice:
     # Once with no errors (normal),
-    # once with small errors (info),
-    # once with large errors (warning).
+    # once with small errors (info).
 
     ## First: normal
 
@@ -944,6 +947,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     hflag = h_table.HPPERRBITS
     kflag = k_table.KPPERRBITS
 
+    # Get the grade
+    jgrade = j_table.JGRADE
+    hgrade = h_table.HGRADE
+    kgrade = k_table.KGRADE
+
     ## Second: info
 
     # Use band_cut to get relevant data chunks.
@@ -976,39 +984,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     jflag = j_table_info.JPPERRBITS
     hflag = h_table_info.HPPERRBITS
     kflag = k_table_info.KPPERRBITS
-    
-    ## Third: warning
 
-    # Use band_cut to get relevant data chunks.
-
-    j_table_warn = band_cut(s_table, 'j', min_flag=257)
-    h_table_warn = band_cut(s_table, 'h', min_flag=257)
-    k_table_warn = band_cut(s_table, 'k', min_flag=257)
-
-
-    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
-    # JD 2451544.500000
-    # (i.e. MJD 51544.0)
-
-    # get a date (x-axis) for each plot
-    jdate_warn = j_table_warn.MEANMJDOBS - 51544
-    hdate_warn = h_table_warn.MEANMJDOBS - 51544
-    kdate_warn = k_table_warn.MEANMJDOBS - 51544
-    
-    # get a magnitude (y-axis) for each plot
-    jcol_warn = j_table_warn.JAPERMAG3
-    hcol_warn = h_table_warn.HAPERMAG3
-    kcol_warn = k_table_warn.KAPERMAG3
-
-    # get a magnitude error (y-error) for each plot
-    jerr_warn = j_table_warn.JAPERMAG3ERR
-    herr_warn = h_table_warn.HAPERMAG3ERR
-    kerr_warn = k_table_warn.KAPERMAG3ERR
-
-    # get a quality flag for each plot
-    jflag = j_table_warn.JPPERRBITS
-    hflag = h_table_warn.HPPERRBITS
-    kflag = k_table_warn.KPPERRBITS
+    # Get the grade
+    jgrade_info = j_table_info.JGRADE
+    hgrade_info = h_table_info.HGRADE
+    kgrade_info = k_table_info.KGRADE
 
     
     ## Define the components and parameters of the figure:
