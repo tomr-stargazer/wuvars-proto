@@ -871,6 +871,51 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
 
     return fig
 
+def color_phase_core (ax, t, x, xerr, period, offset=0, 
+                      hide=False, **kwargs):
+    """ 
+    Scatter-plots a period-folded lightcurve on a given axes object.
+
+    Doesn't assume anything about your data (e.g., that it's in magnitudes)
+    
+    Parameters
+    ----------
+    ax : plt.Axes
+    t, x, xerr : array_like
+    period : float
+    offset : float, optional
+        How much to shift the phase by. Default is zero.
+    sym : str, optional
+        Default 'o'. (circles)
+    color : str, optional
+        Default 'k'. (black)
+    ms : float
+        Default 6.
+        
+    Returns
+    -------
+    period : float
+        The input period.
+    
+    """
+    
+    phase = ((t % period) / period + offset) % 1.
+
+
+    if not hide:    ax.errorbar(phase, x, yerr=xerr, fmt= color+sym, ms=ms)
+    ax.errorbar(phase-1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
+                 ecolor='0.7', ms=ms)
+    ax.errorbar(phase+1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
+                 ecolor='0.7', ms=ms)
+    
+    ax.set_xticks( [0, 0.5, 1] )
+    ax.set_xticks( np.arange(-.5,1.5,.1), minor=True)
+
+    ax.set_xlim(-0.25, 1.25)
+
+    return period
+
+
 
 def graded_lc (table, sid, season=0, outfile='', name='', 
                stetson=True, png_too=False):
