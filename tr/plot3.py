@@ -871,43 +871,59 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
 
     return fig
 
-def color_phase_core (ax, t, x, xerr, period, offset=0, 
-                      hide=False, **kwargs):
+def scatter_phase_core (ax, t, x, xerr, period, offset=0, 
+                        ms=6, sym='o', hide=False, **kwargs):
     """ 
     Scatter-plots a period-folded lightcurve on a given axes object.
 
+    Also plots errorbars underneath.
     Doesn't assume anything about your data (e.g., that it's in magnitudes)
     
     Parameters
     ----------
     ax : plt.Axes
+        An Axes object to plot onto.
     t, x, xerr : array_like
+        The time, value, and uncertainty arrays to plot.
     period : float
+        The period to fold the curve by.
     offset : float, optional
         How much to shift the phase by. Default is zero.
     sym : str, optional
-        Default 'o'. (circles)
+        Symbol for gray dudes on the sides. Default 'o'. (circles)
     color : str, optional
-        Default 'k'. (black)
+        Color of the errorbars. Default 'k'. (black)
     ms : float
         Default 6.
+    **kwargs : keyword arguments for plt.scatter()
+        Suggested kwargs: `c` for color-array, `cmap` for colormap choice,
+        `vmin` and `vmax` for the limits of colormap. Also possible:
+        s (size), other things too I guess.
         
     Returns
     -------
     period : float
-        The input period.
+        The input period, unchanged.
     
     """
     
+    # Calculate the "phase" variable as a function of time and the period.
     phase = ((t % period) / period + offset) % 1.
 
 
-    if not hide:    ax.errorbar(phase, x, yerr=xerr, fmt= color+sym, ms=ms)
+    # Plot the grayed-out guys on the left and right:
     ax.errorbar(phase-1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
                  ecolor='0.7', ms=ms)
     ax.errorbar(phase+1,x,yerr=xerr,fmt=sym, mfc='0.7',mec='0.7', 
                  ecolor='0.7', ms=ms)
-    
+
+    # Now plot our actual scattered dude
+    if not hide:    
+        # errorbars in the background
+        ax.errorbar(phase, x, yerr=xerr, fmt= None, zorder=0)
+        # scatter in the foreground
+        ax.scatter(phase, x, **kwargs)
+        
     ax.set_xticks( [0, 0.5, 1] )
     ax.set_xticks( np.arange(-.5,1.5,.1), minor=True)
 
