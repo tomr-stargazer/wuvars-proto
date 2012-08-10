@@ -34,13 +34,13 @@ def I(b, sigma_b, grade_b, v, sigma_v, grade_v, min_grade=0.8):
     Returns
     -------
     I : float
-        The Stetson index "I" over the input arrays.
+        The Stetson variability index "I" over the input arrays.
 
     Notes
     -----
     This code implements the following mathematical formula:
     
-     .. math:: I = \sqrt{ \frac{1}{n(n-1)}}\frac{\sum_{i=1}^{n} w_i \left(\frac{b_i-\bar b}{\sigma_{b,i}} \right ) \left(\frac{v_i-\bar v}{\sigma_{v,i}} \right )}{\sum_{i=1}^{n} w_i}
+    .. math:: I = \sqrt{ \frac{1}{n(n-1)}}\frac{\sum_{i=1}^{n} w_i \left(\frac{b_i-\bar b}{\sigma_{b,i}} \right ) \left(\frac{v_i-\bar v}{\sigma_{v,i}} \right )}{\sum_{i=1}^{n} w_i}
 
     which is the Welch/Stetson variability index for two color bands, 
     with the slight modification of using weights :math:`w_k` that 
@@ -103,19 +103,34 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
     Computes the Stetson variability index for one star that has
     3 observations on each night. Uses Carpenter et al.'s notation.
     Simplified from the general expression assuming 3 observations every
-      night.
+    night.
+
+    Parameters
+    ----------
+    j, h, k : array-like
+        Magnitudes in bands J, H, and K.
+    sigma_j, sigma_h, sigma_k : array-like
+        Three corresponding arrays of uncertainty values.
+    grade_j, grade_h, grade_k : array_like
+        Corresponding arrays of quality grades.
+    min_grade : float, optional
+        The lowest grade to accept (its weight scales to zero, 
+        as do any grades lower than it).
+
+    Returns
+    -------
+    S : float
+        The Stetson variability index "J" over the 3 input bands.
     
-    INPUTS:
-        j: an array of J-band magnitudes
-        sigma_j: an array of corresponding J-band uncertainties
-        h: an array of H-band magnitudes
-        sigma_h: an array of corresponding H-band uncertainties
-        k: an array of K-band magnitudes
-        sigma_k: an array of corresponding K-band uncertainties
-
-    OUTPUTS:
-        s: the Stetson variability index for 3 bands
-
+    Notes
+    -----
+    This code implements the following mathematical formula:
+    
+    .. math:: J = \frac{\sum_{k=1}^n w_k \textrm{sgn}(P_k)\sqrt{|P_k|}}{\sum_{k=1}^n w_k}
+     
+    where the meaning of the symbol :math:`P_k` is defined in 
+    the reference (Stetson 1996).
+    
     """
 
     n = j.size
@@ -124,9 +139,25 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
     if n < 2:
         return 0
 
+    # Calculate deltas
     d_j = delta(j, sigma_j, j.mean(), n)
     d_h = delta(h, sigma_h, h.mean(), n)
     d_k = delta(k, sigma_k, k.mean(), n)
+
+    # Ensure that no grades are below min_grade
+    grade_j[grade_j < min_grade] = min_grade
+    grade_h[grade_h < min_grade] = min_grade
+    grade_k[grade_k < min_grade] = min_grade
+
+    c = 1./(1-min_grade)
+    wjh = ((grade_j - min_grade) * c) * ((grade_h - min_grade) * c)
+    whk = ((grade_h - min_grade) * c) * ((grade_k - min_grade) * c)
+    wjk = ((grade_j - min_grade) * c) * ((grade_k - min_grade) * c)
+
+    wk = np.array( [wjh, whk, wjk] )
+    
+    # Ensure that no weights are below zero
+    wk[wk < 0] = 0
 
     P_i = np.array( [d_j * d_h,
                      d_h * d_k,
@@ -135,9 +166,10 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
     # I originally had two sums going: one over P_i, and one over all the 
     # elements of n, but then I realized that a single sum over all axes
     # did the exact same thing (I tested it) so now it's back to one sum.
-    s = np.sum( np.sign( P_i ) * np.sqrt( np.abs( P_i ))) /(n*1.)
+    S = (np.sum( wk * np.sign( P_i ) * np.sqrt( np.abs( P_i ))) /
+         np.sum( wk ))
 
-    return s
+    return S
 
 def S_singleton (v, sigma_v):
     """
