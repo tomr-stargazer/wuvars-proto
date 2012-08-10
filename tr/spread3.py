@@ -349,7 +349,7 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
     Calculates several statistical properties for a given star.
 
     Will work with "lonely" datapoints (i.e. not all JHK mags are 
-    well-defined). 
+    well-defined). Optionally works with graded data, too!
 
     Parameters
     ----------
@@ -450,6 +450,14 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
     ret.Stetson_choice = choice
     ret.Stetson_N = stetson_nights
 
+    if graded:
+        # Calculate the graded Stetson index...
+        g_S, g_choice, g_stetson_nights = Stetson_machine (s_table, flags)
+    
+        ret.graded_Stetson = g_S
+        ret.graded_Stetson_choice = g_choice
+        ret.graded_Stetson_N = g_stetson_nights
+
 
     # Create parallel data structures for each band, so we can iterate
     ret.j = Empty(); ret.j.data = jcol; ret.j.err = jerr; ret.j.date = jdate   
@@ -528,7 +536,7 @@ def base_lookup (table):
 
 
 def spreadsheet_write (table, lookup, season, outfile, flags=0,
-                       Test=False, rob=False, per=False):
+                       Test=False, rob=False, per=False, graded=False):
     """ 
     Makes my spreadsheet! Basically with a big forloop.
 
@@ -559,6 +567,11 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     per : bool, optional 
         Run period-finding? Uses fast chi-squared and lomb-scargle.
         (takes longer, default False)
+    graded : bool, optional
+        Also calculate Stetson indices using quality grades as weights?
+        Uses stetson_graded; requires that the data has been graded by
+        night_cleanser.null_cleanser_grader().
+
       
     Returns
     -------
@@ -590,6 +603,12 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     Stetson_choice = np.zeros(l, dtype='|S4')
     Stetson_N = np.ones(l, dtype='int')
     
+    if graded:
+        graded_Stetson = np.ones(l)
+        graded_Stetson_choice = np.zeros(l, dtype='|S4')
+        graded_Stetson_N = np.ones(l, dtype='int')
+
+
     class Band:
         pass
 
@@ -650,6 +669,12 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         Stetson_choice[i] = v.Stetson_choice
         Stetson_N[i] = v.Stetson_N
 
+        if graded:
+            graded_Stetson[i] = v.graded_Stetson
+            graded_Stetson_choice[i] = v.graded_Stetson_choice
+            graded_Stetson_N[i] = v.graded_Stetson_N
+
+
         for b, bn, vb, vbn in zip(bands, band_names, vbands, vband_names):
             
 #            print "writing into band " + repr(b) + " with band " + str(vb)
@@ -707,6 +732,12 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     Output.add_column('Stetson', Stetson)
     Output.add_column('Stetson_choice', Stetson_choice)
     Output.add_column('Stetson_N', Stetson_N)
+    
+    if graded:
+        Output.add_column('graded_Stetson', graded_Stetson)
+        Output.add_column('graded_Stetson_choice', graded_Stetson_choice)
+        Output.add_column('graded_Stetson_N', graded_Stetson_N)
+
 
     for b, band_name in zip(bands, band_names):
         bn = band_name + '_'
