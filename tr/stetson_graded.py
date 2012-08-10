@@ -98,7 +98,9 @@ def delta (m, sigma_m, mean_m, n):
 
     
 
-def S (j, sigma_j, h, sigma_h, k, sigma_k) :
+def S (j, sigma_j, grade_j, 
+       h, sigma_h, grade_h, 
+       k, sigma_k, grade_k) :
     """
     Computes the Stetson variability index for one star that has
     3 observations on each night. Uses Carpenter et al.'s notation.
@@ -171,7 +173,7 @@ def S (j, sigma_j, h, sigma_h, k, sigma_k) :
 
     return S
 
-def S_singleton (v, sigma_v):
+def S_singleton (v, sigma_v, grade_v, min_grade=0.8):
     """
     Computes the 'Stetson' index for a star that has no simultaneous 
     observations (i.e., only observed in a single color).
