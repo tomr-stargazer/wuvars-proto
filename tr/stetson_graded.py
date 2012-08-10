@@ -2,14 +2,22 @@
 'On the Automatic Determination of Light-Curve Parameters for Cepheid
 Variables', Stetson 1996, PASP..108..851S
 
+This code differs from stetson.py in that it supports "graded" 
+Stetson calculations, where the quality of the relevant nights
+is factored into the Stetson calculation.
+
 """
 
+from __future__ import division
 import numpy as np
 
 
-def I(b, sigma_b, v, sigma_v):
-    """The Welch/Stetson variability index I.
+def I(b, sigma_b, grade_b, v, sigma_v, grade_v, min_grade=0.8):
+    """
+    The Welch/Stetson variability index I, with quality-assigned weights.
+    
     Calculates variability index given two magnitude bands and uncertainties.
+    Uses quality grades to assign weights.
 
     Parameters
     ----------
@@ -17,15 +25,31 @@ def I(b, sigma_b, v, sigma_v):
         Two arrays of magnitude values
     sigma_b, sigma_v : array_like
         Two corresponding arrays of uncertainty values.
+    grade_b, grade_v : array_like
+        Corresponding arrays of quality grades.
+    min_grade : float, optional
+        The lowest grade to accept (its weight scales to zero, 
+        as do any grades lower than it).
 
     Returns
     -------
     I : float
         The Stetson index "I" over the input arrays.
 
+    Notes
+    -----
+    This code implements the following mathematical formula:
+    
+     .. math:: I = \sqrt{ \frac{1}{n(n-1)}}\frac{\sum_{i=1}^{n} w_i \left(\frac{b_i-\bar b}{\sigma_{b,i}} \right ) \left(\frac{v_i-\bar v}{\sigma_{v,i}} \right )}{\sum_{i=1}^{n} w_i}
+
+    which is the Welch/Stetson variability index for two color bands, 
+    with the slight modification of using weights :math:`w_k` that 
+    are a function of the product of the nightly grade in each band.
+
     """
 
-    if not (b.size == sigma_b.size == v.size == sigma_v.size):
+    if not (b.size == sigma_b.size == grade_b.size == 
+            v.size == sigma_v.size == grade_v.size):
         raise Exception("Array dimensions mismatch")
         return
 
@@ -35,7 +59,19 @@ def I(b, sigma_b, v, sigma_v):
     if n < 2:
         return 0
 
-    s = np.sum( (b - b.mean())/sigma_b * (v - v.mean())/sigma_v )
+    # Ensure that no grades are below min_grade
+    grade_b[grade_b < min_grade] = min_grade
+    grade_v[grade_v < min_grade] = min_grade
+
+    c = 1./(1-min_grade)
+    wk = ((grade_b - min_grade) * c) * ((grade_v - min_grade) * c)
+
+    # Ensure that no weights are below zero
+    wk[wk < 0] = 0
+    
+
+    s = (np.sum( wk * (b - b.mean())/sigma_b * (v - v.mean())/sigma_v ) /
+         np.sum( wk ))
 
     I = np.sqrt(1. / (n*(n-1))) * s
 
