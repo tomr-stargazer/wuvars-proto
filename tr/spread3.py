@@ -23,9 +23,14 @@ Helper functions:
 
 """
 
-import atpy
+from __future__ import division
+
 import numpy as np
+
+import atpy
+
 import stetson
+import stetson_graded
 import robust as rb
 from helpers3 import data_cut, band_cut
 from scargle import fasper as lsp
@@ -186,7 +191,157 @@ def Stetson_machine ( s_table, flags=0) :
     # variance estimated from only two)."  
 
 
-def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
+# I'm going to software hell for copying the following...
+
+def graded_Stetson_machine ( s_table, flags=0, min_grade=0.8) :
+    """
+    Computes the graded Stetson index on the best combination of bands.
+
+    There's a lot of internal logic here on how to exactly accomplish
+    that, and especially which version of the Stetson index to even use.
+    
+    Differs from that "other" Stetson_machine() in that this one uses
+    stetson_graded.py.
+    
+    Parameters
+    ----------
+    s_table : atpy.Table
+        Table with time-series photometry of one star
+    flags : int, optional 
+        Maximum ppErrBit quality flags to use (default 0)    
+    
+    Returns
+    -------
+    Stetson : float
+        The Stetson variability index (either "I" or "J" depending 
+        on whether 2 or 3 bands were used).
+    choice : str {'jhk', 'hk', 'jh', 'jk'}
+        Which combination of bands is optimal.
+    stetson_nights : int 
+        How many nights have all of the optimal combination
+        (and therefore, how many nights' worth of data is going into
+        the Stetson calculation)
+    min_grade : float, optional
+        The lowest grade to accept (its weight scales to zero, 
+        as do any grades lower than it).
+
+    """
+    
+    # First, slice the data to find how many nights have
+    # a given combination of bands.
+
+    j_table = band_cut( s_table, 'j', max_flag=flags)
+    h_table = band_cut( s_table, 'h', max_flag=flags)
+    k_table = band_cut( s_table, 'k', max_flag=flags)
+    
+    jh_table = band_cut( j_table, 'h', max_flag=flags)
+    hk_table = band_cut( h_table, 'k', max_flag=flags)
+    jk_table = band_cut( j_table, 'k', max_flag=flags)
+
+    jhk_table = band_cut( jh_table, 'k', max_flag=flags)
+
+    # Then we'll measure how many nights are in each combination.
+
+    jh_len = len(jh_table)
+    hk_len = len(hk_table)
+    jk_len = len(jk_table)
+    jhk_len = len(jhk_table)
+
+    # The combination with the most nights (weighted by value^{1})
+    # will win. Ties are determined in order: JHK, HK, JH, JK
+
+    max_len = max(jh_len, hk_len, jk_len, jhk_len*2)
+
+    # Now note the winning choice, and compute the relevant index.
+
+    # If there are no simultaneous observations, choose the most-observed band
+    # and do a singleband 'Stetson'.
+
+    if max_len == 0:
+        j_len = len(j_table)
+        h_len = len(h_table)
+        k_len = len(k_table)
+        max_len_single = max(j_len, h_len, k_len)
+        
+        if k_len == max_len_single:
+            choice = 'k'
+            vcol = k_table.KAPERMAG3
+            verr = k_table.KAPERMAG3ERR
+            vgrade = k_table.KGRADE
+        elif h_len == max_len_single:
+            choice = 'h'
+            vcol = h_table.HAPERMAG3
+            verr = h_table.HAPERMAG3ERR
+            vgrade = h_table.HGRADE
+        else:
+            choice = 'j'
+            vcol = j_table.JAPERMAG3
+            verr = j_table.JAPERMAG3ERR
+            vgrade = j_table.JGRADE
+
+        Stetson = stetson_graded.S_singleton(vcol, verr, vgrade)
+        stetson_nights = max_len_single
+
+    elif 2*jhk_len == max_len:
+        choice = 'jhk'
+        
+        jcol = jhk_table.JAPERMAG3; jerr = jhk_table.JAPERMAG3ERR
+        hcol = jhk_table.HAPERMAG3; herr = jhk_table.HAPERMAG3ERR
+        kcol = jhk_table.KAPERMAG3; kerr = jhk_table.KAPERMAG3ERR
+        
+        jgrade = jhk_table.JGRADE
+        hgrade = jhk_table.HGRADE 
+        kgrade = jhk_table.KGRADE
+
+        Stetson = stetson_graded.S(jcol, jerr, jgrade, 
+                                   hcol, herr, hgrade,
+                                   kcol, kerr, kgrade)
+
+        stetson_nights = jhk_len 
+    else:
+        if hk_len == max_len:
+            choice = 'hk'
+            
+            bcol = hk_table.HAPERMAG3; berr = hk_table.HAPERMAG3ERR
+            vcol = hk_table.KAPERMAG3; verr = hk_table.KAPERMAG3ERR
+
+        elif jh_len == max_len:
+            choice = 'jh'
+
+            bcol = jh_table.JAPERMAG3; berr = jh_table.JAPERMAG3ERR
+            vcol = jh_table.HAPERMAG3; verr = jh_table.HAPERMAG3ERR
+
+        elif jk_len == max_len:
+            choice = 'jk'
+
+            bcol = jk_table.JAPERMAG3; berr = jk_table.JAPERMAG3ERR
+            vcol = jk_table.KAPERMAG3; verr = jk_table.KAPERMAG3ERR
+
+        Stetson = stetson.I(bcol, berr, vcol, verr)
+
+        stetson_nights = max_len
+
+    # Finally, return S, the band choice, and how many nights 
+    # are going into the Stetson calculation for that choice.
+
+    return (Stetson, choice, stetson_nights)
+
+
+    # {1}. From Stetson, P. 1996PASP..108..851S, p. 853
+    # "... if more than two observations are all obtained 
+    # within a time span << the shortest periodicity being 
+    # sought, individual observations may be included in 
+    # more than one pair. For instance, three closely spaced 
+    # observations 'abc' may be distributed into the three 
+    # pairs 'ab', 'bc' and 'ac', with two-thirds weight 
+    # being assigned to each pair so that in aggregate they 
+    # contribute double weight (as a variance determined 
+    # from three observations carries twice the weight of a 
+    # variance estimated from only two)."  
+
+
+def statcruncher (table, sid, season=0, rob=True, per=True, graded=False, 
+                  flags=0) :
     """ 
     Calculates several statistical properties for a given star.
 
@@ -210,6 +365,10 @@ def statcruncher (table, sid, season=0, rob=True, per=True, flags=0) :
     per : bool, optional 
         Run period-finding? Uses fast chi-squared and lomb-scargle.
         (takes longer, default True)
+    graded : bool, optional
+        Also calculate Stetson indices using quality grades as weights?
+        Uses stetson_graded; requires that the data has been graded by
+        night_cleanser.null_cleanser_grader().
     flags : int, optional 
         Maximum ppErrBit quality flags to use (default 0)
 
