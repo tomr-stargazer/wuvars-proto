@@ -176,6 +176,24 @@ def S_singleton (v, sigma_v, grade_v, min_grade=0.8):
     """
     Computes the 'Stetson' index for a star that has no simultaneous 
     observations (i.e., only observed in a single color).
+
+    Parameters
+    ----------
+    v : array_like
+        Array of magnitude values
+    sigma_v : array_like
+        Corresponding array of uncertainty values.
+    grade_v : array_like
+        Corresponding array of quality grades.
+    min_grade : float, optional
+        The lowest grade to accept (its weight scales to zero, 
+        as do any grades lower than it).
+
+    Returns
+    -------
+    S : float
+        The Stetson variability index "J" over the single input band.
+
     """
 
     n = v.size
@@ -186,13 +204,22 @@ def S_singleton (v, sigma_v, grade_v, min_grade=0.8):
 
     d_v = delta(v, sigma_v, v.mean(), n)
 
+    # Ensure that no grades are below min_grade
+    grade_v[grade_v < min_grade] = min_grade
+
+    c = 1./(1-min_grade)
+    wk = (grade_v - min_grade) * c
+
+    # Ensure that no weights are below zero
+    wk[wk < 0] = 0
+
     P_i = np.array( [d_v**2 - 1] )
 
-    # Stolen from S(). The sum may be completely unneccessary?
-    s = np.sum( np.sign( P_i ) * np.sqrt( np.abs( P_i ))) /(n*1.)
+    # Stolen from S(). The sum may be completely unneccessary? Not anymore!
+    S = (np.sum( wk * np.sign( P_i ) * np.sqrt( np.abs( P_i ))) /
+         np.sum( wk ))
 
-    return s
-
+    return S
 
 
 def S_sid (table, sid, season=123, flags=0) :
