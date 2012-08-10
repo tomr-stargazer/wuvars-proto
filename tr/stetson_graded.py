@@ -222,23 +222,26 @@ def S_singleton (v, sigma_v, grade_v, min_grade=0.8):
     return S
 
 
-def S_sid (table, sid, season=123, flags=0) :
-    """ Calculates the Stetson J index for a given source.
+def S_sid (table, sid, season=0, flags=256) :
+    """ Calculates the Stetson J index for a given source. 
 
     Inputs:
       table -- an atpy table with time-series photometry
       sid -- a Source ID from WFCAM (13 digits)
       season -- Which observing season of our dataset (1,2, 3, or all)
     """
-    from tr_helpers import season_cut
+    from helpers3 import data_cut
 
-    s_table = season_cut(table, sid, season, flags=flags)
+    s_table = data_cut(table, sid, season, flags=flags)
     jcol = s_table.JAPERMAG3
     hcol = s_table.HAPERMAG3
     kcol = s_table.KAPERMAG3
     jerr = s_table.JAPERMAG3ERR
     herr = s_table.HAPERMAG3ERR
     kerr = s_table.KAPERMAG3ERR
+    jgrade = s_table.JGRADE
+    hgrade = s_table.HGRADE
+    kgrade = s_table.KGRADE
 
 
-    return S (jcol, jerr, hcol, herr, kcol, kerr)
+    return S (jcol, jerr, jgrade, hcol, herr, hgrade, kcol, kerr, kgrade)
