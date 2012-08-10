@@ -191,8 +191,7 @@ def Stetson_machine ( s_table, flags=0) :
     # variance estimated from only two)."  
 
 
-# I'm going to software hell for copying the following...
-
+# I'm going to software hell for copying the following from above...
 def graded_Stetson_machine ( s_table, flags=0, min_grade=0.8) :
     """
     Computes the graded Stetson index on the best combination of bands.
@@ -304,20 +303,24 @@ def graded_Stetson_machine ( s_table, flags=0, min_grade=0.8) :
             
             bcol = hk_table.HAPERMAG3; berr = hk_table.HAPERMAG3ERR
             vcol = hk_table.KAPERMAG3; verr = hk_table.KAPERMAG3ERR
+            bgrade = hk_table.HGRADE ; vgrade = hk_table.KGRADE
 
         elif jh_len == max_len:
             choice = 'jh'
 
             bcol = jh_table.JAPERMAG3; berr = jh_table.JAPERMAG3ERR
             vcol = jh_table.HAPERMAG3; verr = jh_table.HAPERMAG3ERR
+            bgrade = jh_table.JGRADE ; vgrade = jh_table.HGRADE
 
         elif jk_len == max_len:
             choice = 'jk'
 
             bcol = jk_table.JAPERMAG3; berr = jk_table.JAPERMAG3ERR
             vcol = jk_table.KAPERMAG3; verr = jk_table.KAPERMAG3ERR
+            bgrade = jk_table.JGRADE ; vgrade = jk_table.KGRADE
 
-        Stetson = stetson.I(bcol, berr, vcol, verr)
+        Stetson = stetson_graded.I(bcol, berr, bgrade, 
+                                   vcol, verr, vgrade)
 
         stetson_nights = max_len
 
