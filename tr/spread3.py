@@ -474,7 +474,8 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
 
     if graded:
         # Calculate the graded Stetson index...
-        g_S, g_choice, g_stetson_nights = Stetson_machine (s_table, flags)
+        g_S, g_choice, g_stetson_nights = (
+            graded_Stetson_machine (s_table, flags) )
     
         ret.graded_Stetson = g_S
         ret.graded_Stetson_choice = g_choice
@@ -687,7 +688,8 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     for sid, i in zip(sidarr, range(len(sidarr)) ):
 
         # v for values
-        v = statcruncher (table, sid, season, rob, per, flags=flags)
+        v = statcruncher (table, sid, season, rob, per, graded=graded,
+                          flags=flags)
         if v == None:
             #skip assigning anything!
             continue
