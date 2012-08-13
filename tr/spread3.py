@@ -393,6 +393,10 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
     # First, let's compute single-band statistics. This will require
     # separate data_cuts on each band.
 
+    full_jtable = band_cut(s_table, 'j')
+    full_htable = band_cut(s_table, 'h')
+    full_ktable = band_cut(s_table, 'k')
+
     j_table = band_cut(s_table, 'j', max_flag=flags)
     h_table = band_cut(s_table, 'h', max_flag=flags)
     k_table = band_cut(s_table, 'k', max_flag=flags)
@@ -438,6 +442,24 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
     ret.N_j = len(j_table)
     ret.N_h = len(h_table)
     ret.N_k = len(k_table)
+
+    # What's the distribution of flags and nights?
+    js = full_jtable.JPPERRBITS
+    hs = full_htable.HPPERRBITS
+    ks = full_ktable.KPPERRBITS
+
+    ret.N_j_noflag = len(js[js == 0])
+    ret.N_h_noflag = len(hs[hs == 0])
+    ret.N_k_noflag = len(ks[ks == 0])
+
+    ret.N_j_info = len(js[(js < 256) & (js > 0)])
+    ret.N_h_info = len(hs[(hs < 256) & (hs > 0)])
+    ret.N_k_info = len(ks[(ks < 256) & (ks > 0)])
+
+    ret.N_j_warn = len(js[ js >= 256 ])
+    ret.N_h_warn = len(hs[ hs >= 256 ])
+    ret.N_k_warn = len(ks[ ks >= 256 ])
+
 
     # Mean position of this source
     ret.RA = racol.mean()
@@ -594,10 +616,25 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     N_j = np.ones_like(sidarr)
     N_h = np.copy(N_j)
     N_k = np.copy(N_j)
+
+    N_j_noflag = np.copy(N_j)
+    N_h_noflag = np.copy(N_j)
+    N_k_noflag = np.copy(N_j)
+
+    N_j_info = np.copy(N_j)
+    N_h_info = np.copy(N_j)
+    N_k_info = np.copy(N_j)
+
+    N_j_warn = np.copy(N_j)
+    N_h_warn = np.copy(N_j)
+    N_k_warn = np.copy(N_j)
+
     RA = np.ones(l)
     DEC= np.ones(l)
 #    chip = np.ones_like(sidarr)
 #    one_chip = np.ones_like(sidarr==sidarr)
+
+
     
     Stetson = np.ones(l)
     Stetson_choice = np.zeros(l, dtype='|S4')
@@ -660,6 +697,20 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         N_j[i] = v.N_j
         N_h[i] = v.N_h
         N_k[i] = v.N_k
+
+        # Distribution of flags/nights
+        N_j_noflag[i] = v.N_j_noflag
+        N_h_noflag[i] = v.N_h_noflag
+        N_k_noflag[i] = v.N_k_noflag
+
+        N_j_info[i] = v.N_j_info
+        N_h_info[i] = v.N_h_info
+        N_k_info[i] = v.N_k_info
+
+        N_j_warn[i] = v.N_j_warn
+        N_h_warn[i] = v.N_h_warn
+        N_k_warn[i] = v.N_k_warn
+
 
         RA[i] = v.RA
         DEC[i] = v.DEC
@@ -762,6 +813,18 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             Output.add_column(bn+'lsp_pow', b.lsp_pow)
             Output.add_column(bn+'fx2_per', b.fx2_per)
 
+
+    Output.add_column('N_j_noflag', N_j_noflag)
+    Output.add_column('N_h_noflag', N_h_noflag)
+    Output.add_column('N_k_noflag', N_k_noflag)
+
+    Output.add_column('N_j_info', N_j_info)
+    Output.add_column('N_h_info', N_h_info)
+    Output.add_column('N_k_info', N_k_info)
+
+    Output.add_column('N_j_warn', N_j_warn)
+    Output.add_column('N_h_warn', N_h_warn)
+    Output.add_column('N_k_warn', N_k_warn)
             
 #    Output.add_column('color_slope', color_slope)
     # Output.add_column('jpp_max', jpp_max)
