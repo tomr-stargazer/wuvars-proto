@@ -1095,7 +1095,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     ## Start plotting. 
     # Every band will take two steps: putting the errorbars
     
-    fmt_info = 'D'
+    fmt_info = 'd'
 #    fmt_warn = '.'
 
     # Let's define dictionaries
@@ -1442,7 +1442,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     ## Start plotting. 
     # Every band will take two steps: putting the errorbars
     
-    fmt_info = 'D'
+    fmt_info = 'd'
 #    fmt_warn = '.'
 
     # Let's define dictionaries
