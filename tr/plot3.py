@@ -1143,7 +1143,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
             # Next, scatter the points themselves, colored re:grade :
             d_ax[band].scatter( d_date_info[band], d_col_info[band], 
-                                marker=fmt_info, s=4,
+                                marker=fmt_info, 
                                 c=d_grade_info[band], cmap=d_cmap[band], 
                                 vmin=0.8, vmax=1, zorder=100)
 
