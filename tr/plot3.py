@@ -1472,6 +1472,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         if len(d_date[band]) > 0:
             scatter_phase_core( d_ax[band], d_date[band], d_col[band],
                                 d_err[band], period, c=d_grade[band],
+                                offset = offset,
                                 cmap=d_cmap[band], vmin=0.8, vmax=1 )
 
             # First, plot the errorbars, with no markers, in the background:
@@ -1489,7 +1490,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
             scatter_phase_core( d_ax[band], d_date_info[band], d_col_info[band],
                                 d_err_info[band], period, c=d_grade_info[band],
                                 cmap=d_cmap[band], vmin=0.8, vmax=1, 
-                                marker=fmt_info )
+                                offset = offset, marker=fmt_info )
 
             # First, plot the errorbars, with no markers, in the background:
 #            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
