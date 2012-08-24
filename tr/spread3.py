@@ -37,6 +37,7 @@ from scargle import fasper as lsp
 from timing import lsp_mask
 from chi2 import test_analyze
 from network2 import get_chip
+from color_slope import slope, star_slope
 
 
 def reduced_chisq ( m, sigma_m ):
@@ -343,8 +344,8 @@ def graded_Stetson_machine ( s_table, flags=0, min_grade=0.8) :
     # variance estimated from only two)."  
 
 
-def statcruncher (table, sid, season=0, rob=True, per=True, graded=False, 
-                  flags=0) :
+def statcruncher (table, sid, season=0, rob=True, per=True, 
+                  graded=False, colorslope=False, flags=0) :
     """ 
     Calculates several statistical properties for a given star.
 
@@ -372,6 +373,9 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
         Also calculate Stetson indices using quality grades as weights?
         Uses stetson_graded; requires that the data has been graded by
         night_cleanser.null_cleanser_grader().
+    colorslope : bool, optional
+        Calculate color slopes? Runs them over (JvJ-H, KvH-K, J-HvH-K).
+        Make sure your data has been color-error-corrected! Default False.
     flags : int, optional 
         Maximum ppErrBit quality flags to use (default 0)
 
@@ -403,6 +407,9 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
 
     jmh_table = band_cut(j_table, 'h', max_flag=flags)
     hmk_table = band_cut(h_table, 'k', max_flag=flags)
+    
+    # jhk_table used only for colorslope
+    jhk_table = band_cut( jmh_table, 'k', max_flag=flags)
 
     # get a date (x-axis) for each 
     jdate = j_table.MEANMJDOBS
@@ -530,7 +537,23 @@ def statcruncher (table, sid, season=0, rob=True, per=True, graded=False,
             b.lsp_pow = b.lsp[1][Jmax]
             b.fx2_per = 1./ test_analyze( b.date, b.data, b.err )
 
-    
+    if colorslope:
+        # J vs J-H : use jmh_table exclusively
+        (ret.jjh_slope, a, ret.jjh_slope_err) = (
+            slope( jmh_table.JMHPNT, jmh_table.JAPERMAG3, 
+                   jmh_table.JMHPNTERR, jmh_table.JAPERMAG3ERR, 
+                   verbose=False) )
+        # K vs H-K : use hmk_table exclusively
+        (ret.khk_slope, a, ret.khk_slope_err) = (
+            slope( hmk_table.HMKPNT, hmk_table.KAPERMAG3, 
+                   hmk_table.HMKPNTERR, hmk_table.KAPERMAG3ERR,
+                   verbose=False) )
+        # J-H vs H-K : use jhk_table exclusively
+        (ret.jhk_slope, a, ret.jhk_slope_err) = (
+            slope( jhk_table.HMKPNT, jhk_table.JMHPNT, 
+                   jhk_table.HMKPNTERR, jhk_table.JMHPNTERR,
+                   verbose=False) )
+        
     # and the pp_max, using the messy table
     # (slated for a re-implementation)
     # ret.jpp_max = jppcol.max()
@@ -679,7 +702,11 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.lsp_pow =  np.ones(l) * null
         b.fx2_per =  np.ones(l) * null
     
-#    color_slope =  np.ones(l)
+    
+    jjh_slope =  np.ones(l) * null
+    khk_slope =  np.ones(l) * null
+    jhk_slope =  np.ones(l) * null
+    
     # jpp_max = np.ones_like(sidarr)
     # hpp_max = np.ones_like(sidarr)
     # kpp_max = np.ones_like(sidarr)
