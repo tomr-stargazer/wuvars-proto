@@ -3,6 +3,7 @@ color_slope.py : a module to fit slopes to color trajectories.
 
 """
 
+import numpy as np
 from scipy.odr import RealData, Model, ODR
 
 from helpers3 import data_cut, band_cut
@@ -19,7 +20,7 @@ def f(B, x):
 
 linear = Model(f)
 
-def slope(x, y, xerr, yerr, verbose=True):
+def slope(x, y, xerr, yerr, verbose=True, null=np.double(-9.99999488e+08)):
     """
     Calculates the slope of a color trajectory.
 
@@ -55,6 +56,9 @@ def slope(x, y, xerr, yerr, verbose=True):
 
     """
     
+    if (len(x) != len(y)) or len(x) == 0 or len(y) == 0:
+        return null, null, null
+    
     mydata = RealData(x, y, sx=xerr, sy=yerr)
 
     # Someday, we may want to improve the "initial guess" with 
@@ -67,7 +71,8 @@ def slope(x, y, xerr, yerr, verbose=True):
 
     return myoutput.beta[0], myoutput.beta[1], myoutput.sd_beta[0]
 
-def star_slope( table, sid, xband='hmk', yband='k', flags=0, verbose=True):
+def star_slope( table, sid, xband='hmk', yband='k', flags=0, 
+                verbose=True, null=np.double(-9.99999488e+08)):
     """
     Calculates the color slope, given an input table and ID.
 
