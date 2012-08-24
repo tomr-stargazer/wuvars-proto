@@ -582,7 +582,8 @@ def base_lookup (table):
 
 
 def spreadsheet_write (table, lookup, season, outfile, flags=0,
-                       Test=False, rob=False, per=False, graded=False):
+                       Test=False, rob=False, per=False, 
+                       graded=False, colorslope=False):
     """ 
     Makes my spreadsheet! Basically with a big forloop.
 
@@ -617,7 +618,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         Also calculate Stetson indices using quality grades as weights?
         Uses stetson_graded; requires that the data has been graded by
         night_cleanser.null_cleanser_grader().
-
+    colorslope : bool, optional
+        Calculate color slopes? Runs them over (JvJ-H, KvH-K, J-HvH-K).
+        Make sure your data has been color-error-corrected! Default False.
       
     Returns
     -------
@@ -702,10 +705,13 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.lsp_pow =  np.ones(l) * null
         b.fx2_per =  np.ones(l) * null
     
-    
-    jjh_slope =  np.ones(l) * null
-    khk_slope =  np.ones(l) * null
-    jhk_slope =  np.ones(l) * null
+    if colorslope:
+        jjh_slope =  np.ones(l) * null
+        jjh_slope_err =  np.ones(l) * null
+        khk_slope =  np.ones(l) * null
+        khk_slope_err =  np.ones(l) * null
+        jhk_slope =  np.ones(l) * null
+        jhk_slope_err =  np.ones(l) * null
     
     # jpp_max = np.ones_like(sidarr)
     # hpp_max = np.ones_like(sidarr)
@@ -716,7 +722,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
         # v for values
         v = statcruncher (table, sid, season, rob, per, graded=graded,
-                          flags=flags)
+                          flags=flags, colorslope=colorslope)
         if v == None:
             #skip assigning anything!
             continue
@@ -786,7 +792,15 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
                 b.lsp_per[i] = vb.lsp_per
                 b.lsp_pow[i] = vb.lsp_pow
                 b.fx2_per[i] = vb.fx2_per
-    
+
+        if colorslope:
+            jjh_slope[i] = v.jjh_slope
+            jjh_slope_err[i] = v.jjh_slope_err
+            khk_slope[i] = v.khk_slope
+            khk_slope_err[i] = v.khk_slope_err
+            jhk_slope[i] = v.jhk_slope
+            jhk_slope_err[i] = v.jhk_slope_err
+
 #        color_slope[i] = v.color_slope
         # jpp_max[i] = v.jpp_max
         # hpp_max[i] = v.hpp_max
@@ -854,8 +868,15 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     Output.add_column('N_j_warn', N_j_warn)
     Output.add_column('N_h_warn', N_h_warn)
     Output.add_column('N_k_warn', N_k_warn)
-            
-#    Output.add_column('color_slope', color_slope)
+
+    if colorslope:
+        Output.add_column('jjh_slope', jjh_slope)
+        Output.add_column('jjh_slope_err', jjh_slope_err)
+        Output.add_column('khk_slope', khk_slope)
+        Output.add_column('khk_slope_err', khk_slope_err)
+        Output.add_column('jhk_slope', jhk_slope)
+        Output.add_column('jhk_slope_err', jhk_slope_err)
+
     # Output.add_column('jpp_max', jpp_max)
     # Output.add_column('hpp_max', hpp_max)
     # Output.add_column('kpp_max', kpp_max)
