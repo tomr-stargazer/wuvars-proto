@@ -25,12 +25,22 @@ def abridger( s_table, date_offset, flags=256 ):
         MJD value to use as "zero" date.
     flags : int, optional 
         Maximum ppErrBit quality flags to use (default 0)    
-
         
     Returns
     -------
+    s2_subtraction_factor, s3_subtraction_factor : float
+        What values to subtract for (1) all data after the end of season
+        1, and (2) all data after the end of season 2. Note that season 3 
+        will need to have both subtractions performed on it.
     s1_s2_line, s2_s3_line : float
-        The x-value to plot vertical lines
+        The x-values to plot vertical dotted separator lines
+    xticks : array-like
+        X-values to place xticks at. 
+        Generally separated by increments of 50; season boundaries are funny.
+    xticklabels : list of str
+        Labels for the above xticks
+    xlim_bounds : tuple of float
+        Values to use for the min and max xlim().
     
     """
     
@@ -76,14 +86,18 @@ def abridger( s_table, date_offset, flags=256 ):
     s3_xticks = s3_xticks_raw-int(s3_subtraction_factor+s2_subtraction_factor)
     s3_xticklabels = [ str(x) for x in s3_xticks_raw ]
 
+    # combine the respective xtick and xticklabel arrays together!
+
+    xticks = np.concatenate( s1_xticks, s2_xticks, s3_xticks )
+    xticklabels = s1_xticklabels + s2_xticklabels + s3_xticklabels
+
     # now determine where to put the dotted line spacings.
     s1_s2_line = s1_xmax + spacing
     s2_s3_line = s2_xmax + spacing - s2_subtraction_factor
     
     # and how to size the plot, overall
-    xlim_bounds = (s1_xmin - spacing, s3_xmax + spacing)
-
-    
+    xlim_bounds = (s1_xmin-spacing, 
+                   s3_xmax+spacing-s2_subtraction_factor-s3_subtraction_factor)
 
     # set the locations of the xticks
     # xticks( arange(6) )
@@ -91,3 +105,5 @@ def abridger( s_table, date_offset, flags=256 ):
     # set the locations and labels of the xticks
     # xticks( arange(5), ('Tom', 'Dick', 'Harry', 'Sally', 'Sue') )
   
+    return (s2_subtraction_factor, s3_subtraction_factor,
+            s1_s2_line, s2_s3_line, xticks, xticklabels, xlim_bounds)
