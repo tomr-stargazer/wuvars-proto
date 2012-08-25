@@ -934,7 +934,7 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
 
 
 def graded_lc (table, sid, season=0, outfile='', name='', 
-               stetson=True, png_too=False, 
+               stetson=True, png_too=False, abridged=False,
                d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}):
     """ 
     Plots JHK lightcurves of a star, with datapoints colored by grade.
@@ -969,6 +969,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    abridged : bool, optional (default: False)
+        Create an abridged, panel-like plot?
     d_cmap : dict or str or tuple
         Which colormaps to use for J, H, and K. If a single string 
         (rather than a dict) is given, all 3 bands will use the 
@@ -990,6 +992,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     if len(s_table) == 0:
         print "no data here"
         return
+
+    
 
     ## Let's do the 3 lightcurve bands.
 
