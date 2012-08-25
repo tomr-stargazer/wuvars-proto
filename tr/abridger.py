@@ -48,9 +48,9 @@ def abridger( s_table, date_offset, flags=256 ):
     # and on the edges?
     spacing = 5
 
-    s1_start = 54034
-    s1_s2_bound = 54300
-    s2_s3_bound = 54600
+    s1_start = 54034 - date_offset
+    s1_s2_bound = 54300 - date_offset
+    s2_s3_bound = 54600 - date_offset
 
     # extract the data that beat "flags" from s_table; 
     # that's our "working table"
@@ -71,8 +71,8 @@ def abridger( s_table, date_offset, flags=256 ):
     s3_xmin = dates[dates > s2_s3_bound].min() 
     s3_xmax = dates.max() 
 
-    s2_subtraction_factor = s2_xmin - s1_xmax + 2*spacing
-    s3_subtraction_factor = s3_xmin - s2_xmax + 2*spacing
+    s2_subtraction_factor = s2_xmin - s1_xmax - 2*spacing
+    s3_subtraction_factor = s3_xmin - s2_xmax - 2*spacing
 
     # now determine where to place xticks and what to call them
     s1_xticks = np.arange(int(s1_xmin), int(s1_xmax), 50)
@@ -88,11 +88,11 @@ def abridger( s_table, date_offset, flags=256 ):
 
     # combine the respective xtick and xticklabel arrays together!
 
-    xticks = np.concatenate( s1_xticks, s2_xticks, s3_xticks )
+    xticks = np.concatenate( (s1_xticks, s2_xticks, s3_xticks) )
     xticklabels = s1_xticklabels + s2_xticklabels + s3_xticklabels
 
     # now determine where to put the dotted line spacings.
-    s1_s2_line = s1_xmax + spacing
+    s1_s2_line = s2_xmin - spacing - s2_subtraction_factor
     s2_s3_line = s2_xmax + spacing - s2_subtraction_factor
     
     # and how to size the plot, overall
