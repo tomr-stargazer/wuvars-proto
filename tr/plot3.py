@@ -30,6 +30,7 @@ from chi2 import test_analyze
 from scargle import fasper as lsp
 from timing import lsp_mask
 from spread3 import Stetson_machine
+from abridger import abridger
 
 #import coords
 #import stetson
@@ -998,7 +999,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         return
 
     if abridged: 
-        abridger_stuff = abridger.abridger(s_table, 54034, flags=256)
+        abridger_stuff = abridger(s_table, 54034, flags=256)
 
         ab_s2sub = abridger_stuff[0]
         ab_s3sub = abridger_stuff[1]
@@ -1033,7 +1034,10 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     kdate = k_table.MEANMJDOBS - date_offset
 
     if abridged:
-        jdate[jdate > 54300-date_offset] -= ab_s2sub - date_offset
+        jdate[jdate > 54300-date_offset] -= ab_s2sub
+        print "subtracting %d from the %d dates above date=%d" % \
+            (ab_s2sub, len(jdate[jdate > 54300-date_offset]),
+             54300-date_offset)
         jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
         hdate[hdate > 54300-date_offset] -= ab_s2sub - date_offset
         hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
