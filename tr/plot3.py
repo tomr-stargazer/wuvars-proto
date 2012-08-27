@@ -999,6 +999,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         return
 
     if abridged: 
+        date_offset = 54034
         abridger_stuff = abridger(s_table, 54034, flags=256)
 
         ab_s2sub = abridger_stuff[0]
@@ -1241,7 +1242,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     plt.setp(ax_h.get_xticklabels(), visible=False)
 
     # Label stuff
-    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+#    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+    ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
 
     ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
