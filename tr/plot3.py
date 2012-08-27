@@ -935,7 +935,8 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
 
 def graded_lc (table, sid, season=0, outfile='', name='', 
                stetson=True, png_too=False, abridged=False,
-               d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}):
+               d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
+               date_offset = 51544):
     """ 
     Plots JHK lightcurves of a star, with datapoints colored by grade.
 
@@ -976,6 +977,9 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         (rather than a dict) is given, all 3 bands will use the 
         same colormap. If a tuple is given, J:0, H:1, K:2.
         Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
+    date_offset : float, optional
+        What MJD to use as day "zero". Default 01/01/2000, 
+        aka MJD=51544.
    
         
 
@@ -993,7 +997,16 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         print "no data here"
         return
 
-    
+    if abridged: 
+        abridger_stuff = abridger.abridger(s_table, 54034, flags=256)
+
+        ab_s2sub = abridger_stuff[0]
+        ab_s3sub = abridger_stuff[1]
+        ab_s1s2line = abridger_stuff[2]
+        ab_s2s3line = abridger_stuff[3]
+        ab_xticks = abridger_stuff[4]
+        ab_xticklab = abridger_stuff[5]
+        ab_xlim = abridger_stuff[6]
 
     ## Let's do the 3 lightcurve bands.
 
@@ -1015,9 +1028,18 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate = j_table.MEANMJDOBS - 51544
-    hdate = h_table.MEANMJDOBS - 51544
-    kdate = k_table.MEANMJDOBS - 51544
+    jdate = j_table.MEANMJDOBS - date_offset
+    hdate = h_table.MEANMJDOBS - date_offset
+    kdate = k_table.MEANMJDOBS - date_offset
+
+    if abridged:
+        jdate[jdate > 54300-date_offset] -= ab_s2sub - date_offset
+        jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
+        hdate[hdate > 54300-date_offset] -= ab_s2sub - date_offset
+        hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
+        kdate[kdate > 54300-date_offset] -= ab_s2sub - date_offset
+        kdate[kdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
+
     
     # get a magnitude (y-axis) for each plot
     jcol = j_table.JAPERMAG3
@@ -1054,9 +1076,21 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate_info = j_table_info.MEANMJDOBS - 51544
-    hdate_info = h_table_info.MEANMJDOBS - 51544
-    kdate_info = k_table_info.MEANMJDOBS - 51544
+    jdate_info = j_table_info.MEANMJDOBS - date_offset
+    hdate_info = h_table_info.MEANMJDOBS - date_offset
+    kdate_info = k_table_info.MEANMJDOBS - date_offset
+
+    if abridged:
+        jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub - date_offset
+        jdate_info[jdate_info > (54600-date_offset) - 
+                   ab_s2sub] -= ab_s3sub - date_offset
+        hdate_info[hdate_info > 54300-date_offset] -= ab_s2sub - date_offset
+        hdate_info[hdate_info > (54600-date_offset) - 
+                   ab_s2sub] -= ab_s3sub - date_offset
+        kdate_info[kdate_info > 54300-date_offset] -= ab_s2sub - date_offset
+        kdate_info[kdate_info > (54600-date_offset) - 
+                   ab_s2sub] -= ab_s3sub - date_offset
+
     
     # get a magnitude (y-axis) for each plot
     jcol_info = j_table_info.JAPERMAG3
@@ -1166,7 +1200,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
                           'h', max_flag=256)
 
-    khkdate = khk_table.MEANMJDOBS - 51544
+    khkdate = khk_table.MEANMJDOBS - date_offset
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
 
@@ -1174,7 +1208,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     # defined everywhere. That's one more cut.
     jhk_table = band_cut(khk_table, 'j', max_flag=256)
 
-    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jhkdate = jhk_table.MEANMJDOBS - date_offset
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
 
