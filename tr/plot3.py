@@ -1035,14 +1035,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     if abridged:
         jdate[jdate > 54300-date_offset] -= ab_s2sub
-        print "subtracting %d from the %d dates above date=%d" % \
-            (ab_s2sub, len(jdate[jdate > 54300-date_offset]),
-             54300-date_offset)
-        jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
-        hdate[hdate > 54300-date_offset] -= ab_s2sub - date_offset
-        hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
-        kdate[kdate > 54300-date_offset] -= ab_s2sub - date_offset
-        kdate[kdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub - date_offset
+        jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
+        hdate[hdate > 54300-date_offset] -= ab_s2sub 
+        hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
+        kdate[kdate > 54300-date_offset] -= ab_s2sub 
+        kdate[kdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
 
     
     # get a magnitude (y-axis) for each plot
@@ -1085,16 +1082,12 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     kdate_info = k_table_info.MEANMJDOBS - date_offset
 
     if abridged:
-        jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub - date_offset
-        jdate_info[jdate_info > (54600-date_offset) - 
-                   ab_s2sub] -= ab_s3sub - date_offset
-        hdate_info[hdate_info > 54300-date_offset] -= ab_s2sub - date_offset
-        hdate_info[hdate_info > (54600-date_offset) - 
-                   ab_s2sub] -= ab_s3sub - date_offset
-        kdate_info[kdate_info > 54300-date_offset] -= ab_s2sub - date_offset
-        kdate_info[kdate_info > (54600-date_offset) - 
-                   ab_s2sub] -= ab_s3sub - date_offset
-
+        jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub
+        jdate_info[jdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
+        hdate_info[hdate_info > 54300-date_offset] -= ab_s2sub 
+        hdate_info[hdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
+        kdate_info[kdate_info > 54300-date_offset] -= ab_s2sub 
+        kdate_info[kdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
     
     # get a magnitude (y-axis) for each plot
     jcol_info = j_table_info.JAPERMAG3
