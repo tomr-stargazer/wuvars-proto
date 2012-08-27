@@ -68,7 +68,10 @@ def abridger( s_table, date_offset, flags=256 ):
     s2_xmin = dates[dates > s1_s2_bound].min() 
     s2_xmax = dates[dates < s2_s3_bound].max() 
 
-    s3_xmin = dates[dates > s2_s3_bound].min() 
+    try:
+        s3_xmin = dates[dates > s2_s3_bound].min() 
+    except ValueError:
+        s3_xmin = dates.max()
     s3_xmax = dates.max() 
 
     s2_subtraction_factor = s2_xmin - s1_xmax - 2*spacing
@@ -82,7 +85,7 @@ def abridger( s_table, date_offset, flags=256 ):
     s2_xticks = s2_xticks_raw - int(s2_subtraction_factor)
     s2_xticklabels = [ str(x) for x in s2_xticks_raw ]
  
-    s3_xticks_raw = np.arange(int(s3_xmin), int(s3_xmax), 50)
+    s3_xticks_raw = np.arange(int(s3_xmin+10), int(s3_xmax), 50)
     s3_xticks = s3_xticks_raw-int(s3_subtraction_factor+s2_subtraction_factor)
     s3_xticklabels = [ str(x) for x in s3_xticks_raw ]
 
