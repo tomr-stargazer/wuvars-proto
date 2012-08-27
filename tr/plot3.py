@@ -1171,6 +1171,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
             # Next, scatter the points themselves, colored re:grade :
             d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
                                 c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
+
             
 
         if len(d_date_info[band]) > 0:
@@ -1187,6 +1188,16 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
         # Finally, flip it (magnitudes are backwards).
         d_ax[band].invert_yaxis()
+
+        # And plot the dotted lines, if relevant.
+        if abridged:
+            d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "m--",
+                            scaley=False, scalex=False)
+
+            d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "m--",
+                            scaley=False, scalex=False)
+            
+
 
     ## Now let's do the 2 color-mag/color-color plots.
 
@@ -1243,6 +1254,12 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    # Mess around with the X axis if it's abridged:
+    if abridged:
+        ax_k.set_xticks(ab_xticks)
+        ax_k.set_xticklabels(ab_xticklab)
+        ax_k.set_xlim(ab_xlim)
 
     if name != '':
         ax_j.set_title(name)
