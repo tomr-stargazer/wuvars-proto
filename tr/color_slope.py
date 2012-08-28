@@ -67,7 +67,8 @@ def slope(x, y, xerr, yerr, verbose=True, null=np.double(-9.99999488e+08)):
 
     myoutput = myodr.run()
 
-    print myoutput.pprint()
+    if verbose:
+        print myoutput.pprint()
 
     return myoutput.beta[0], myoutput.beta[1], myoutput.sd_beta[0]
 
