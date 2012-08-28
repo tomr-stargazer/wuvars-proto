@@ -65,8 +65,12 @@ def abridger( s_table, date_offset, flags=256 ):
     s1_xmin = dates.min() 
     s1_xmax = dates[dates < s1_s2_bound].max() 
     
-    s2_xmin = dates[dates > s1_s2_bound].min() 
-    s2_xmax = dates[dates < s2_s3_bound].max() 
+    try:
+        s2_xmin = dates[dates > s1_s2_bound].min() 
+        s2_xmax = dates[dates < s2_s3_bound].max() 
+    except ValueError:
+        s2_xmin = dates.max()
+        s2_xmax = dates.max()
 
     try:
         s3_xmin = dates[dates > s2_s3_bound].min() 
