@@ -1189,10 +1189,10 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
         # And plot the dotted lines, if relevant.
         if abridged:
-            d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "m--",
+            d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "k--",
                             scaley=False, scalex=False)
 
-            d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "m--",
+            d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "k--",
                             scaley=False, scalex=False)
             
 
