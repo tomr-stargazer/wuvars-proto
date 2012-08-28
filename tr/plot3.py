@@ -1214,6 +1214,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     khkdate = khk_table.MEANMJDOBS - date_offset
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
+    k_khk_err = khk_table.KAPERMAG3ERR
+    hmk_khk_err = khk_table.HMKPNTERR
 
     # In the color-color plot, we need data where J, H, and K are
     # defined everywhere. That's one more cut.
@@ -1222,19 +1224,47 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     jhkdate = jhk_table.MEANMJDOBS - date_offset
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
+    jmh_jhk_err = jhk_table.JMHPNTERR
+    hmk_jhk_err = jhk_table.HMKPNTERR
 
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
         plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate )
+
+        if color_slope:
+            jhk_slope, jhk_intercept, slope_err = (
+                slope(hmk_jhk, jmh_jhk, hmk_jhk_err, jmh_jhk_err,
+                      verbose=False) )
+            
+            ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
+                        ':', scalex=False, scaley=False)
+            
     except Exception:
         print "JHK plot broke!"
         pass
+        
 
     # Plot K vs H-K using the "khk_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate, 
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate,
                               ms=False, ctts=False) 
-        
+
+        # plot boundaries are manually set for readability, if necessary
+        if len(ax_khk.get_xticks()) > 7:
+            khk_xmin = np.floor(hmk_khk.min() * 0.95 * 20)/20.
+            khk_xmax = np.ceil( hmk_khk.max() * 1.05 * 20)/20.
+
+            khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
+            ax_khk.set_xticks(khk_xticks)
+
+        if color_slope:
+            khk_slope, khk_intercept, slope_err = (
+                slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
+                      verbose=False) )
+            
+            ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
+                        '--', scalex=False, scaley=False)
+    
     except Exception:
         print "KHK plot broke!"
         pass
