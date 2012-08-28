@@ -31,6 +31,7 @@ from scargle import fasper as lsp
 from timing import lsp_mask
 from spread3 import Stetson_machine
 from abridger import abridger
+from color_slope import slope
 
 #import coords
 #import stetson
@@ -937,7 +938,7 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
 def graded_lc (table, sid, season=0, outfile='', name='', 
                stetson=True, png_too=False, abridged=False,
                d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
-               date_offset = 51544):
+               date_offset = 51544, color_slope=False):
     """ 
     Plots JHK lightcurves of a star, with datapoints colored by grade.
 
@@ -980,10 +981,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
     date_offset : float, optional
         What MJD to use as day "zero". Default 01/01/2000, 
-        aka MJD=51544.
-   
+        aka MJD=51544, unless `abridged`=True, in which case
+        MJD = 54034 is set (initial observations of Orion dataset).
+    color_slope : bool, optional (defalt: False)
+        Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
         
-
     Returns
     -------
     fig : plt.Figure 
@@ -1232,6 +1234,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     try:
         plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate, 
                               ms=False, ctts=False) 
+        
     except Exception:
         print "KHK plot broke!"
         pass
