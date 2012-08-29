@@ -1324,7 +1324,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
 def graded_phase (table, sid, period='auto', season=0, offset=0, 
                   outfile='', name='', stetson=True, png_too=False,
-                  d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}):
+                  d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
+                  color_slope=False):
                   
     """ 
     Plots folded lightcurves of a star, with datapoints colored by grade.
@@ -1375,7 +1376,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         (rather than a dict) is given, all 3 bands will use the 
         same colormap. If a tuple is given, J:0, H:1, K:2.
         Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
-
+    color_slope : bool, optional (defalt: False)
+        Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
 
     Returns
     -------
@@ -1608,6 +1610,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     khkdate = khk_table.MEANMJDOBS - 51544
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
+    k_khk_err = khk_table.KAPERMAG3ERR
+    hmk_khk_err = khk_table.HMKPNTERR
 
     khkphase = ((khkdate % period) / period + offset) % 1.
 
@@ -1618,12 +1622,23 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     jhkdate = jhk_table.MEANMJDOBS - 51544
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
+    jmh_jhk_err = jhk_table.JMHPNTERR
+    hmk_jhk_err = jhk_table.HMKPNTERR
 
     jhkphase = ((jhkdate % period) / period + offset) % 1.
 
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
         plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkphase )
+
+        if color_slope:
+            jhk_slope, jhk_intercept, slope_err = (
+                slope(hmk_jhk, jmh_jhk, hmk_jhk_err, jmh_jhk_err,
+                      verbose=False) )
+            
+            ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
+                        ':', scalex=False, scaley=False)
+
     except Exception:
         print "JHK plot broke!"
         pass
@@ -1632,6 +1647,23 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     try:
         plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkphase, 
                               ms=False, ctts=False) 
+
+        # plot boundaries are manually set for readability, if necessary
+        if len(ax_khk.get_xticks()) > 7:
+            khk_xmin = np.floor(hmk_khk.min() * 0.95 * 20)/20.
+            khk_xmax = np.ceil( hmk_khk.max() * 1.05 * 20)/20.
+
+            khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
+            ax_khk.set_xticks(khk_xticks)
+
+        if color_slope:
+            khk_slope, khk_intercept, slope_err = (
+                slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
+                      verbose=False) )
+            
+            ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
+                        '--', scalex=False, scaley=False)
+
     except Exception:
         print "KHK plot broke!"
         pass
