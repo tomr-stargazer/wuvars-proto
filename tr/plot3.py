@@ -922,7 +922,7 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
     # Now plot our actual scattered dude
     if not hide:    
         # errorbars in the background
-        ax.errorbar(phase, x, yerr=xerr, fmt= None, zorder=0)
+        ax.errorbar(phase, x, yerr=xerr, fmt= None, ecolor='k', zorder=0)
         # scatter in the foreground
         ax.scatter(phase, x, zorder=100, **kwargs)
         
