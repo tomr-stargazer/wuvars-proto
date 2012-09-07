@@ -20,7 +20,25 @@ import numpy
 from tr_helpers import season_cut
 
 def chi_input_writer (name, t, x, err, outfile):
-    ''' Writes data to a table suitable for runchi2's input. Returns outfile.'''
+    """ 
+    Writes data to a table suitable for runchi2's input. Returns outfile.
+    
+    Parameters
+    ----------
+    name : str
+        The name of the source.
+    t, x, err : array-like
+        Arrays for the time values, x-values, and error-bar values to 
+        use in the period-finding.
+    outfile : str
+        Path to write an output file to.
+
+    Returns
+    -------
+    outfile : str
+        Same value as input `outfile`.
+
+    """
 
     if not (t.size == x.size == err.size):
         print "Input arrays must be the same size!"
@@ -39,7 +57,26 @@ def chi_input_writer (name, t, x, err, outfile):
 
 
 def smart_chi_writer (table, sid, band = 'j', season=123) :
-    '''Writes one source's data into runchi2's format.'''
+    """
+    Writes one source's data into runchi2's format.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table of time-series data from WFCAM.
+    sid : int
+        13-digit WFCAM source ID.
+    band : {'j', 'h', 'k', 'jmh', 'hmk'}
+        Which band to run period-finding over.
+    season : {0, 1, 2, 3, 123}
+        which season to select (1, 2, 3, 123, or other=no cut)
+
+    Returns
+    -------
+    outfile : str
+        An outfile path based on the name of the source.
+
+    """
 
     print band
 
@@ -63,31 +100,51 @@ def smart_chi_writer (table, sid, band = 'j', season=123) :
     return chi_input_writer (name, t, x, err, outfile) 
 
 def run_chi (infile) :
-    ''' Runs Palmer's runchi2 program on a given input file. 
-    '''
-    # This function, as yet incomplete, will probably make heavy use of the 
-    # "subprocess" module. With any luck I can pass the output of
-    # runchi2 to stdout, have python's subprocess call return that stdout 
-    # string, and then parse the string from there, and thus return
-    # a tuple or _dictionary_ of important values such as periods.
-    
-    #let's figure out what's needed here.
+    """ 
+    Runs Palmer's runchi2 program on a given input file. 
 
+    Parameters
+    ----------
+    infile : str
+        An input file for runchi2, formatted to the standards 
+        specified in /home/tom/reu/software/FastChi2-1.03/README.
+        Created by chi_input_writer() or, if you enjoy punshment,
+        by hand.
+
+    Returns
+    -------
+    result : str
+        The "stdout" output from runchi2, which needs to be parsed by
+        parse_chi().
+       
+    """
+    # These arguments, after "runchi2", correspond to 
+    # `nharmonics`, `freqmax`, and `infile` (with its "-i" flag) respectively.
+    # See /home/tom/reu/software/FastChi2-1.03/README for more details.
     args = ["runchi2","3","12","-i",infile]
+
+    # Here I  pass the output of runchi2 to stdout, 
+    # then python's subprocess call returns that stdout 
+    # string, which can later be parsed by parse_chi(). 
 
     runchi = subprocess.Popen(args, stdout=subprocess.PIPE)
 
     result = runchi.communicate()[0]
-#    print result
+
     return result
 
 
 def parse_chi (string) :
-    ''' Parses the output of runchi2 for one source, returns frequency '''
+    """
+    Parses the output of runchi2 for one source, returns frequency 
+
+    """
     # maybe it would be a better idea to define this earlier and have
     # run_chi call this function before returning. The big sloppy string is
     # never ever useful until it's been parsed...
 
+    # and then parse the string from there, and thus return
+    # a tuple or _dictionary_ of important values such as periods.
 
     # Okay, we're gonna have to do some stripping and some parsing (splitting)
 
