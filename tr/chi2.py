@@ -134,10 +134,28 @@ def run_chi (infile) :
     return result
 
 
-def parse_chi (string) :
+def parse_chi (string, ret_chimin=False) :
     """
     Parses the output of runchi2 for one source, returns frequency 
 
+    Parameters
+    ----------
+    string : str
+        A single string containing the text output of runchi2,
+        called with only the -i option.
+    ret_chimin : bool, optional (default False)
+        Return a chimin value?
+        If True, then the return value is a tuple of two floats.
+        If False, then the return value is a float.
+
+    Returns
+    -------
+    fbest : float
+        The best-fit period returned by runchi2. If the parsing fails, 
+        then a value of -1 is returned.
+    chimin : float, only if chimin=True
+        The minimum chisquared value at `fbest`
+    
     """
     # maybe it would be a better idea to define this earlier and have
     # run_chi call this function before returning. The big sloppy string is
@@ -159,10 +177,15 @@ def parse_chi (string) :
     # THE FOLLOWING WAS A 6AM HACK
     try:
         fbest= float(results[1])
+        chimin = float(results[3]) #tom go check which one is chimin
     except:
         fbest= -1
+        chimin = -1
 
-    return fbest
+    if ret_chimin:
+        return fbest, chimin
+    else:
+        return fbest
     
 def chi_analyze (table, sid, band = 'j', season=123) :
     ''' Does everything for one source and returns the frequency information.'''
