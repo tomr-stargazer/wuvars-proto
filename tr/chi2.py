@@ -153,7 +153,7 @@ def parse_chi (string, ret_chimin=False) :
     fbest : float
         The best-fit period returned by runchi2. If the parsing fails, 
         then a value of -1 is returned.
-    chimin : float, only if chimin=True
+    chimin : float, only if ret_chimin=True
         The minimum chisquared value at `fbest`
     
     """
@@ -188,19 +188,57 @@ def parse_chi (string, ret_chimin=False) :
         return fbest
     
 def chi_analyze (table, sid, band = 'j', season=123) :
-    ''' Does everything for one source and returns the frequency information.'''
+    """
+    Does everything for one source and returns the frequency information.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table of WFCAM time-series photometry
+    sid : int
+        13-digit WFCAM source ID of star to analyze
+    band : {'j', 'h', 'k', 'jmh', 'hmk'}, optional
+        Which band to run period-finding over.
+    season : {0, 1, 2, 3, 123}, optional
+        which season to select (1, 2, 3, 123, or other=no cut)
+
+    Returns
+    -------
+    fbest : float
+        The star's best frequency at that band (or -1 if failure)
+
+    """
 
     datafile = smart_chi_writer(table,sid,band, season)
     
     return parse_chi ( run_chi ( datafile ) )
 
-def test_analyze (t, x, err):
-    ''' Takes in test data, returns best frequency '''
+def test_analyze (t, x, err, ret_chimin=False):
+    """
+    Takes in test data, returns best frequency 
+
+    Parameters
+    ----------
+    t, x, err : array-like
+        Arrays for the time values, x-values, and error-bar values to 
+        use in the period-finding.
+    ret_chimin : bool, optional (default False)
+        Return a chimin value?
+
+    Returns
+    -------
+    fbest : float
+        The best-fit period returned by runchi2. If the parsing fails, 
+        then a value of -1 is returned.
+    chimin : float, only if ret_chimin=True
+        The minimum chisquared value at `fbest`
+        
+    """
 
     datafile = chi_input_writer("test", t, x, err, 
                                 '/home/trice/reu/DATA/chi2/chitest.in')
 
-    return parse_chi ( run_chi ( datafile ) )
+    return parse_chi( run_chi(datafile), ret_chimin=ret_chimin )
 
 # def chi_plot (table, sid, band = 'j', outfile='', season=123, harmonic=1) :
 #     ''' Does everything for one source and plots a phase plot.
