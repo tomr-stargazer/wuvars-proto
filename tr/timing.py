@@ -87,7 +87,7 @@ def lsp_tuning(t, upper_frequency=1):
 
     tmin = t.min()
     tmax = t.max()
-    tdif = xmax-xmin
+    tdif = tmax-tmin
 
     # The "average nyqust frequency" is given by
     # 0.5 * (n / tdif), so we invert that to find the proper hifac:
