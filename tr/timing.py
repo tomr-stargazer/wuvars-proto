@@ -4,6 +4,7 @@ analysis, and to return the best filtered period.
 
 Useful functions:
   lsp_mask - Trims unreliable frequencies from a periodogram
+  lsp_tuning - Selects the proper `hifac` value for a desired highest frequency.
 '''
 
 from __future__ import division
@@ -58,3 +59,38 @@ def lsp_mask ( Wk1, Wk2, upper_f=upper_f, lower_f=lower_f, midrange=midrange ):
     Jmax = np.where( Wk2 == Wk2[trim].max() )[0][0]
     return Jmax
 
+
+
+def lsp_tuning(t, upper_frequency=1):
+    """
+    Tunes the `hifac` value in a periodogram to a desired upper frequency.
+
+    By default, it'll tell you what `hifac` value to use so that your 
+    periodogram starts at a 1 day period on the lower end.
+
+    Parameters
+    ----------
+    t : array-like
+        Array of timestamps going into the periodogram
+    upper_frequency : float, optional
+        Highest frequency (1/lowest period) that one desires to scan over
+        in the period search.
+
+    Returns
+    -------
+    hifac : float
+        Suggested value of `hifac` to feed into scargle.fasper().
+
+    """
+
+    n = len(t)
+
+    tmin = t.min()
+    tmax = t.max()
+    tdif = xmax-xmin
+
+    # The "average nyqust frequency" is given by
+    # 0.5 * (n / tdif), so we invert that to find the proper hifac:
+    hifac = 2. * tdif / n * upper_frequency
+
+    return hifac
