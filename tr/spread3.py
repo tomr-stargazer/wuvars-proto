@@ -34,7 +34,8 @@ import stetson_graded
 import robust as rb
 from helpers3 import data_cut, band_cut
 from scargle import fasper as lsp
-from timing import lsp_mask
+from scargle import getSignificance
+from timing import lsp_mask, lsp_tuning
 from chi2 import test_analyze
 from network2 import get_chip
 from color_slope import slope, star_slope
@@ -531,11 +532,19 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
         # Period finding... is a little dodgy still, and might take forever
         if per==True and b.N > 2:
 
-            b.lsp = lsp(b.date, b.data, 6., 6.) # apologies if this is cluttered
+            hifac = lsp_tuning(b.date)
+            
+            b.lsp = lsp(b.date, b.data, 6., hifac) 
             Jmax = lsp_mask(b.lsp[0], b.lsp[1])
             b.lsp_per = 1./ b.lsp[0][Jmax]
             b.lsp_pow = b.lsp[1][Jmax]
-            b.fx2_per = 1./ test_analyze( b.date, b.data, b.err )
+            b.lsp_sig = getSignificance(b.lsp[0], b.lsp[1], b.lsp[2], 6.)[Jmax]
+
+            best_freq, chimin = test_analyze( b.date, b.data, b.err, 
+                                              ret_chimin=True )
+
+            b.fx2_per, b.fx2_chimin = 1./best_freq, chimin
+            
 
     if colorslope:
         # J vs J-H : use jmh_table exclusively
@@ -703,7 +712,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         # per:
         b.lsp_per =  np.ones(l) * null
         b.lsp_pow =  np.ones(l) * null
+        b.lsp_sig =  np.ones(l) * null
         b.fx2_per =  np.ones(l) * null
+        b.fx2_chimin =  np.ones(l) * null
     
     if colorslope:
         jjh_slope =  np.ones(l) * null
@@ -791,7 +802,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             if per and vb.N > 2:
                 b.lsp_per[i] = vb.lsp_per
                 b.lsp_pow[i] = vb.lsp_pow
+                b.lsp_sig[i] = vb.lsp_sig
                 b.fx2_per[i] = vb.fx2_per
+                b.fx2_chimin[i] = vb.fx2_chimin
 
         if colorslope:
             jjh_slope[i] = v.jjh_slope
@@ -854,7 +867,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         if per:
             Output.add_column(bn+'lsp_per', b.lsp_per)
             Output.add_column(bn+'lsp_pow', b.lsp_pow)
+            Output.add_column(bn+'lsp_sig', b.lsp_sig)
             Output.add_column(bn+'fx2_per', b.fx2_per)
+            Output.add_column(bn+'fx2_chimin', b.fx2_chimin)
 
 
     Output.add_column('N_j_noflag', N_j_noflag)
