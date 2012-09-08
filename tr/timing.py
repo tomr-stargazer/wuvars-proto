@@ -61,12 +61,16 @@ def lsp_mask ( Wk1, Wk2, upper_f=upper_f, lower_f=lower_f, midrange=midrange ):
 
 
 
-def lsp_tuning(t, upper_frequency=1):
+def lsp_tuning(t, upper_frequency=0.5):
     """
     Tunes the `hifac` value in a periodogram to a desired upper frequency.
 
     By default, it'll tell you what `hifac` value to use so that your 
-    periodogram starts at a 1 day period on the lower end.
+    periodogram starts at a 2 day period on the lower end.
+    
+    Note: 2 days is the empirically-derived (and unsurprising) effective 
+    Nyquist frequency (0.5 day^-1) for our dataset, based on looking at lots
+    of aliased periodograms. (and thinking about it.)
 
     Parameters
     ----------
@@ -80,6 +84,7 @@ def lsp_tuning(t, upper_frequency=1):
     -------
     hifac : float
         Suggested value of `hifac` to feed into scargle.fasper().
+        Automatically rounded up (np.ceil) for your convenience.
 
     """
 
@@ -91,6 +96,6 @@ def lsp_tuning(t, upper_frequency=1):
 
     # The "average nyqust frequency" is given by
     # 0.5 * (n / tdif), so we invert that to find the proper hifac:
-    hifac = 2. * tdif / n * upper_frequency
+    hifac = np.ceil(2. * tdif / n * upper_frequency)
 
     return hifac
