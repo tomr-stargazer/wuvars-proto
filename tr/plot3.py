@@ -561,7 +561,8 @@ def phase (table, sid, period='auto', season=0, offset=0,
             kpercol = kper_table.KAPERMAG3
             kpererr = kper_table.KAPERMAG3ERR
             
-            lomb = lsp(kperdate,kpercol,6.,6.)
+            hifac = lsp_tuning(kperdate)
+            lomb = lsp(kperdate,kpercol,6., hifac)
             lsp_freq = lomb[0]
             lsp_power= lomb[1]
             Jmax = lsp_mask( lsp_freq, lsp_power)
@@ -798,7 +799,8 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         jcol = j_table.JAPERMAG3
 
     ## Calculate periodograms
-        jlsp = lsp(jdate, jcol, 6., 6.)
+        hifac = lsp_tuning(jdate)
+        jlsp = lsp(jdate, jcol, 6., hifac)
         j_lsp_freq = jlsp[0]
         j_lsp_power = jlsp[1]
         
@@ -817,7 +819,8 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         hdate = h_table.MEANMJDOBS - 51544
         hcol = h_table.HAPERMAG3
         
-        hlsp = lsp(hdate, hcol, 6., 6.)
+        hifac = lsp_tuning(hdate)
+        hlsp = lsp(hdate, hcol, 6., hifac)
         h_lsp_freq = hlsp[0]
         h_lsp_power = hlsp[1]
         
@@ -834,8 +837,9 @@ def lsp_power (table, sid, season=123, outfile='', name='', png_too=False):
         k_table = band_cut(s_table, 'k', max_flag=256)
         kdate = k_table.MEANMJDOBS - 51544
         kcol = k_table.KAPERMAG3
-        
-        klsp = lsp(kdate, kcol, 6., 6.)
+
+        hifac = lsp_tuning(kdate)
+        klsp = lsp(kdate, kcol, 6., hifac)
         k_lsp_freq = klsp[0]
         k_lsp_power = klsp[1]
         
