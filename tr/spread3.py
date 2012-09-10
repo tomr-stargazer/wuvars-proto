@@ -525,18 +525,18 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
         b.rchi2 = reduced_chisq( b.data, b.err )
 
         b.mean = b.data.mean()
-        b.median = np.median(b.data)
+        b.median = np.median(b.data) # d
         b.rms = b.data.std()
         b.min = b.data.min()
         b.max = b.data.max()
         b.range = b.max - b.min
 
-        b.err_mean = b.err.mean()
-        b.err_median = np.median(b.err)
-        b.err_rms = b.err.std()
-        b.err_min = b.err.min()
-        b.err_max = b.err.max()
-        b.err_range = b.err_max - b.err_min
+        b.err_mean = b.err.mean() #d
+        b.err_median = np.median(b.err) #d
+        b.err_rms = b.err.std() #d
+        b.err_min = b.err.min() #d
+        b.err_max = b.err.max() #d
+        b.err_range = b.err_max - b.err_min #d
 
 
         # Robust quantifiers simply have an "r" at the end of their names
@@ -545,18 +545,18 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
             b.errr = b.err[b.indr]
             
             b.meanr = rb.meanr(b.data)
-            b.medianr = rb.medianr(b.data)
+            b.medianr = rb.medianr(b.data) # d
             b.rmsr = rb.stdr(b.data)
             b.minr = b.datar.min()
             b.maxr = b.datar.max()
             b.ranger = b.maxr - b.minr
 
-            b.err_meanr = b.errr.mean()
-            b.err_medianr = np.median(b.errr)
-            b.err_rmsr = b.errr.std()
-            b.err_minr = b.errr.min()
-            b.err_maxr = b.errr.max()
-            b.err_ranger = b.err_maxr - b.err_minr
+            b.err_meanr = b.errr.mean() # d
+            b.err_medianr = np.median(b.errr) #d
+            b.err_rmsr = b.errr.std() #d
+            b.err_minr = b.errr.min() #d
+            b.err_maxr = b.errr.max() #d
+            b.err_ranger = b.err_maxr - b.err_minr #d
 
         # Period finding... is a little dodgy still, and might take forever
         if per==True and b.N > 2:
@@ -725,19 +725,36 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
    
     for b in bands:
         b.mean = np.ones(l) * null
+        b.median = np.ones(l) * null
         b.rms =  np.ones(l) * null
         b.rchi2 =np.ones(l) * null
         b.min =  np.ones(l) * null
         b.max =  np.ones(l) * null
         b.range =  np.ones(l) * null
- 
+
+        b.err_mean = np.ones(l) * null
+        b.err_median = np.ones(l) * null
+        b.err_rms =  np.ones(l) * null
+        b.err_rchi2 =np.ones(l) * null
+        b.err_min =  np.ones(l) * null
+        b.err_max =  np.ones(l) * null
+        b.err_range =  np.ones(l) * null
+        
         # rob:
         b.meanr =  np.ones(l) * null
+        b.medianr =  np.ones(l) * null
         b.rmsr =  np.ones(l) * null
         b.minr =  np.ones(l) * null
         b.maxr =  np.ones(l) * null
         b.ranger =  np.ones(l) * null
         
+        b.err_meanr =  np.ones(l) * null
+        b.err_medianr =  np.ones(l) * null
+        b.err_rmsr =  np.ones(l) * null
+        b.err_minr =  np.ones(l) * null
+        b.err_maxr =  np.ones(l) * null
+        b.err_ranger =  np.ones(l) * null
+
         # per:
         b.lsp_per =  np.ones(l) * null
         b.lsp_pow =  np.ones(l) * null
