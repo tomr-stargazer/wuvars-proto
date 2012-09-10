@@ -21,6 +21,19 @@ Helper functions:
                  (formerly arraystat_2)
   
 
+Additional notes:
+-----------------
+
+Procedure for adding a parameter to spread3:
+  in statcruncher():
+  - calculate its value
+  - add it to to `ret`
+  in spreadsheet_write():
+  - declare an empty array for it
+  - assign the array cells iteratively
+  - add it to `Output`
+  then test it all!
+
 """
 
 from __future__ import division
@@ -512,22 +525,38 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
         b.rchi2 = reduced_chisq( b.data, b.err )
 
         b.mean = b.data.mean()
+        b.median = np.median(b.data)
         b.rms = b.data.std()
         b.min = b.data.min()
         b.max = b.data.max()
         b.range = b.max - b.min
 
-        b.mean_err = b.err.mean()
+        b.err_mean = b.err.mean()
+        b.err_median = np.median(b.err)
+        b.err_rms = b.err.std()
+        b.err_min = b.err.min()
+        b.err_max = b.err.max()
+        b.err_range = b.err_max - b.err_min
+
 
         # Robust quantifiers simply have an "r" at the end of their names
         if rob:
-            b.datar = rb.removeoutliers(b.data, 3, niter=2)
+            b.datar, b.indr = rb.removeoutliers(b.data, 3, niter=2, retind=True)
+            b.errr = b.err[b.indr]
             
             b.meanr = rb.meanr(b.data)
+            b.medianr = rb.medianr(b.data)
             b.rmsr = rb.stdr(b.data)
             b.minr = b.datar.min()
             b.maxr = b.datar.max()
             b.ranger = b.maxr - b.minr
+
+            b.err_meanr = b.errr.mean()
+            b.err_medianr = np.median(b.errr)
+            b.err_rmsr = b.errr.std()
+            b.err_minr = b.errr.min()
+            b.err_maxr = b.errr.max()
+            b.err_ranger = b.err_maxr - b.err_minr
 
         # Period finding... is a little dodgy still, and might take forever
         if per==True and b.N > 2:
