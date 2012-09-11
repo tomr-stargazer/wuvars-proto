@@ -955,6 +955,7 @@ def scatter_phase_core (ax, t, x, xerr, period, offset=0,
 
 def graded_lc (table, sid, season=0, outfile='', name='', 
                stetson=True, png_too=False, abridged=False,
+               timecolor=False, time_cmap='jet',
                d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
                date_offset = 51544, color_slope=False):
     """ 
@@ -992,6 +993,13 @@ def graded_lc (table, sid, season=0, outfile='', name='',
         Do not specify a file extension in `outfile`.
     abridged : bool, optional (default: False)
         Create an abridged, panel-like plot?
+    timecolor : bool, optional (default: False)
+        Color lightcurve datapoints by time?
+        Attempts to sync all colored plots.
+    time_cmap : str, optional (defalt: 'jet')
+        Which colormap to use for `timecolor`; when `timecolor`=True,
+        this overrides d_cmap.
+        Future possibility: the KHK and JHK plots using this cmap.
     d_cmap : dict or str or tuple
         Which colormaps to use for J, H, and K. If a single string 
         (rather than a dict) is given, all 3 bands will use the 
@@ -1054,6 +1062,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     hdate = h_table.MEANMJDOBS - date_offset
     kdate = k_table.MEANMJDOBS - date_offset
 
+    # let's save the old versions in case we need em later
+    raw_jdate = np.copy(jdate)
+    raw_hdate = np.copy(hdate)
+    raw_kdate = np.copy(kdate)
+
     if abridged:
         jdate[jdate > 54300-date_offset] -= ab_s2sub
         jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
@@ -1101,6 +1114,11 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     jdate_info = j_table_info.MEANMJDOBS - date_offset
     hdate_info = h_table_info.MEANMJDOBS - date_offset
     kdate_info = k_table_info.MEANMJDOBS - date_offset
+
+    # let's save the old versions in case we need em later
+    raw_jdate_info = np.copy(jdate_info)
+    raw_hdate_info = np.copy(hdate_info)
+    raw_kdate_info = np.copy(kdate_info)
 
     if abridged:
         jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub
@@ -1157,7 +1175,9 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
     
-    if type(d_cmap) is str:
+    if timecolor:
+        d_cmap = {'j': time_cmap, 'h': time_cmap, 'k': time_cmap}
+    elif type(d_cmap) is str:
         d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
@@ -1174,6 +1194,29 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
     d_grade_info = {'j': jgrade_info, 'h': hgrade_info, 'k': kgrade_info}
 
+    d_rawdate = {'j': raw_jdate, 'h': raw_hdate, 'k': raw_kdate}
+    d_rawdate_info = {
+        'j': raw_jdate_info, 'h': raw_hdate_info, 'k': raw_kdate_info}
+
+    color_vmin = s_table.MEANMJDOBS.min() - date_offset
+    color_vmax = s_table.MEANMJDOBS.max() - date_offset
+    # min(
+    #     (d_rawdate['j'].min(), d_rawdate['h'].min(), d_rawdate['k'].min(),
+    #      d_rawdate_info['j'].min(), d_rawdate_info['h'].min(), d_rawdate_info['k'].min()))
+    # color_vmax = max(
+    #     (d_rawdate['j'].max(), d_rawdate['h'].max(), d_rawdate['k'].max(),
+    #      d_rawdate_info['j'].max(), d_rawdate_info['h'].max(), d_rawdate_info['k'].max()))
+
+    if timecolor:
+        d_c = d_rawdate
+        d_c_info = d_rawdate_info
+        vmin = color_vmin
+        vmax = color_vmax
+    else:
+        d_c = d_grade
+        d_c_info = d_grade_info
+        vmin = 0.8
+        vmax = 1
 
     for band in ['j', 'h', 'k']:
 
@@ -1188,7 +1231,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
             
             # Next, scatter the points themselves, colored re:grade :
             d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
-                                c=d_grade[band], vmin=0.8, vmax=1, zorder=100)
+                                c=d_c[band], vmin=vmin, vmax=vmax, zorder=100)
 
             
 
@@ -1201,8 +1244,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
             # Next, scatter the points themselves, colored re:grade :
             d_ax[band].scatter( d_date_info[band], d_col_info[band], 
                                 marker=fmt_info, 
-                                c=d_grade_info[band], cmap=d_cmap[band], 
-                                vmin=0.8, vmax=1, zorder=100)
+                                c=d_c_info[band], cmap=d_cmap[band], 
+                                vmin=vmin, vmax=vmax, zorder=100)
 
         # Finally, flip it (magnitudes are backwards).
         d_ax[band].invert_yaxis()
@@ -1247,7 +1290,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
-        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate )
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate,
+                              vmin=color_vmin, vmax=color_vmax) 
 
         if color_slope:
             jhk_slope, jhk_intercept, slope_err = (
@@ -1265,7 +1309,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     # Plot K vs H-K using the "khk_" variables.
     try:
         plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate,
-                              ms=False, ctts=False) 
+                              ms=False, ctts=False, 
+                              vmin=color_vmin, vmax=color_vmax) 
 
         # plot boundaries are manually set for readability, if necessary
         if len(ax_khk.get_xticks()) > 7:
