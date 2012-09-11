@@ -525,18 +525,18 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
         b.rchi2 = reduced_chisq( b.data, b.err )
 
         b.mean = b.data.mean()
-        b.median = np.median(b.data) # d
+        b.median = np.median(b.data) # dao
         b.rms = b.data.std()
         b.min = b.data.min()
         b.max = b.data.max()
         b.range = b.max - b.min
 
-        b.err_mean = b.err.mean() #d
-        b.err_median = np.median(b.err) #d
-        b.err_rms = b.err.std() #d
-        b.err_min = b.err.min() #d
-        b.err_max = b.err.max() #d
-        b.err_range = b.err_max - b.err_min #d
+        b.err_mean = b.err.mean() #dao
+        b.err_median = np.median(b.err) #dao
+        b.err_rms = b.err.std() #dao
+        b.err_min = b.err.min() #dao
+        b.err_max = b.err.max() #dao
+        b.err_range = b.err_max - b.err_min #dao
 
 
         # Robust quantifiers simply have an "r" at the end of their names
@@ -545,18 +545,18 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
             b.errr = b.err[b.indr]
             
             b.meanr = rb.meanr(b.data)
-            b.medianr = rb.medianr(b.data) # d
+            b.medianr = rb.medianr(b.data) # dao
             b.rmsr = rb.stdr(b.data)
             b.minr = b.datar.min()
             b.maxr = b.datar.max()
             b.ranger = b.maxr - b.minr
 
-            b.err_meanr = b.errr.mean() # d
-            b.err_medianr = np.median(b.errr) #d
-            b.err_rmsr = b.errr.std() #d
-            b.err_minr = b.errr.min() #d
-            b.err_maxr = b.errr.max() #d
-            b.err_ranger = b.err_maxr - b.err_minr #d
+            b.err_meanr = b.errr.mean() # dao
+            b.err_medianr = np.median(b.errr) #dao
+            b.err_rmsr = b.errr.std() #dao
+            b.err_minr = b.errr.min() #dao
+            b.err_maxr = b.errr.max() #dao
+            b.err_ranger = b.err_maxr - b.err_minr #dao
 
         # Period finding... is a little dodgy still, and might take forever
         if per==True and b.N > 2:
@@ -727,15 +727,14 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         b.mean = np.ones(l) * null
         b.median = np.ones(l) * null
         b.rms =  np.ones(l) * null
-        b.rchi2 =np.ones(l) * null
         b.min =  np.ones(l) * null
         b.max =  np.ones(l) * null
         b.range =  np.ones(l) * null
+        b.rchi2 =np.ones(l) * null
 
         b.err_mean = np.ones(l) * null
         b.err_median = np.ones(l) * null
         b.err_rms =  np.ones(l) * null
-        b.err_rchi2 =np.ones(l) * null
         b.err_min =  np.ones(l) * null
         b.err_max =  np.ones(l) * null
         b.err_range =  np.ones(l) * null
@@ -826,24 +825,39 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             if vb.N == 0: continue
 
             b.mean[i] = vb.mean
-#            print "mean: " + str(vb.mean)
-#            print "recorded mean: " + str(b.mean[i])
-#            return
+            b.median[i] = vb.median
             b.rms[i] = vb.rms
             b.min[i] = vb.min
             b.max[i] = vb.max
             b.range[i] = vb.range
-
             b.rchi2[i] = vb.rchi2
 
-#            b.mean_err[i] = vb.mean_err
+            b.err_mean[i] = vb.err_mean
+            b.err_median[i] = vb.err_median
+            b.err_rms[i] = vb.err_rms
+            b.err_min[i] = vb.err_min
+            b.err_max[i] = vb.err_max
+            b.err_range[i] = vb.err_range
+
+#            print "mean: " + str(vb.mean)
+#            print "recorded mean: " + str(b.mean[i])
+#            return
+
             
             if rob:
                 b.meanr[i] = vb.meanr
+                b.medianr[i] = vb.medianr
                 b.rmsr[i] = vb.rmsr
                 b.maxr[i] = vb.maxr
                 b.minr[i] = vb.minr
                 b.ranger[i] = vb.ranger
+
+                b.err_meanr[i] = vb.err_meanr
+                b.err_medianr[i] = vb.err_medianr
+                b.err_rmsr[i] = vb.err_rmsr
+                b.err_maxr[i] = vb.err_maxr
+                b.err_minr[i] = vb.err_minr
+                b.err_ranger[i] = vb.err_ranger
 
             if per and vb.N > 2:
                 b.lsp_per[i] = vb.lsp_per
@@ -895,6 +909,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     for b, band_name in zip(bands, band_names):
         bn = band_name + '_'
         Output.add_column(bn+'mean', b.mean)
+        Output.add_column(bn+'median', b.median)
 #        print Output[bn+'mean'][0]
         Output.add_column(bn+'rms', b.rms)
         Output.add_column(bn+'min', b.min)
@@ -903,12 +918,28 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
         Output.add_column(bn+'rchi2', b.rchi2)
 
+        Output.add_column(bn+'err_mean', b.err_mean)
+        Output.add_column(bn+'err_median', b.err_median)
+        Output.add_column(bn+'err_rms', b.err_rms)
+        Output.add_column(bn+'err_min', b.err_min)
+        Output.add_column(bn+'err_max', b.err_max)
+        Output.add_column(bn+'err_range', b.err_range)
+
+
         if rob:
             Output.add_column(bn+'meanr', b.meanr)
+            Output.add_column(bn+'medianr', b.medianr)
             Output.add_column(bn+'rmsr', b.rmsr)
             Output.add_column(bn+'minr', b.minr)
             Output.add_column(bn+'maxr', b.maxr)
             Output.add_column(bn+'ranger', b.ranger)
+
+            Output.add_column(bn+'err_meanr', b.err_meanr)
+            Output.add_column(bn+'err_medianr', b.err_medianr)
+            Output.add_column(bn+'err_rmsr', b.err_rmsr)
+            Output.add_column(bn+'err_minr', b.err_minr)
+            Output.add_column(bn+'err_maxr', b.err_maxr)
+            Output.add_column(bn+'err_ranger', b.err_ranger)
 
         if per:
             Output.add_column(bn+'lsp_per', b.lsp_per)
