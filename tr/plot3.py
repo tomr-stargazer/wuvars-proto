@@ -19,6 +19,8 @@ Useful functions:
 
 """
 
+from __future__ import division
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -963,6 +965,9 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     Also plots color-color and color-mag trajectories, colored by time.
 
+    Lightcurve datapoints can match the "time" coloration by setting
+    `timecolor`=True.
+
     Will display "lonely" datapoints (i.e. not all JHK mags are 
     well-defined), and plots error-flagged data as different symbols.
     Compare to plot2.lc() which does neither, and to plot3.lc() which 
@@ -1387,8 +1392,9 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
 def graded_phase (table, sid, period='auto', season=0, offset=0, 
                   outfile='', name='', stetson=True, png_too=False,
+                  timecolor=False, time_cmap='jet',
                   d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
-                  color_slope=False):
+                  date_offset = 54034, color_slope=False):
                   
     """ 
     Plots folded lightcurves of a star, with datapoints colored by grade.
@@ -1434,11 +1440,23 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    timecolor : {False, 'phase', 'time'}, optional (default: False)
+        Color lightcurve datapoints by phase or time?
+        Attempts to sync all colored plots.
+        If `timecolor` evaluates to True and isn't one of the above, 
+        defaults to 'phase'.
+    time_cmap : str, optional (defalt: 'jet')
+        Which colormap to use for `timecolor`; when `timecolor`=True,
+        this overrides d_cmap.
+        Future possibility: the KHK and JHK plots using this cmap.
     d_cmap : dict or str or tuple
         Which colormaps to use for J, H, and K. If a single string 
         (rather than a dict) is given, all 3 bands will use the 
         same colormap. If a tuple is given, J:0, H:1, K:2.
         Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
+    date_offset : float, optional
+        What MJD to use as day "zero". Default MJD = 54034 
+        (initial observations of Orion dataset).
     color_slope : bool, optional (defalt: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
 
@@ -1476,9 +1494,9 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate = j_table.MEANMJDOBS - 51544
-    hdate = h_table.MEANMJDOBS - 51544
-    kdate = k_table.MEANMJDOBS - 51544
+    jdate = j_table.MEANMJDOBS - date_offset
+    hdate = h_table.MEANMJDOBS - date_offset
+    kdate = k_table.MEANMJDOBS - date_offset
     
     # get a magnitude (y-axis) for each plot
     jcol = j_table.JAPERMAG3
@@ -1515,9 +1533,9 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate_info = j_table_info.MEANMJDOBS - 51544
-    hdate_info = h_table_info.MEANMJDOBS - 51544
-    kdate_info = k_table_info.MEANMJDOBS - 51544
+    jdate_info = j_table_info.MEANMJDOBS - date_offset
+    hdate_info = h_table_info.MEANMJDOBS - date_offset
+    kdate_info = k_table_info.MEANMJDOBS - date_offset
     
     # get a magnitude (y-axis) for each plot
     jcol_info = j_table_info.JAPERMAG3
@@ -1599,7 +1617,10 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
-    if type(d_cmap) is str:
+    
+    if timecolor:
+        d_cmap = {'j': time_cmap, 'h': time_cmap, 'k': time_cmap}
+    elif type(d_cmap) is str:
         d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
@@ -1616,6 +1637,34 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
     d_grade_info = {'j': jgrade_info, 'h': hgrade_info, 'k': kgrade_info}
 
+    # Do we want to have color-color scatter go with time, or phase?
+    if timecolor == 'time':
+        color_vmin = s_table.MEANMJDOBS.min() - date_offset
+        color_vmax = s_table.MEANMJDOBS.max() - date_offset
+    else:
+        color_vmin = 0
+        color_vmax = 1
+
+    # How do we want to color the datapoints themselves?
+    if timecolor == 'time':
+        d_c = d_date
+        d_c_info = d_date_info
+        vmin = color_vmin
+        vmax = color_vmax
+    elif timecolor:
+        # This transforms the dictionary of date arrays to
+        # a dictionary of phase arrays: it's a "dict comprehension"
+        d_c = {key:(((t % period) / period + offset) % 1.) for 
+               key,t in d_date.iteritems()}
+        d_c_info = {key:(((t % period) / period + offset) % 1.) for 
+               key,t in d_date_info.iteritems()}
+        vmin = color_vmin
+        vmax = color_vmax
+    else:
+        d_c = d_grade
+        d_c_info = d_grade_info
+        vmin = 0.8
+        vmax = 1
 
     for band in ['j', 'h', 'k']:
 
@@ -1623,9 +1672,9 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
         if len(d_date[band]) > 0:
             scatter_phase_core( d_ax[band], d_date[band], d_col[band],
-                                d_err[band], period, c=d_grade[band],
+                                d_err[band], period, c=d_c[band],
                                 offset = offset,
-                                cmap=d_cmap[band], vmin=0.8, vmax=1 )
+                                cmap=d_cmap[band], vmin=vmin, vmax=vmax )
 
             # First, plot the errorbars, with no markers, in the background:
 #            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
@@ -1640,8 +1689,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         if len(d_date_info[band]) > 0:
 
             scatter_phase_core( d_ax[band], d_date_info[band], d_col_info[band],
-                                d_err_info[band], period, c=d_grade_info[band],
-                                cmap=d_cmap[band], vmin=0.8, vmax=1, 
+                                d_err_info[band], period, c=d_c_info[band],
+                                cmap=d_cmap[band], vmin=vmin, vmax=vmax, 
                                 offset = offset, marker=fmt_info )
 
             # First, plot the errorbars, with no markers, in the background:
@@ -1670,7 +1719,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
                           'h', max_flag=256)
 
-    khkdate = khk_table.MEANMJDOBS - 51544
+    khkdate = khk_table.MEANMJDOBS - date_offset
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
     k_khk_err = khk_table.KAPERMAG3ERR
@@ -1682,7 +1731,7 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
     # defined everywhere. That's one more cut.
     jhk_table = band_cut(khk_table, 'j', max_flag=256)
 
-    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jhkdate = jhk_table.MEANMJDOBS - date_offset
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
     jmh_jhk_err = jhk_table.JMHPNTERR
@@ -1690,9 +1739,20 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     jhkphase = ((jhkdate % period) / period + offset) % 1.
 
+    if timecolor != 'time':
+        color_label = 'Phase'
+        jhktime = jhkphase
+        khktime = khkphase
+    else:
+        color_label = 'Time'
+        jhktime = jhkdate
+        khktime = khkdate
+
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
-        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkphase )
+        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhktime,
+                              vmin=color_vmin, vmax=color_vmax,
+                              label = color_label)
 
         if color_slope:
             jhk_slope, jhk_intercept, slope_err = (
@@ -1708,8 +1768,11 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     # Plot K vs H-K using the "khk_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkphase, 
-                              ms=False, ctts=False) 
+        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khktime, 
+                              ms=False, ctts=False,
+                              vmin=color_vmin, vmax=color_vmax,
+                              label = color_label)
+ 
 
         # plot boundaries are manually set for readability, if necessary
         if len(ax_khk.get_xticks()) > 7:
