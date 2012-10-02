@@ -6,18 +6,21 @@ is found at http://public.lanl.gov/palmer/fastchi.html and described in
 Useful functions:
   chi_analyze - returns best frequency for one source in a table
   test_analyze - returns best frequency for raw input arrays t, x, xerr
+
 '''
 
 # This is the correct one.
 
 # Current major issues: This code does not recognize error messages given by 
 # runchi2! If something goes wrong everything crashes and burns. 
+# Update (2 Oct '12) : The above issue never comes up in practice.
 
 import subprocess
+
 import numpy
-#import tr_plot
-#import plot
+
 from tr_helpers import season_cut
+
 
 def chi_input_writer (name, t, x, err, outfile):
     """ 
@@ -46,7 +49,7 @@ def chi_input_writer (name, t, x, err, outfile):
 
     f = open(outfile,'w')
     f.write(name+"\n")
-    f.write(str(t.size)+"\n") #small possibility i should add or sub 1 to this
+    f.write(str(t.size)+"\n") 
     
     for i in range(t.size):
         f.write("%f \t %f \t %f \n" % (t[i], x[i], err[i]))
@@ -240,22 +243,6 @@ def test_analyze (t, x, err, ret_chimin=False):
 
     return parse_chi( run_chi(datafile), ret_chimin=ret_chimin )
 
-# def chi_plot (table, sid, band = 'j', outfile='', season=123, harmonic=1) :
-#     ''' Does everything for one source and plots a phase plot.
-#     Returns the PERIOD that is plots by. '''
-
-#     import plot
-
-#     f = chi_analyze (table, sid, band, season)
-
-#     period = 1./f
-    
-#     #tr_plot.plot_phase (table, sid, period*harmonic, band, season)
-#     plot.plot_phase (table, sid, period*harmonic, outfile=outfile, band=band,
-#                      season=season)
-
-#     return period
-    
 # Next step... combine stat and chi2 to make a table of best-freq and chi^2 
 # values for every source. I've been assuming that chi^2 can be used as a 
 # measure of how good the periodicity actually is.
