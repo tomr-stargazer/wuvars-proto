@@ -28,7 +28,7 @@ import atpy
 
 from helpers3 import data_cut, band_cut
 from plot2 import plot_trajectory_core
-from chi2 import test_analyze
+from chi2 import test_analyze, diagnostic_analyze
 from scargle import fasper as lsp
 from timing import lsp_mask, lsp_tuning
 from spread3 import Stetson_machine
@@ -747,7 +747,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
 def lsp_power (table, sid, season=0, upper_frequency=0.5,
                outfile='', name='', png_too=False):
     """ 
-    Plots J, H, K periodograms for one star.
+    Plots J, H, K lomb-scargle periodograms for one star.
 
     Parameters
     ----------
@@ -892,6 +892,153 @@ def lsp_power (table, sid, season=0, upper_frequency=0.5,
     fig.ax_j = ax_j
 
     return fig
+
+def fx2_periodogram (table, sid, season=0, 
+                     outfile='', name='', png_too=False):
+    """ 
+    Plots J, H, K fast chi-squared periodograms for one star.
+
+    Parameters
+    ----------
+    table : atpy.Table
+        Table with WFCAM time-series photometry
+    sid : int
+        13-digit WFCAM source ID of star to plot
+    season : int, optional
+        Which observing season of our dataset (1, 2, 3, or all).
+        Any value that is not the integers (1, 2, 3, or 123) will be 
+        treated as "no season", and no time-cut will be made.
+        Note that this is the default behavior.
+    outfile : str, optional
+        What filename to save plot to. Default behavior (when 
+        `outfile` is an empty string) is to display plot on-screen
+        and *not* save to file.
+    png_too : bool, optional (default: False)
+        If `png_too` is True (and `outfile` is not ''), then 
+        save the plot in 3 file formats: PDF, PNG, and EPS.
+        Do not specify a file extension in `outfile`.
+        
+    Returns
+    -------
+    fig : plt.Figure 
+        The canvas figure that the graphs are plotted onto.
+    
+    """
+
+    ## Loading data
+    s_table = data_cut (table, sid, season)
+
+    if len(s_table) < 2:
+        print "no data here"
+        return
+
+    ## Set up plot
+
+    fig = plt.figure(figsize = (10, 6), dpi=80,
+                     facecolor='w', edgecolor='k')
+
+    ax_j = fig.add_subplot(3,1,1)
+    ax_h = fig.add_subplot(3,1,2, sharex=ax_j)
+    ax_k = fig.add_subplot(3,1,3, sharex=ax_j)
+
+    ## J
+
+    # do some band_cutting, with flags = 256 like usual
+    j_table = band_cut(s_table, 'j', max_flag=256)
+    if len(j_table) < 1:
+        print "no J data"
+    else:
+        jdate = j_table.MEANMJDOBS - 51544
+
+    # get a magnitude (y-axis) for each plot
+        jcol = j_table.JAPERMAG3
+
+    ## Calculate periodograms
+        hifac = lsp_tuning(jdate, upper_frequency=upper_frequency)
+        jlsp = lsp(jdate, jcol, 6., hifac)
+        j_lsp_freq = jlsp[0]
+        j_lsp_power = jlsp[1]
+        
+    # best periods, filtered by the lsp_mask
+        j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
+
+    ## Plot things
+
+        ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
+#    except Exception:
+#        print "J power broke!"
+#        pass
+
+    ## H
+    h_table = band_cut(s_table, 'h', max_flag=256)
+    if len(h_table) < 1:
+        print "no H data"
+    else:
+        hdate = h_table.MEANMJDOBS - 51544
+        hcol = h_table.HAPERMAG3
+        
+        hifac = lsp_tuning(hdate, upper_frequency=upper_frequency)
+        hlsp = lsp(hdate, hcol, 6., hifac)
+        h_lsp_freq = hlsp[0]
+        h_lsp_power = hlsp[1]
+        
+        h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
+        
+        ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
+        
+#    except Exception:
+#        print "H power broke!"
+#        pass
+
+
+    ## K
+    k_table = band_cut(s_table, 'k', max_flag=256)
+    if len(k_table) < 1:
+        print "no K data"
+    else:
+        kdate = k_table.MEANMJDOBS - 51544
+        kcol = k_table.KAPERMAG3
+
+        hifac = lsp_tuning(kdate, upper_frequency=upper_frequency)
+        klsp = lsp(kdate, kcol, 6., hifac)
+        k_lsp_freq = klsp[0]
+        k_lsp_power = klsp[1]
+        
+        k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
+
+        ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
+#    except Exception:
+#        print "K power broke!"
+#        pass
+    
+    ax_j.set_xscale('log')
+    ax_h.set_xscale('log')
+    ax_k.set_xscale('log')
+
+    ax_j.set_title(name)
+    ax_k.set_xlabel("Period (days)")
+    ax_h.set_ylabel("Periodogram Power")
+
+    ## Save things
+
+    if outfile == '':
+        plt.show()
+    else:
+        if png_too:
+            plt.savefig(outfile+".pdf")
+            plt.savefig(outfile+".png")
+            plt.savefig(outfile+".eps")
+            plt.close()
+        else:
+            plt.savefig(outfile)
+            plt.close()
+
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+
+    return fig
+
 
 def scatter_phase_core (ax, t, x, xerr, period, offset=0, 
                         ms=6, sym='o', hide=False, **kwargs):
