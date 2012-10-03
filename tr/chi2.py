@@ -102,7 +102,7 @@ def smart_chi_writer (table, sid, band = 'j', season=123) :
     outfile = '/home/trice/reu/DATA/chi2/' + name
     return chi_input_writer (name, t, x, err, outfile) 
 
-def run_chi (infile) :
+def run_chi (infile, diagnostic=False) :
     """ 
     Runs Palmer's runchi2 program on a given input file. 
 
@@ -113,6 +113,9 @@ def run_chi (infile) :
         specified in /home/tom/reu/software/FastChi2-1.03/README.
         Created by chi_input_writer() or, if you enjoy punshment,
         by hand.
+    diagnostic : bool or str, optional (default False)
+        "diagnosticfile contains the chi-squared reduction 
+        (larger is better) for each frequency"
 
     Returns
     -------
@@ -125,6 +128,10 @@ def run_chi (infile) :
     # `nharmonics`, `freqmax`, and `infile` (with its "-i" flag) respectively.
     # See /home/tom/reu/software/FastChi2-1.03/README for more details.
     args = ["runchi2","3","12","-i",infile]
+
+    # If we want to get a diagnosticfile, we'll add an argument:
+    if diagnostic and type(diagnostic) is str:
+        args.extend(["-D", diagnostic])
 
     # Here I  pass the output of runchi2 to stdout, 
     # then python's subprocess call returns that stdout 
@@ -246,3 +253,66 @@ def test_analyze (t, x, err, ret_chimin=False):
 # Next step... combine stat and chi2 to make a table of best-freq and chi^2 
 # values for every source. I've been assuming that chi^2 can be used as a 
 # measure of how good the periodicity actually is.
+
+def parse_diagnostic( diagnostic ) :
+    """
+    Loads in the diagnostic file and returns freq. and chisq arrays.
+
+    Parameters
+    ----------
+    diagnostic : str
+        Filepath of the input diagnostic file.
+    
+    Returns
+    -------
+    freq : array-like
+        An array of frequencies tested by Fast chi-squared.
+    chisq_red : array-like
+        An array of the chi-squared reduction (larger is better) 
+        for each frequency.
+
+    """
+    
+    # 9 rows are skipped because of the form of the input file.
+    # If this varies, I may need to do this more intelligently.
+    contents = np.loadtxt(diagnostic, skiprows=9)
+
+    freq = contents[:,0]
+    chisq_red = contents[:,1]
+
+    return freq, chisq_red
+
+
+def diagnostic_analyze(t, x, err):
+    """
+    Takes in test data, returns fx2 periodogram. 
+    
+    Note: much of this is of the same form as test_analyze(), and 
+    could in principle be easily combined with that function.
+
+    Parameters
+    ----------
+    t, x, err : array-like
+        Arrays for the time values, x-values, and error-bar values to 
+        use in the period-finding.
+
+    Returns
+    -------
+    freq : array-like
+        An array of frequencies tested by Fast chi-squared.
+    chisq_red : array-like
+        An array of the chi-squared reduction (larger is better) 
+        for each frequency.
+
+    """
+    
+    input_file = '/home/trice/reu/DATA/chi2/chitest.in'
+    diag_file = '/home/trice/reu/DATA/chi2/diagnostic.txt'
+
+    # This line is the same as for test_analyze()
+    datafile = chi_input_writer("test", t, x, err, input_file)
+
+    # do a runchi2, but ignore the piped output; we just want diag_file
+    run_chi(datafile, diagnostic=diag_file)
+    
+    return parse_diagnostic( diag_file )
