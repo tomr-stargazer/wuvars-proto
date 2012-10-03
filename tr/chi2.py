@@ -17,7 +17,7 @@ Useful functions:
 
 import subprocess
 
-import numpy
+import numpy as np
 
 from tr_helpers import season_cut
 

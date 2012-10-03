@@ -952,19 +952,18 @@ def fx2_periodogram (table, sid, season=0,
 
     # get a magnitude (y-axis) for each plot
         jcol = j_table.JAPERMAG3
+        jerr = j_table.JAPERMAG3ERR
 
     ## Calculate periodograms
-        hifac = lsp_tuning(jdate, upper_frequency=upper_frequency)
-        jlsp = lsp(jdate, jcol, 6., hifac)
-        j_lsp_freq = jlsp[0]
-        j_lsp_power = jlsp[1]
+        j_fx2_freq, j_fx2_csr = diagnostic_analyze(jdate, jcol, jerr)
         
     # best periods, filtered by the lsp_mask
-        j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
+#        j_lsp_per = 1./ j_lsp_freq[ lsp_mask( j_lsp_freq, j_lsp_power) ]    
 
     ## Plot things
 
-        ax_j.plot(1./j_lsp_freq, j_lsp_power, 'b')
+        ax_j.plot(1./j_fx2_freq, j_fx2_csr, 'b')
+
 #    except Exception:
 #        print "J power broke!"
 #        pass
@@ -976,15 +975,12 @@ def fx2_periodogram (table, sid, season=0,
     else:
         hdate = h_table.MEANMJDOBS - 51544
         hcol = h_table.HAPERMAG3
+        herr = h_table.HAPERMAG3ERR
+
+    ## Calculate periodograms
+        h_fx2_freq, h_fx2_csr = diagnostic_analyze(hdate, hcol, herr)
         
-        hifac = lsp_tuning(hdate, upper_frequency=upper_frequency)
-        hlsp = lsp(hdate, hcol, 6., hifac)
-        h_lsp_freq = hlsp[0]
-        h_lsp_power = hlsp[1]
-        
-        h_lsp_per = 1./ h_lsp_freq[ lsp_mask( h_lsp_freq, h_lsp_power) ]
-        
-        ax_h.plot(1./h_lsp_freq, h_lsp_power, 'g')
+        ax_h.plot(1./h_fx2_freq, h_fx2_csr, 'g')
         
 #    except Exception:
 #        print "H power broke!"
@@ -998,15 +994,13 @@ def fx2_periodogram (table, sid, season=0,
     else:
         kdate = k_table.MEANMJDOBS - 51544
         kcol = k_table.KAPERMAG3
+        kerr = k_table.KAPERMAG3ERR
 
-        hifac = lsp_tuning(kdate, upper_frequency=upper_frequency)
-        klsp = lsp(kdate, kcol, 6., hifac)
-        k_lsp_freq = klsp[0]
-        k_lsp_power = klsp[1]
+    ## Calculate periodograms
+        k_fx2_freq, k_fx2_csr = diagnostic_analyze(kdate, kcol, kerr)
         
-        k_lsp_per = 1./ k_lsp_freq[ lsp_mask( k_lsp_freq, k_lsp_power) ]
+        ax_k.plot(1./k_fx2_freq, k_fx2_csr, 'r')
 
-        ax_k.plot(1./k_lsp_freq, k_lsp_power, 'r')
 #    except Exception:
 #        print "K power broke!"
 #        pass
@@ -1017,7 +1011,7 @@ def fx2_periodogram (table, sid, season=0,
 
     ax_j.set_title(name)
     ax_k.set_xlabel("Period (days)")
-    ax_h.set_ylabel("Periodogram Power")
+    ax_h.set_ylabel(r"$\chi^2$ reduction")
 
     ## Save things
 
