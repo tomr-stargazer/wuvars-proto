@@ -308,6 +308,8 @@ def lc (table, sid, season=0, outfile='', name='', stetson=True, png_too=False):
 
     if name != '':
         ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
 
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
@@ -718,6 +720,8 @@ def phase (table, sid, period='auto', season=0, offset=0,
 
     if name != '':
         ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
 
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
@@ -1504,6 +1508,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     if name != '':
         ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
 
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
@@ -1954,6 +1960,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
 
     if name != '':
         ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
 
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
