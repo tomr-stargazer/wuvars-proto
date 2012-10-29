@@ -66,6 +66,8 @@ def best_period( periodic_spread ):
     """ 
     A function that chooses the best period of the six returned.
 
+    Currently operates only on LSP input, just like periodic_selector.
+
     Parameters
     ----------
     periodic_spread : atpy.Table
@@ -90,7 +92,6 @@ def best_period( periodic_spread ):
             (r.j_lsp_pow[i] > 12) and (r.h_lsp_pow[i] > 12)
             ):
             best_period[i] = r.h_lsp_per[i]
-#            print "JH period was good!"
         # H, K
         elif ((r.h_lsp_per[i] < r.k_lsp_per[i] * 1.05) and
               (r.h_lsp_per[i] > r.k_lsp_per[i] * 0.95) and
@@ -98,7 +99,6 @@ def best_period( periodic_spread ):
               (r.h_lsp_pow[i] > 12) and (r.k_lsp_pow[i] > 12)
               ):
             best_period[i] = r.h_lsp_per[i]
-#            print "HK period was good!"
         # J, K
         elif ((r.j_lsp_per[i] < r.k_lsp_per[i] * 1.05) and
               (r.j_lsp_per[i] > r.k_lsp_per[i] * 0.95) and
@@ -106,21 +106,19 @@ def best_period( periodic_spread ):
               (r.j_lsp_pow[i] > 12) and (r.k_lsp_pow[i] > 12)
               ):
             best_period[i] = r.k_lsp_per[i]
-#            print "JK period was good!"
         # J
         elif (r.j_lsp_pow[i] > 15) and (r.j_lsp_per[i] < 50):
             best_period[i] = r.j_lsp_per[i]
-#            print "J period was good!"
         # H
         elif (r.h_lsp_pow[i] > 15) and (r.h_lsp_per[i] < 50):
             best_period[i] = r.h_lsp_per[i]
-#            print "H period was good!"
         # K
         elif (r.k_lsp_pow[i] > 15) and (r.k_lsp_per[i] < 50):
             best_period[i] = r.k_lsp_per[i]
-#            print "K period was good!"
         else:
             print "SOMETHING IS FISHY HERE"
 
-    print "waffles"
-            
+    r.add_column("best_period", best_period)
+
+    periodic_spread_updated = r
+    return r
