@@ -503,6 +503,11 @@ def statcruncher (table, sid, season=0, rob=True, per=True,
         ret.graded_Stetson_N = g_stetson_nights
 
 
+    # Calculate PSTAR parameters
+    ret.pstar_mean = s_table.PSTAR.mean()
+    ret.pstar_median = np.median(s_table.PSTAR)
+    ret.pstar_rms = s_table.PSTAR.std()
+
     # Create parallel data structures for each band, so we can iterate
     ret.j = Empty(); ret.j.data = jcol; ret.j.err = jerr; ret.j.date = jdate   
     ret.h = Empty(); ret.h.data = hcol; ret.h.err = herr; ret.h.date = hdate
@@ -711,6 +716,10 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         graded_Stetson_N = np.ones(l, dtype='int')
 
 
+    pstar_mean = np.ones(l)
+    pstar_median = np.ones(l)
+    pstar_rms = np.ones(l)
+
     class Band:
         pass
 
@@ -816,6 +825,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
             graded_Stetson_choice[i] = v.graded_Stetson_choice
             graded_Stetson_N[i] = v.graded_Stetson_N
 
+        pstar_mean[i] = v.pstar_mean
+        pstar_median[i] = v.pstar_median
+        pstar_rms[i] = v.pstar_rms
 
         for b, bn, vb, vbn in zip(bands, band_names, vbands, vband_names):
             
@@ -895,6 +907,10 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 
 #    Output.add_column('chip', chip)
 #    Output.add_column('one_chip', one_chip)
+
+    Output.add_column('pstar_mean', pstar_mean)
+    Output.add_column('pstar_median', pstar_median)
+    Output.add_column('pstar_rms', pstar_rms)
 
     Output.add_column('Stetson', Stetson)
     Output.add_column('Stetson_choice', Stetson_choice)
