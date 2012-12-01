@@ -873,7 +873,8 @@ def jjh (table, sid, season=0, outfile='', name='',
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
         stet_string = "S = %.2f" % S
-        ax_jjh.set_title(ax_jjh.get_title()+", "+stet_string) 
+        suptitle = plt.suptitle(ax_jjh.get_title()+", "+stet_string) 
+        ax_jjh.set_title('')
 
     if outfile == '':
         plt.show()
