@@ -807,64 +807,63 @@ def jjh (table, sid, season=0, outfile='', name='',
     left = 0.075
     width = 0.5
 
-    ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
+    ax_jjh = fig.add_axes( (.65, bottom+.475, .3, .375) )
 
     color_vmin = s_table.MEANMJDOBS.min() - date_offset # PROTECT
     color_vmax = s_table.MEANMJDOBS.max() - date_offset # PROTECT
     ## Now let's do the 2 color-mag/color-color plots.
 
-    # We'll use different data-cuts for the two different plots.
     # Relevant comment: I made an executive call to include only
-    # 'normal' and 'info'-flagged data in the C-C and C-M plots
+    # 'normal' and 'info'-flagged data in the C-M plot
     # (i.e. max_flag=256 in all relevant bands).
     
-    # In the color-mag plot, we need data where H and K are defined 
+    # In the color-mag plot, we need data where H and J are defined 
     # everywhere. That's two cuts.
-    khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
+    jjh_table = band_cut( band_cut(s_table, 'j', max_flag=256),
                           'h', max_flag=256)
 
-    khkdate = khk_table.MEANMJDOBS - date_offset
-    k_khk = khk_table.KAPERMAG3
-    hmk_khk = khk_table.HMKPNT
-    k_khk_err = khk_table.KAPERMAG3ERR
-    hmk_khk_err = khk_table.HMKPNTERR
+    jjhdate = jjh_table.MEANMJDOBS - date_offset
+    j_jjh = jjh_table.JAPERMAG3
+    jmh_jjh = jjh_table.JMHPNT
+    j_jjh_err = jjh_table.JAPERMAG3ERR
+    jmh_jjh_err = jjh_table.JMHPNTERR
 
         
 
-    # Plot K vs H-K using the "khk_" variables.
+    # Plot J vs J-H using the "jjh_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate,
+        plot_trajectory_core( ax_jjh, jmh_jjh, j_jjh, jjhdate,
                               ms=False, ctts=False, 
                               vmin=color_vmin, vmax=color_vmax) 
 
         # plot boundaries are manually set for readability, if necessary
-        if len(ax_khk.get_xticks()) > 7:
-            khk_xmin = np.floor(hmk_khk.min() * 0.95 * 20)/20.
-            khk_xmax = np.ceil( hmk_khk.max() * 1.05 * 20)/20.
+        if len(ax_jjh.get_xticks()) > 7:
+            jjh_xmin = np.floor(jmh_jjh.min() * 0.95 * 20)/20.
+            jjh_xmax = np.ceil( jmh_jjh.max() * 1.05 * 20)/20.
 
-            khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
-            ax_khk.set_xticks(khk_xticks)
+            jjh_xticks = np.linspace(jjh_xmin, jjh_xmax, 6)
+            ax_jjh.set_xticks(jjh_xticks)
 
         if color_slope:
-            khk_slope, khk_intercept, slope_err = (
-                slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
+            jjh_slope, jjh_intercept, slope_err = (
+                slope(jmh_jjh, j_jjh, jmh_jjh_err, j_jjh_err,
                       verbose=False) )
             
-            ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
+            ax_jjh.plot([0, 6], [jjh_intercept, jjh_intercept + 6*jjh_slope],
                         '--', scalex=False, scaley=False)
     
     except Exception:
-        print "KHK plot broke!"
+        print "JJH plot broke!"
         pass
-    ax_khk.invert_yaxis()
+    ax_jjh.invert_yaxis()
 
 
     # Label stuff
 #    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
-    ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
+#    ax_j.set_xlabel( "Time (MJD - %.1f)" % date_offset )
 
-    ax_khk.set_xlabel( "H-K" )
-    ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+    ax_jjh.set_xlabel( "J-H" )
+    ax_jjh.set_ylabel( "J")#, {'rotation':'horizontal'})
 
     if name != '':
         ax_j.set_title(name)
@@ -874,7 +873,7 @@ def jjh (table, sid, season=0, outfile='', name='',
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
         stet_string = "S = %.2f" % S
-        ax_khk.set_title(stet_string) # ALTER
+        ax_jjh.set_title(ax_jjh.get_title()+", "+stet_string) 
 
     if outfile == '':
         plt.show()
@@ -888,7 +887,7 @@ def jjh (table, sid, season=0, outfile='', name='',
             plt.savefig(outfile)
             plt.close()
 
-    fig.ax_khk = ax_khk
+    fig.ax_jjh = ax_jjh
 
     return fig
 
