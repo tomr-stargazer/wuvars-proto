@@ -863,12 +863,12 @@ def jjh (table, sid, season=0, outfile='', name='',
 #    ax_j.set_xlabel( "Time (MJD - %.1f)" % date_offset )
 
     ax_jjh.set_xlabel( "J-H" )
-    ax_jjh.set_ylabel( "J")#, {'rotation':'horizontal'})
+    ax_jjh.set_ylabel( "J", {'rotation':'horizontal'})
 
     if name != '':
-        ax_j.set_title(name)
+        ax_jjh.set_title(name)
     else:
-        ax_j.set_title(str(sid))
+        ax_jjh.set_title(str(sid))
 
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
