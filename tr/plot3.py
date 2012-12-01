@@ -799,15 +799,15 @@ def jjh (table, sid, season=0, outfile='', name='',
 
     ## Define the components and parameters of the figure:
     
-    fig = plt.figure(figsize = (10, 6), dpi=80,
+    fig = plt.figure(figsize = (4.286, 3.2143), dpi=80,
                      facecolor='w', edgecolor='k')
 
     bottom = 0.1
-    height = .25
-    left = 0.075
-    width = 0.5
+#    height = .25
+#    left = 0.075
+#    width = 0.5
 
-    ax_jjh = fig.add_axes( (.65, bottom+.475, .3, .375) )
+    ax_jjh = fig.add_axes( (.2, .15, .7, .7) )
 
     color_vmin = s_table.MEANMJDOBS.min() - date_offset # PROTECT
     color_vmax = s_table.MEANMJDOBS.max() - date_offset # PROTECT
