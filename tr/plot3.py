@@ -749,7 +749,9 @@ def phase (table, sid, period='auto', season=0, offset=0,
     return fig
 
 
-def jjh (table, sid):
+def jjh (table, sid, season=0, outfile='', name='', 
+         stetson=True, png_too=False,         
+         date_offset = 51544, color_slope=False):
     """ 
     Plots a J, J-H color-color diagram for a single star, colored by time.
 
@@ -795,129 +797,6 @@ def jjh (table, sid):
         print "no data here"
         return
 
-    if abridged: 
-        date_offset = 54034
-        abridger_stuff = abridger(s_table, 54034, flags=256)
-
-        ab_s2sub = abridger_stuff[0]
-        ab_s3sub = abridger_stuff[1]
-        ab_s1s2line = abridger_stuff[2]
-        ab_s2s3line = abridger_stuff[3]
-        ab_xticks = abridger_stuff[4]
-        ab_xticklab = abridger_stuff[5]
-        ab_xlim = abridger_stuff[6]
-
-    ## Let's do the 3 lightcurve bands.
-
-    ### Initializing variables. Most of the following are done twice:
-    # Once with no errors (normal),
-    # once with small errors (info).
-
-    ## First: normal
-
-    # Use band_cut to get relevant data chunks.
-
-    j_table = band_cut(s_table, 'j', max_flag=0)
-    h_table = band_cut(s_table, 'h', max_flag=0)
-    k_table = band_cut(s_table, 'k', max_flag=0)
-
-
-    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
-    # JD 2451544.500000
-    # (i.e. MJD 51544.0)
-
-    # get a date (x-axis) for each plot
-    jdate = j_table.MEANMJDOBS - date_offset
-    hdate = h_table.MEANMJDOBS - date_offset
-    kdate = k_table.MEANMJDOBS - date_offset
-
-    # let's save the old versions in case we need em later
-    raw_jdate = np.copy(jdate)
-    raw_hdate = np.copy(hdate)
-    raw_kdate = np.copy(kdate)
-
-    if abridged:
-        jdate[jdate > 54300-date_offset] -= ab_s2sub
-        jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        hdate[hdate > 54300-date_offset] -= ab_s2sub 
-        hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        kdate[kdate > 54300-date_offset] -= ab_s2sub 
-        kdate[kdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-
-    
-    # get a magnitude (y-axis) for each plot
-    jcol = j_table.JAPERMAG3
-    hcol = h_table.HAPERMAG3
-    kcol = k_table.KAPERMAG3
-
-    # get a magnitude error (y-error) for each plot
-    jerr = j_table.JAPERMAG3ERR
-    herr = h_table.HAPERMAG3ERR
-    kerr = k_table.KAPERMAG3ERR
-
-    # get a quality flag for each plot
-    # (aftercomment: not sure we're going to ever use these)
-    jflag = j_table.JPPERRBITS
-    hflag = h_table.HPPERRBITS
-    kflag = k_table.KPPERRBITS
-
-    # Get the grade
-    jgrade = j_table.JGRADE
-    hgrade = h_table.HGRADE
-    kgrade = k_table.KGRADE
-
-    ## Second: info
-
-    # Use band_cut to get relevant data chunks.
-
-    j_table_info = band_cut(s_table, 'j', min_flag=1, max_flag=256)
-    h_table_info = band_cut(s_table, 'h', min_flag=1, max_flag=256)
-    k_table_info = band_cut(s_table, 'k', min_flag=1, max_flag=256)
-
-
-    # The Julian date for CE  2000 January  1 00:00:00.0 UT is
-    # JD 2451544.500000
-    # (i.e. MJD 51544.0)
-
-    # get a date (x-axis) for each plot
-    jdate_info = j_table_info.MEANMJDOBS - date_offset
-    hdate_info = h_table_info.MEANMJDOBS - date_offset
-    kdate_info = k_table_info.MEANMJDOBS - date_offset
-
-    # let's save the old versions in case we need em later
-    raw_jdate_info = np.copy(jdate_info)
-    raw_hdate_info = np.copy(hdate_info)
-    raw_kdate_info = np.copy(kdate_info)
-
-    if abridged:
-        jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub
-        jdate_info[jdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        hdate_info[hdate_info > 54300-date_offset] -= ab_s2sub 
-        hdate_info[hdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        kdate_info[kdate_info > 54300-date_offset] -= ab_s2sub 
-        kdate_info[kdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-    
-    # get a magnitude (y-axis) for each plot
-    jcol_info = j_table_info.JAPERMAG3
-    hcol_info = h_table_info.HAPERMAG3
-    kcol_info = k_table_info.KAPERMAG3
-
-    # get a magnitude error (y-error) for each plot
-    jerr_info = j_table_info.JAPERMAG3ERR
-    herr_info = h_table_info.HAPERMAG3ERR
-    kerr_info = k_table_info.KAPERMAG3ERR
-
-    # get a quality flag for each plot
-    jflag = j_table_info.JPPERRBITS
-    hflag = h_table_info.HPPERRBITS
-    kflag = k_table_info.KPPERRBITS
-
-    # Get the grade
-    jgrade_info = j_table_info.JGRADE
-    hgrade_info = h_table_info.HGRADE
-    kgrade_info = k_table_info.KGRADE
-
-    
     ## Define the components and parameters of the figure:
     
     fig = plt.figure(figsize = (10, 6), dpi=80,
@@ -928,107 +807,10 @@ def jjh (table, sid):
     left = 0.075
     width = 0.5
 
-    ax_k = fig.add_axes( (left, bottom, width, height) )
-    ax_h = fig.add_axes( (left, bottom+.3, width, height), sharex=ax_k )
-    ax_j = fig.add_axes( (left, bottom+.6, width, height), sharex=ax_k )
-    
-    ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
     ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
 
-    ## Start plotting. 
-    # Every band will take two steps: putting the errorbars
-    
-    fmt_info = 'd'
-#    fmt_warn = '.'
-
-    # Let's define dictionaries
-    d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
-    
-    if timecolor:
-        d_cmap = {'j': time_cmap, 'h': time_cmap, 'k': time_cmap}
-    elif type(d_cmap) is str:
-        d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
-    elif type(d_cmap) is not dict:
-        d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
-    d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
-    d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
-
-    d_date = {'j': jdate, 'h': hdate, 'k': kdate}
-    d_col = {'j': jcol, 'h': hcol, 'k': kcol}
-    d_err = {'j': jerr, 'h': herr, 'k': kerr}
-    d_grade = {'j': jgrade, 'h': hgrade, 'k': kgrade}
-
-    d_date_info = {'j': jdate_info, 'h': hdate_info, 'k': kdate_info}
-    d_col_info = {'j': jcol_info, 'h': hcol_info, 'k': kcol_info}
-    d_err_info = {'j': jerr_info, 'h': herr_info, 'k': kerr_info}
-    d_grade_info = {'j': jgrade_info, 'h': hgrade_info, 'k': kgrade_info}
-
-    d_rawdate = {'j': raw_jdate, 'h': raw_hdate, 'k': raw_kdate}
-    d_rawdate_info = {
-        'j': raw_jdate_info, 'h': raw_hdate_info, 'k': raw_kdate_info}
-
-    color_vmin = s_table.MEANMJDOBS.min() - date_offset
-    color_vmax = s_table.MEANMJDOBS.max() - date_offset
-    # min(
-    #     (d_rawdate['j'].min(), d_rawdate['h'].min(), d_rawdate['k'].min(),
-    #      d_rawdate_info['j'].min(), d_rawdate_info['h'].min(), d_rawdate_info['k'].min()))
-    # color_vmax = max(
-    #     (d_rawdate['j'].max(), d_rawdate['h'].max(), d_rawdate['k'].max(),
-    #      d_rawdate_info['j'].max(), d_rawdate_info['h'].max(), d_rawdate_info['k'].max()))
-
-    if timecolor:
-        d_c = d_rawdate
-        d_c_info = d_rawdate_info
-        vmin = color_vmin
-        vmax = color_vmax
-    else:
-        d_c = d_grade
-        d_c_info = d_grade_info
-        vmin = 0.8
-        vmax = 1
-
-    for band in ['j', 'h', 'k']:
-
-        # Plot a generic band and reduce the size of the code!
-
-        if len(d_date[band]) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-
-            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
-                                 yerr=d_err[band], fmt=None, ecolor='k',
-                                 zorder=0)
-            
-            # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
-                                c=d_c[band], vmin=vmin, vmax=vmax, zorder=100)
-
-            
-
-        if len(d_date_info[band]) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
-                                 yerr=d_err_info[band], marker=None,
-                                 fmt=None, ecolor='k', zorder=0)
-
-            # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
-                                marker=fmt_info, 
-                                c=d_c_info[band], cmap=d_cmap[band], 
-                                vmin=vmin, vmax=vmax, zorder=100)
-
-        # Finally, flip it (magnitudes are backwards).
-        d_ax[band].invert_yaxis()
-
-        # And plot the dotted lines, if relevant.
-        if abridged:
-            d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "k--",
-                            scaley=False, scalex=False)
-
-            d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "k--",
-                            scaley=False, scalex=False)
-            
-
-
+    color_vmin = s_table.MEANMJDOBS.min() - date_offset # PROTECT
+    color_vmax = s_table.MEANMJDOBS.max() - date_offset # PROTECT
     ## Now let's do the 2 color-mag/color-color plots.
 
     # We'll use different data-cuts for the two different plots.
@@ -1047,32 +829,6 @@ def jjh (table, sid):
     k_khk_err = khk_table.KAPERMAG3ERR
     hmk_khk_err = khk_table.HMKPNTERR
 
-    # In the color-color plot, we need data where J, H, and K are
-    # defined everywhere. That's one more cut.
-    jhk_table = band_cut(khk_table, 'j', max_flag=256)
-
-    jhkdate = jhk_table.MEANMJDOBS - date_offset
-    jmh_jhk = jhk_table.JMHPNT
-    hmk_jhk = jhk_table.HMKPNT
-    jmh_jhk_err = jhk_table.JMHPNTERR
-    hmk_jhk_err = jhk_table.HMKPNTERR
-
-    # Plot J-H vs H-K using the "jhk_" variables.
-    try:
-        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate,
-                              vmin=color_vmin, vmax=color_vmax) 
-
-        if color_slope:
-            jhk_slope, jhk_intercept, slope_err = (
-                slope(hmk_jhk, jmh_jhk, hmk_jhk_err, jmh_jhk_err,
-                      verbose=False) )
-            
-            ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
-                        ':', scalex=False, scaley=False)
-            
-    except Exception:
-        print "JHK plot broke!"
-        pass
         
 
     # Plot K vs H-K using the "khk_" variables.
@@ -1102,28 +858,13 @@ def jjh (table, sid):
         pass
     ax_khk.invert_yaxis()
 
-    # Hide the bad labels...
-    plt.setp(ax_j.get_xticklabels(), visible=False)
-    plt.setp(ax_h.get_xticklabels(), visible=False)
 
     # Label stuff
 #    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
     ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
 
-    ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
-    ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
-    ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
-
-    ax_jhk.set_xlabel( "H-K" )
-    ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
     ax_khk.set_xlabel( "H-K" )
     ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
-
-    # Mess around with the X axis if it's abridged:
-    if abridged:
-        ax_k.set_xticks(ab_xticks)
-        ax_k.set_xticklabels(ab_xticklab)
-        ax_k.set_xlim(ab_xlim)
 
     if name != '':
         ax_j.set_title(name)
@@ -1133,7 +874,7 @@ def jjh (table, sid):
     if stetson == True:
         S, choice, n = Stetson_machine( s_table, flags=256 )
         stet_string = "S = %.2f" % S
-        ax_khk.set_title(stet_string)
+        ax_khk.set_title(stet_string) # ALTER
 
     if outfile == '':
         plt.show()
@@ -1147,10 +888,6 @@ def jjh (table, sid):
             plt.savefig(outfile)
             plt.close()
 
-    fig.ax_k = ax_k
-    fig.ax_h = ax_h
-    fig.ax_j = ax_j
-    fig.ax_jhk = ax_jhk
     fig.ax_khk = ax_khk
 
     return fig
