@@ -753,22 +753,10 @@ def jjh (table, sid):
     """ 
     Plots a J, J-H color-color diagram for a single star, colored by time.
 
-    Also plots color-color and color-mag trajectories, colored by time.
-
-    Lightcurve datapoints can match the "time" coloration by setting
-    `timecolor`=True.
-
-    Will display "lonely" datapoints (i.e. not all JHK mags are 
-    well-defined), and plots error-flagged data as different symbols.
-    Compare to plot2.lc() which does neither, and to plot3.lc() which 
-    is unaware of grades.
-
     Parameters
     ----------
     table : atpy.Table
         Table with time-series photometry and grade columns. 
-        "JGRADE", "HGRADE", "KGRADE" must be bestowed by 
-        night_cleanser.null_cleanser_grader().
     sid : int
         13-digit WFCAM source ID of star to plot
     season : int, optional
@@ -786,31 +774,17 @@ def jjh (table, sid):
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
-    abridged : bool, optional (default: False)
-        Create an abridged, panel-like plot?
-    timecolor : bool, optional (default: False)
-        Color lightcurve datapoints by time?
-        Attempts to sync all colored plots.
-    time_cmap : str, optional (defalt: 'jet')
-        Which colormap to use for `timecolor`; when `timecolor`=True,
-        this overrides d_cmap.
-        Future possibility: the KHK and JHK plots using this cmap.
-    d_cmap : dict or str or tuple
-        Which colormaps to use for J, H, and K. If a single string 
-        (rather than a dict) is given, all 3 bands will use the 
-        same colormap. If a tuple is given, J:0, H:1, K:2.
-        Default {'j':'Blues', 'h': 'Greens', 'k': 'Reds'} for now.
     date_offset : float, optional
         What MJD to use as day "zero". Default 01/01/2000, 
         aka MJD=51544, unless `abridged`=True, in which case
         MJD = 54034 is set (initial observations of Orion dataset).
     color_slope : bool, optional (defalt: False)
-        Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
+        Whether to fit a color slope line to the J, J-H plot.
         
     Returns
     -------
     fig : plt.Figure 
-        The canvas figure that the graphs are plotted onto.
+        The canvas figure that the graph is plotted onto.
     
     """
 
