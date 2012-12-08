@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import atpy
 
-import plot3
+import plot3, spread3
 
 from cygob7_jjh_script_helper import *
 
@@ -36,17 +36,31 @@ welo = atpy.Table(
     path+"WISE_extras_lonelytwo_only_ALLDATA_errorcorrected_ce.fits")
 
 # RWA data
-
-rwa_data = atpy.Table(path3+"disk_data_extended17.fits")
 rwa_stats = atpy.Table(path3+"disk_stats_radec_withRWA_extended17.fits")
 
 rwa_sources = rwa_stats.SOURCEID
 rwa_names = ["RWA "+str(x) for x in rwa_stats.Designation]
 
+rwa16 = 44027710020132
+rwa_data = data.where( 
+    np.in1d(data.SOURCEID,rwa_sources) & 
+    (((data.JPPERRBITS + data.HPPERRBITS + data.KPPERRBITS) == 0) |
+     (data.SOURCEID == rwa16)) )
+
+# This is no good because of errorbars not being calibrated:
+#rwa_data = atpy.Table(path3+"disk_data_extended17.fits")
+
+
 # We have created lists for Wise disks, Wise extras, Aspin sources, and 
 # Transition disks. variables:
 # `wise_disks`, `wise_extras`, `aspin_sources`, `wise_trans`
 # with identifiers as the variable name + "_names"
+
+# "real" wise disks - to filter out non-matches
+rwd = wise_disks > 1
+ras = aspin_sources > 1
+rwt = wise_trans > 1
+rwe = wise_extras > 1
 
 def wise_guys():
     """
@@ -54,9 +68,7 @@ def wise_guys():
     
     """
 
-    # "real" wise disks - to filter out non-matches
-    rwd = wise_disks > 1
-
+    # wise disks
     for s, n in zip(wise_disks[rwd], wise_disks_names[rwd]):
         fig = plot3.jjh(watso, s, name=str(n), color_slope=True, 
                         date_offset=54579,
@@ -65,8 +77,8 @@ def wise_guys():
         if fig == None:
             print "dude %s failed to plot right" % str(s)
 
-    ras = aspin_sources > 1
 
+    # aspins
     for s, n in zip(aspin_sources[ras], aspin_sources_names[ras]):
         fig = plot3.jjh(watso, s, name=str(n), color_slope=True, 
                         date_offset=54579,
@@ -76,8 +88,7 @@ def wise_guys():
             print "dude %s failed to plot right" % str(s)
 
 
-    rwt = wise_trans > 1
-
+    # wise trans
     for s, n in zip(wise_trans[rwt], wise_trans_names[rwt]):
         fig = plot3.jjh(watso, s, name=str(n), color_slope=True, 
                         date_offset=54579,
@@ -86,8 +97,7 @@ def wise_guys():
         if fig == None:
             print "dude %s failed to plot right" % str(s)
 
-    rwe = wise_extras > 1
-
+    # wise extras
     for s, n in zip(wise_extras[rwe], wise_extras_names[rwe]):
         fig = plot3.jjh(data, s, name=str(n), color_slope=True, 
                         date_offset=54579,
@@ -117,3 +127,81 @@ def rwa_guys():
 
         if fig == None:
             print "dude %s failed to plot right" % str(s)
+
+
+def tables():
+    """
+    Creates spreadsheets for Wise, Aspin, wise_trans, wise_extras, 
+    and rwa_sources that include color-slope terms and robust stats.
+
+    """
+
+    # wise disks
+    
+    wise_disks_lookup = atpy.Table()
+    wise_disks_lookup.add_column("SOURCEID", wise_disks[rwd])
+    wise_disks_lookup.add_column("Designation", wise_disks_names[rwd])
+
+    spread3.spreadsheet_write(
+        watso, wise_disks_lookup, 0, 
+        path2+"Wise/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True, per=True)
+    
+    # aspins
+    
+    aspin_sources_lookup = atpy.Table()
+    aspin_sources_lookup.add_column("SOURCEID", aspin_sources[ras])
+    aspin_sources_lookup.add_column("Designation", aspin_sources_names[ras])
+
+    spread3.spreadsheet_write(
+        watso, aspin_sources_lookup, 0, 
+        path2+"Aspin/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True, per=True)
+    
+    # wise trans
+
+    wise_trans_lookup = atpy.Table()
+    wise_trans_lookup.add_column("SOURCEID", wise_trans[rwt])
+    wise_trans_lookup.add_column("Designation", wise_trans_names[rwt])
+
+    spread3.spreadsheet_write(
+        watso, wise_trans_lookup, 0,
+        path2+"transition/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True, per=True)
+
+    # wise extras
+
+    wise_extras_lookup = atpy.Table()
+    wise_extras_lookup.add_column("SOURCEID", wise_extras[rwe])
+    wise_extras_lookup.add_column("Designation", wise_extras_names[rwe])
+
+    spread3.spreadsheet_write(
+        data, wise_extras_lookup, 0,
+        path2+"Wise_extras/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True)
+
+    # special case of whatevers - this is gonna be annoying to disentangle.
+    # I'll have to see what the error behavior of statcruncher is when
+    # there's no data for a star. Hopefully null values and no crashing.
+
+    welo_lookup = atpy.Table()
+    welo_lookup.add_column("SOURCEID", welo_sources)
+    welo_lookup.add_column("Designation", welo_names)
+    
+    spread3.spreadsheet_write(
+        welo, welo_lookup, 0,
+        path2+"Wise_extras/spreadsheet_withcolors_lonely.fits",
+        flags=256, rob=True, colorslope=True)
+    
+    # rwa dudes
+
+    rwa_lookup = atpy.Table()
+    rwa_lookup.add_column("SOURCEID", rwa_sources)
+    rwa_lookup.add_column("Designation", rwa_names)
+
+    spread3.spreadsheet_write(
+        rwa_data, rwa_lookup, 0,
+        path2+"RWA_sources/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True, per=True)
+    
+    print "Did the spreadsheets!"

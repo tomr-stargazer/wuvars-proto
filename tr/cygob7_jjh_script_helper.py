@@ -213,3 +213,7 @@ wise_trans_names = np.array([23626,
 11810,
 16077,
 15289])
+
+welo_sources = np.array([44027709894711, 44027709894777])
+
+welo_names = wise_extras_names[ np.in1d(wise_extras, welo_sources) ]
