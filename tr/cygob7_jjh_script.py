@@ -77,6 +77,12 @@ def wise_guys():
         if fig == None:
             print "dude %s failed to plot right" % str(s)
 
+    # wise special case
+    for s, n in zip(wise_v, wise_v_names):
+        fig = plot3.jjh(data, s, name=str(n), color_slope=True, 
+                        date_offset=54579,
+                        outfile=path2+'Wise/'+str(n), png_too=True)
+
 
     # aspins
     for s, n in zip(aspin_sources[ras], aspin_sources_names[ras]):
@@ -145,6 +151,16 @@ def tables():
     spread3.spreadsheet_write(
         watso, wise_disks_lookup, 0, 
         path2+"Wise/spreadsheet_withcolors.fits",
+        flags=256, rob=True, colorslope=True, per=True)
+
+    # wise special case
+    wise_v_lookup = atpy.Table()
+    wise_v_lookup.add_column("SOURCEID", wise_v)
+    wise_v_lookup.add_column("Designation", wise_v_names)
+
+    spread3.spreadsheet_write(
+        data, wise_v_lookup, 0, 
+        path2+"Wise/spreadsheet_withcolors_wise29434.fits",
         flags=256, rob=True, colorslope=True, per=True)
     
     # aspins
