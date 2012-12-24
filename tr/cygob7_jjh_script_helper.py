@@ -217,3 +217,7 @@ wise_trans_names = np.array([23626,
 welo_sources = np.array([44027709894711, 44027709894777])
 
 welo_names = wise_extras_names[ np.in1d(wise_extras, welo_sources) ]
+
+# WISE sources that got missed because they "variables" from Paper 2a.
+wise_v = np.array([44027709925129])
+wise_v_names = [29434]
