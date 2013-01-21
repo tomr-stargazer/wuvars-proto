@@ -949,7 +949,7 @@ def lsp_power (table, sid, season=0, upper_frequency=0.5,
 
     # do some band_cutting, with flags = 256 like usual
     j_table = band_cut(s_table, 'j', max_flag=256)
-    if len(j_table) < 1:
+    if len(j_table) <= 1:
         print "no J data"
     else:
         jdate = j_table.MEANMJDOBS - 51544
@@ -975,7 +975,7 @@ def lsp_power (table, sid, season=0, upper_frequency=0.5,
 
     ## H
     h_table = band_cut(s_table, 'h', max_flag=256)
-    if len(h_table) < 1:
+    if len(h_table) <= 1:
         print "no H data"
     else:
         hdate = h_table.MEANMJDOBS - 51544
@@ -997,7 +997,7 @@ def lsp_power (table, sid, season=0, upper_frequency=0.5,
 
     ## K
     k_table = band_cut(s_table, 'k', max_flag=256)
-    if len(k_table) < 1:
+    if len(k_table) <= 1:
         print "no K data"
     else:
         kdate = k_table.MEANMJDOBS - 51544
@@ -1095,7 +1095,7 @@ def fx2_periodogram (table, sid, season=0,
 
     # do some band_cutting, with flags = 256 like usual
     j_table = band_cut(s_table, 'j', max_flag=256)
-    if len(j_table) < 1:
+    if len(j_table) <= 1:
         print "no J data"
     else:
         jdate = j_table.MEANMJDOBS - 51544
@@ -1120,7 +1120,7 @@ def fx2_periodogram (table, sid, season=0,
 
     ## H
     h_table = band_cut(s_table, 'h', max_flag=256)
-    if len(h_table) < 1:
+    if len(h_table) <= 1:
         print "no H data"
     else:
         hdate = h_table.MEANMJDOBS - 51544
@@ -1139,7 +1139,7 @@ def fx2_periodogram (table, sid, season=0,
 
     ## K
     k_table = band_cut(s_table, 'k', max_flag=256)
-    if len(k_table) < 1:
+    if len(k_table) <= 1:
         print "no K data"
     else:
         kdate = k_table.MEANMJDOBS - 51544
