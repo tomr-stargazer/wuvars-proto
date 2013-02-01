@@ -25,12 +25,15 @@ sect = np.intersect1d
 v = False
 
 def vprint ( string ):
-    '''Prints a string only if verbose is true'''
+    """
+    Prints `string` only if the global variable `verbose` is True.
+    """
     if v:
         print string
 
 def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
-    ''' Matches two sets of position arrays and returns (two numpy arrays).
+    """ 
+    Matches two sets of position arrays and returns (two numpy arrays).
 
     Assumes all positions are decimal degrees.
 
@@ -51,7 +54,7 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
     min_offset : numpy array
         Gives the distance between the best-matched items in 
         table 1 vs table 2.
-    '''
+    """
     
     global v
     v = verbose
@@ -109,7 +112,8 @@ def core_match ( radd1, dedd1, radd2, dedd2, max_match, verbose = True ) :
 
 
 def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
-    ''' Matches two catalogs and returns a tuple of two numpy arrays.
+    """ 
+    Matches two catalogs and returns a tuple of two numpy arrays.
 
     Arguments:
     (atpy.Table, atpy.Table, string, string, string, string, float)
@@ -121,7 +125,7 @@ def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
     
     Keywords:
     verbose -- print running progress? (default True)
-    '''
+    """
 
     global v
     v = verbose
@@ -157,7 +161,7 @@ def gen_match ( table1, table2, ra1, dec1, ra2, dec2, max_match, verbose=True):
                        max_match, verbose=verbose)
 
 def smart_match(table1, table2, boxsize, verbose=True) : 
-    ''' 
+    """ 
     Matches two catalogs and returns a tuple of two numpy arrays.
 
     Usage:
@@ -169,7 +173,7 @@ def smart_match(table1, table2, boxsize, verbose=True) :
     
     Keywords:
     verbose -- print running progress? (default True)
-    '''
+    """
 
     global v
     v = verbose
@@ -195,10 +199,11 @@ def smart_match(table1, table2, boxsize, verbose=True) :
                       verbose=verbose)
 
 def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
-    ''' Matches one position in decimal degrees to a source in a table. 
+    """ 
+    Matches one position in decimal degrees to a source in a table. 
 
     Negative return values indicate failure to match.
-    '''
+    """
 
     radd1 = np.array([ra])
     dedd1 = np.array([dec])
@@ -207,7 +212,7 @@ def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
     return (match[0], min_offset[0])
 
 def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
-    ''' 
+    """ 
     Matches a coords.Position object to a table with coordinates.
 
     Parameters
@@ -227,7 +232,7 @@ def coords_match ( position, table, max_match = 10, verbose=True, units='rad') :
     Returns
     -------
 
-    '''
+    """
     ra,dec = position.dd()
     if units=='rad':
         radd2 = np.degrees(table.RA)
