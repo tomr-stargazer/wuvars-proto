@@ -1,4 +1,4 @@
-''' 
+""" 
 A collection of functions for matching tables based on source positions.
 
 Available functions:
@@ -11,7 +11,7 @@ June 2010: Created. Tom Rice (t.rice90@gmail.com)
 15 May 2012: Updating code.
 17 May 2012: Still updating code, mainly by standardizing documentation.
 
-'''
+"""
 
 import atpy 
 import numpy as np
@@ -27,6 +27,7 @@ v = False
 def vprint ( string ):
     """
     Prints `string` only if the global variable `verbose` is True.
+
     """
     if v:
         print string
@@ -203,6 +204,25 @@ def small_match ( ra, dec, radd2, dedd2, max_match, verbose=True ) :
     Matches one position in decimal degrees to a source in a table. 
 
     Negative return values indicate failure to match.
+
+    Parameters
+    ----------
+    ra, dec : float
+        R.A. and Decl. values for the single object. In decimal degrees.
+    radd2, dedd2 : numpy arrays
+        R.A. and Decl. arrays for the table. In decimal degrees.
+    max_match : float
+        Largest acceptable offset (in arcsec) for two sources to match.
+
+    Returns
+    -------
+    match : numpy array
+        Gives the index in table 2 corresponding to each item 
+        in table 1. A value of -1 is a failed match.
+    min_offset : numpy array
+        Gives the distance between the best-matched items in 
+        table 1 vs table 2.
+
     """
 
     radd1 = np.array([ra])
