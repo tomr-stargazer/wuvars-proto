@@ -44,7 +44,8 @@ from color_slope import slope
 
 def lc (table, sid, season=0, outfile='', name='', 
         stetson=True, png_too=False, 
-        date_offset = 51544, color_slope=False, custom_xlabel=None):
+        date_offset = 51544, color_slope=False, custom_xlabel=None, 
+        plot_warn=True):
     """ 
     Plots J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -84,6 +85,10 @@ def lc (table, sid, season=0, outfile='', name='',
         What string to use (e.g. "Time (JD since 04/23/2008)") instead of
         the default "Time (MJD - `date_offset`)" for the lightcurve
         x-axis label.
+    plot_warn : bool, optional
+        Do you want to plot data with "warning" error flags?
+        Default True for backwards compatibility, but you probably want
+        False for readability.
 
 
     Returns
@@ -236,7 +241,7 @@ def lc (table, sid, season=0, outfile='', name='',
     if len(jdate_info) > 0:
         ax_j.errorbar( jdate_info, jcol_info, yerr=jerr_info, 
                        fmt='b'+fmt_info, ms=4, ecolor='k')
-    if len(jdate_warn) > 0:
+    if (len(jdate_warn) > 0) and plot_warn:
         ax_j.errorbar( jdate_warn, jcol_warn, yerr=jerr_warn, 
                        fmt='k'+fmt_warn, ecolor='k')
     ax_j.invert_yaxis()
@@ -247,7 +252,7 @@ def lc (table, sid, season=0, outfile='', name='',
     if len(hdate_info) > 0:
         ax_h.errorbar( hdate_info, hcol_info, yerr=herr_info, 
                        fmt='g'+fmt_info, ms=4, ecolor='k')
-    if len(hdate_warn) > 0:
+    if (len(hdate_warn) > 0) and plot_warn:
         ax_h.errorbar( hdate_warn, hcol_warn, yerr=herr_warn, 
                        fmt='k'+fmt_warn, ecolor='k')
     ax_h.invert_yaxis()
@@ -258,7 +263,7 @@ def lc (table, sid, season=0, outfile='', name='',
     if len(kdate_info) > 0:
         ax_k.errorbar( kdate_info, kcol_info, yerr=kerr_info, 
                        fmt='r'+fmt_info, ms=4, ecolor='k')
-    if len(kdate_warn) > 0:
+    if (len(kdate_warn) > 0) and plot_warn:
         ax_k.errorbar( kdate_warn, kcol_warn, yerr=kerr_warn, 
                        fmt='k'+fmt_warn, ecolor='k')
     ax_k.invert_yaxis()
