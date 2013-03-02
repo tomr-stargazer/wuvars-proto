@@ -44,7 +44,7 @@ from color_slope import slope
 
 def lc (table, sid, season=0, outfile='', name='', 
         stetson=True, png_too=False, 
-        date_offset = 51544, color_slope=False):
+        date_offset = 51544, color_slope=False, custom_xlabel=None):
     """ 
     Plots J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -74,8 +74,16 @@ def lc (table, sid, season=0, outfile='', name='',
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    date_offset : float, optional
+        What MJD to use as day "zero". Default 01/01/2000, 
+        aka MJD=51544. Date corresponding to the start of Cyg OB7
+        observations (04/23/2008) is MJD=54579.
     color_slope : bool, optional (defalt: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
+    custom_xlabel : str or None, optional
+        What string to use (e.g. "Time (JD since 04/23/2008)") instead of
+        the default "Time (MJD - `date_offset`)" for the lightcurve
+        x-axis label.
 
 
     Returns
@@ -113,9 +121,9 @@ def lc (table, sid, season=0, outfile='', name='',
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate = j_table.MEANMJDOBS - 51544
-    hdate = h_table.MEANMJDOBS - 51544
-    kdate = k_table.MEANMJDOBS - 51544
+    jdate = j_table.MEANMJDOBS - date_offset
+    hdate = h_table.MEANMJDOBS - date_offset
+    kdate = k_table.MEANMJDOBS - date_offset
     
     # get a magnitude (y-axis) for each plot
     jcol = j_table.JAPERMAG3
@@ -147,9 +155,9 @@ def lc (table, sid, season=0, outfile='', name='',
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate_info = j_table_info.MEANMJDOBS - 51544
-    hdate_info = h_table_info.MEANMJDOBS - 51544
-    kdate_info = k_table_info.MEANMJDOBS - 51544
+    jdate_info = j_table_info.MEANMJDOBS - date_offset
+    hdate_info = h_table_info.MEANMJDOBS - date_offset
+    kdate_info = k_table_info.MEANMJDOBS - date_offset
     
     # get a magnitude (y-axis) for each plot
     jcol_info = j_table_info.JAPERMAG3
@@ -180,9 +188,9 @@ def lc (table, sid, season=0, outfile='', name='',
     # (i.e. MJD 51544.0)
 
     # get a date (x-axis) for each plot
-    jdate_warn = j_table_warn.MEANMJDOBS - 51544
-    hdate_warn = h_table_warn.MEANMJDOBS - 51544
-    kdate_warn = k_table_warn.MEANMJDOBS - 51544
+    jdate_warn = j_table_warn.MEANMJDOBS - date_offset
+    hdate_warn = h_table_warn.MEANMJDOBS - date_offset
+    kdate_warn = k_table_warn.MEANMJDOBS - date_offset
     
     # get a magnitude (y-axis) for each plot
     jcol_warn = j_table_warn.JAPERMAG3
@@ -267,7 +275,7 @@ def lc (table, sid, season=0, outfile='', name='',
     khk_table = band_cut( band_cut(s_table, 'k', max_flag=256),
                           'h', max_flag=256)
 
-    khkdate = khk_table.MEANMJDOBS - 51544
+    khkdate = khk_table.MEANMJDOBS - date_offset
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
     k_khk_err = khk_table.KAPERMAG3ERR
@@ -277,7 +285,7 @@ def lc (table, sid, season=0, outfile='', name='',
     # defined everywhere. That's one more cut.
     jhk_table = band_cut(khk_table, 'j', max_flag=256)
 
-    jhkdate = jhk_table.MEANMJDOBS - 51544
+    jhkdate = jhk_table.MEANMJDOBS - date_offset
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
     jmh_jhk_err = jhk_table.JMHPNTERR
@@ -330,7 +338,12 @@ def lc (table, sid, season=0, outfile='', name='',
     plt.setp(ax_h.get_xticklabels(), visible=False)
 
     # Label stuff
-    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+#    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
+    if custom_xlabel:
+        ax_k.set_xlabel( custom_xlabel )
+    else:
+        ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
+
 
     ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
