@@ -79,7 +79,7 @@ def lc (table, sid, season=0, outfile='', name='',
         What MJD to use as day "zero". Default 01/01/2000, 
         aka MJD=51544. Date corresponding to the start of Cyg OB7
         observations (04/23/2008) is MJD=54579.
-    color_slope : bool, optional (defalt: False)
+    color_slope : bool, optional (default: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
     custom_xlabel : str or None, optional
         What string to use (e.g. "Time (JD since 04/23/2008)") instead of
