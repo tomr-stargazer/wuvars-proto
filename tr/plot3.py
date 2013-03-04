@@ -440,7 +440,7 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
 
 def phase (table, sid, period='auto', season=0, offset=0, 
            outfile='', name='', stetson=True, png_too=False,
-           color_slope=False):
+           color_slope=False, period_decimal_places = 6):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -483,6 +483,9 @@ def phase (table, sid, period='auto', season=0, offset=0,
         Do not specify a file extension in `outfile`.
     color_slope : bool, optional (default: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
+    period_decimal_places : int, optional (default: 6)
+        How many decimal places to print of the period on the
+        phase plot's x-label. 
 
     Returns
     -------
@@ -634,10 +637,10 @@ def phase (table, sid, period='auto', season=0, offset=0,
         return
 
     if np.abs(period) < 1:
-        period_string = "%f hours" % (period*24)
+        period_string = "%.*f hours" % (period_decimal_places, period*24)
 #        print period_string
     else:
-        period_string = "%f days" % period
+        period_string = "%.*f days" % (period_decimal_places, period)
 
     ## Define the components and parameters of the figure:
     
