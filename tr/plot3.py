@@ -439,7 +439,8 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
 
 
 def phase (table, sid, period='auto', season=0, offset=0, 
-           outfile='', name='', stetson=True, png_too=False):
+           outfile='', name='', stetson=True, png_too=False,
+           color_slope=False):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -480,6 +481,8 @@ def phase (table, sid, period='auto', season=0, offset=0,
         If `png_too` is True (and `outfile` is not ''), then 
         save the plot in 3 file formats: PDF, PNG, and EPS.
         Do not specify a file extension in `outfile`.
+    color_slope : bool, optional (default: False)
+        Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
 
     Returns
     -------
@@ -725,6 +728,8 @@ def phase (table, sid, period='auto', season=0, offset=0,
     khkdate = khk_table.MEANMJDOBS - 51544
     k_khk = khk_table.KAPERMAG3
     hmk_khk = khk_table.HMKPNT
+    k_khk_err = khk_table.KAPERMAG3ERR
+    hmk_khk_err = khk_table.HMKPNTERR
 
     khkphase = ((khkdate % period) / period + offset) % 1.
 
@@ -735,22 +740,49 @@ def phase (table, sid, period='auto', season=0, offset=0,
     jhkdate = jhk_table.MEANMJDOBS - 51544
     jmh_jhk = jhk_table.JMHPNT
     hmk_jhk = jhk_table.HMKPNT
+    jmh_jhk_err = jhk_table.JMHPNTERR
+    hmk_jhk_err = jhk_table.HMKPNTERR
 
     jhkphase = ((jhkdate % period) / period + offset) % 1.
 
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
         plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkphase )
-    except Exception:
-        print "JHK plot broke!"
+
+        if color_slope:
+            jhk_slope, jhk_intercept, slope_err = (
+                slope(hmk_jhk, jmh_jhk, hmk_jhk_err, jmh_jhk_err,
+                      verbose=False) )
+
+            ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
+                        ':', scalex=False, scaley=False)
+
+    except Exception, e:
+        print "JHK plot broke!", e
         pass
 
     # Plot K vs H-K using the "khk_" variables.
     try:
         plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkphase, 
                               ms=False, ctts=False) 
-    except Exception:
-        print "KHK plot broke!"
+        # plot boundaries are manually set for readability, if necessary
+        if len(ax_khk.get_xticks()) > 7:
+            khk_xmin = np.floor(hmk_khk.min() * 0.95 * 20)/20.
+            khk_xmax = np.ceil( hmk_khk.max() * 1.05 * 20)/20.
+
+            khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
+            ax_khk.set_xticks(khk_xticks)
+
+        if color_slope:
+            khk_slope, khk_intercept, slope_err = (
+                slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
+                      verbose=False) )
+            
+            ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
+                        '--', scalex=False, scaley=False)
+
+    except Exception, e:
+        print "KHK plot broke!", e
         pass
     ax_khk.invert_yaxis()
 
