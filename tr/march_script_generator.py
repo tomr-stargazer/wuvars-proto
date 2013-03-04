@@ -28,7 +28,7 @@ from cygob7_jjh_script_helper import *
 
 # where the data is stored
 path = '/home/tom/Dropbox/Cyg_OB7/paper2/'
-path2 ='/home/tom/Dropbox/Cyg_OB7/paper2/book/December2012/' 
+path2 ='/home/tom/Dropbox/Cyg_OB7/paper2/book/March2013/' 
 path3 ='/home/tom/reu/DATA/Merged_Catalogs/September_2011/'
 
 # The data file that contains data for all of the wise disks, aspin sources,
@@ -73,9 +73,11 @@ ras = aspin_sources > 1
 rwt = wise_trans > 1
 rwe = wise_extras > 1
 
-def wise_guys():
+def do_it_all_cygob7():
     """
-    Creates JJH plots for WISE and Aspin sources.
+    Creates Lightcurve plots for WISE, Aspin, and RWA sources.
+
+    For each (season), (period-type), (subcategory of stars), do stuff!
     
     """
 
@@ -127,14 +129,6 @@ def wise_guys():
             if fig2 == None:
                 print "dude %s failed to plot right" % str(s)
 
-    print "did that."
-
-def rwa_guys():
-    """
-    Creates JJH plots for RWA sources.
-
-    """
-    
     print "Now for RWA sources:"
 
     for s, n in zip(rwa_sources, rwa_names):
@@ -144,5 +138,10 @@ def rwa_guys():
 
         if fig == None:
             print "dude %s failed to plot right" % str(s)
+
+
+    print "did that."
+
+    
 
 
