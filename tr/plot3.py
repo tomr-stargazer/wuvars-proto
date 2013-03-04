@@ -440,7 +440,8 @@ def plot_phase_core (ax, t, x, xerr, period, offset=0,
 
 def phase (table, sid, period='auto', season=0, offset=0, 
            outfile='', name='', stetson=True, png_too=False,
-           color_slope=False, period_decimal_places = 6):
+           color_slope=False, period_decimal_places = 6,
+           plot_warn=True):
     """ 
     Plots folded J, H, K lightcurves, plus color-color and color-mag
     trajectories, for one star.
@@ -486,6 +487,10 @@ def phase (table, sid, period='auto', season=0, offset=0,
     period_decimal_places : int, optional (default: 6)
         How many decimal places to print of the period on the
         phase plot's x-label. 
+    plot_warn : bool, optional (default: True)
+        Do you want to plot data with "warning" error flags?
+        Default True for backwards compatibility, but you probably want
+        False for readability.
 
     Returns
     -------
@@ -674,7 +679,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
 #                       fmt='b'+fmt_info, ms=4, ecolor='k')
         plot_phase_core( ax_j, jdate_info, jcol_info, jerr_info, period, 
                          offset=offset, color='b', sym=fmt_info, ms=4)
-    if len(jdate_warn) > 0:
+    if (len(jdate_warn) > 0) and plot_warn:
 #        ax_j.errorbar( jdate_warn, jcol_warn, yerr=jerr_warn, 
 #                       fmt='k'+fmt_warn, ecolor='k')
         plot_phase_core( ax_j, jdate_warn, jcol_warn, jerr_warn, period,
@@ -691,7 +696,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
 #                       fmt='g'+fmt_info, ms=4, ecolor='k')
         plot_phase_core( ax_h, hdate_info, hcol_info, herr_info, period, 
                          offset=offset, color='g', sym=fmt_info, ms=4)
-    if len(hdate_warn) > 0:
+    if (len(hdate_warn) > 0) and plot_warn:
 #        ax_h.errorbar( hdate_warn, hcol_warn, yerr=herr_warn, 
 #                       fmt='k'+fmt_warn, ecolor='k')
         plot_phase_core( ax_h, hdate_warn, hcol_warn, herr_warn, period,
@@ -709,7 +714,7 @@ def phase (table, sid, period='auto', season=0, offset=0,
 #                       fmt='r'+fmt_info, ms=4, ecolor='k')
         plot_phase_core( ax_k, kdate_info, kcol_info, kerr_info, period, 
                          offset=offset, color='r', sym=fmt_info, ms=4)
-    if len(kdate_warn) > 0:
+    if (len(kdate_warn) > 0) and plot_warn:
 #        ax_k.errorbar( kdate_warn, kcol_warn, yerr=kerr_warn, 
 #                       fmt='k'+fmt_warn, ecolor='k')
         plot_phase_core( ax_k, kdate_warn, kcol_warn, kerr_warn, period,
