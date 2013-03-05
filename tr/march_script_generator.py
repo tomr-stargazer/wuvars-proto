@@ -144,6 +144,7 @@ def do_it_all_cygob7(lc=True):
                 fig = plot3.lc(data, s, season=season,
                                name=str(n), color_slope=True, 
                                date_offset=54579,
+                               custom_xlabel="Time (JD since 04/23/2008)",
                                outfile=lc_path+'Wise/lc/'+s_name+'/'+str(n),
                                png_too=True)
 
@@ -154,6 +155,7 @@ def do_it_all_cygob7(lc=True):
                 fig = plot3.lc(watso, s, season=season,
                                name=str(n), color_slope=True, 
                                date_offset=54579,
+                               custom_xlabel="Time (JD since 04/23/2008)",
                                outfile=lc_path+'Aspin/lc/'+s_name+'/'+str(n), 
                                png_too=True)
 
@@ -166,6 +168,7 @@ def do_it_all_cygob7(lc=True):
                 fig = plot3.lc(watso, s, season=season, 
                                name=str(n), color_slope=True, 
                                date_offset=54579,
+                               custom_xlabel="Time (JD since 04/23/2008)",
                                outfile=lc_path+'transition/lc/'+s_name+'/'+str(n), 
                                png_too=True)
 
@@ -177,6 +180,7 @@ def do_it_all_cygob7(lc=True):
                 fig = plot3.lc(data, s, season=season,
                                name=str(n), color_slope=True, 
                                date_offset=54579,
+                               custom_xlabel="Time (JD since 04/23/2008)",
                                outfile=lc_path+'Wise_extras/lc/'+s_name+'/'+str(n),
                                png_too=True)
 
@@ -184,6 +188,7 @@ def do_it_all_cygob7(lc=True):
                     fig2 = plot3.lc(welo, s, season=season,
                                     name=str(n), color_slope=True, 
                                     date_offset=54579,
+                                    custom_xlabel="Time (JD since 04/23/2008)",
                                     outfile=lc_path+'Wise_extras/lc/'+s_name+'/'+str(n),
                                     png_too=True)
                     if fig2 == None:
@@ -195,6 +200,7 @@ def do_it_all_cygob7(lc=True):
                 fig = plot3.lc(rwa_data, s, season=season,
                                name=str(n), color_slope=True, 
                                date_offset=54579,
+                               custom_xlabel="Time (JD since 04/23/2008)",
                                outfile=lc_path+'RWA_sources/lc/'+s_name+'/'+str(n), 
                                png_too=True)
 
