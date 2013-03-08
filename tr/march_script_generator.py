@@ -32,6 +32,8 @@ path = '/home/tom/Dropbox/Cyg_OB7/paper2/'
 lc_path ='/home/tom/Dropbox/Cyg_OB7/paper2/book/March2013/' 
 path3 ='/home/tom/reu/DATA/Merged_Catalogs/September_2011/'
 
+fig6path='/home/tom/Dropbox/Cyg_OB7/paper2/book/March2013/Figure6_folded_plots/' 
+
 # The data file that contains data for all of the wise disks, aspin sources,
 # and wise transition disks
 watso = atpy.Table(path+"Watso_ALLDATA_cleaned_errorcorrected_ce.fits")
@@ -74,7 +76,7 @@ ras = aspin_sources > 1
 rwt = wise_trans > 1
 rwe = wise_extras > 1
 
-def do_it_all_cygob7(lc=True):
+def do_it_all_cygob7(lc=True, phase=True):
     """
     Creates Lightcurve plots for WISE, Aspin, and RWA sources.
 
@@ -123,7 +125,6 @@ def do_it_all_cygob7(lc=True):
     if lc:
         for season, s_name in zip([1,2,3,123], ss):
 
-            if season < 3: continue
             print season, "is the current season"
 
             # wise disks
@@ -210,7 +211,61 @@ def do_it_all_cygob7(lc=True):
 
         print "did that."
 
-    
+    if phase:
+        # We're making lightcurves for TEN specific stars.
+        
+        # eight RWA stars:
+        rwa_phase_list = [
+            {'name': "RWA 1", 'season': 123, 'per': 9.114109},
+            {'name': "RWA 3", 'season': 123, 'per': 17.87},
+            {'name': "RWA 4", 'season': 3, 'per': 6.337136},
+            {'name': "RWA 13", 'season': 3, 'per': 9.372071},
+            {'name': "RWA 21", 'season': 123, 'per': 3.724390},
+            {'name': "RWA 23", 'season': 123, 'per': 2.806367},
+            {'name': "RWA 26", 'season': 123, 'per': 5.800502},
+            {'name': "RWA 28", 'season': 123, 'per': 4.810614} ]
+
+        # one each WISE and Aspin
+        wise_phase = {'name': 31848, 'season': 123, 'per': 39.556962}
+        
+        aspin_phase = {'name': 'aspin Cyg 19', 'season': 123, 'per': 9.521996}
+
+        for d in rwa_phase_list:
+            s = rwa_sources[d['name'] == np.array(rwa_names)][0]
+            print d['name'], s
+            fig = plot3.phase(rwa_data, s, season=d['season'],
+                              name=d['name'],
+                              period=d['per'],
+                              color_slope=True,
+                              outfile=fig6path+d['name']+".eps",
+                              plot_warn=False,
+                              period_decimal_places=2)
+
+        for d in [wise_phase]:
+            s = wise_disks[d['name'] == wise_disks_names][0]
+            fig = plot3.phase(watso, s, season=d['season'],
+                        name=d['name'],
+                        period=d['per'],
+                        color_slope=True,
+                        outfile=fig6path+"WISE "+str(d['name'])+".eps",
+                        plot_warn=False,
+                        period_decimal_places=2)
+
+        for d in [aspin_phase]:
+            s = aspin_sources[d['name'] == aspin_sources_names][0]
+            fig = plot3.phase(watso, s, season=d['season'],
+                        name=d['name'],
+                        period=d['per'],
+                        color_slope=True,
+                        outfile=fig6path+d['name']+".eps",
+                        plot_warn=False,
+                        period_decimal_places=2)
+        
+                              
+        
+
+           
+        
 
 
 
