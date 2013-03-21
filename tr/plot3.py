@@ -1791,7 +1791,8 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
                   outfile='', name='', stetson=True, png_too=False,
                   timecolor=False, time_cmap='jet',
                   d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
-                  date_offset = 54034, color_slope=False):
+                  date_offset = 54034, color_slope=False, 
+                  period_decimal_places = 6):
                   
     """ 
     Plots folded lightcurves of a star, with data colored by grade or phase.
@@ -1857,6 +1858,9 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         (initial observations of Orion dataset).
     color_slope : bool, optional (defalt: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
+    period_decimal_places : int, optional (default: 6)
+        How many decimal places to print of the period on the
+        phase plot's x-label.
 
     Returns
     -------
@@ -1993,11 +1997,10 @@ def graded_phase (table, sid, period='auto', season=0, offset=0,
         return
 
     if np.abs(period) < 1:
-        period_string = "%f hours" % (period*24)
+        period_string = "%.*f hours" % (period_decimal_places, period*24) 
 #        print period_string
     else:
-        period_string = "%f days" % period
-
+        period_string = "%.*f days" % (period_decimal_places, period) 
 
 
     ## Define the components and parameters of the figure:
