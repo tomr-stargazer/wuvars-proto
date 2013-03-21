@@ -1345,7 +1345,7 @@ def graded_lc (table, sid, season=0, outfile='', name='',
                d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
                date_offset = 51544, color_slope=False):
     """ 
-    Plots JHK lightcurves of a star, with datapoints colored by grade.
+    Plots JHK lightcurves of a star, with data colored by grade or time.
 
     Also plots color-color and color-mag trajectories, colored by time.
 
@@ -1362,7 +1362,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     table : atpy.Table
         Table with time-series photometry and grade columns. 
         "JGRADE", "HGRADE", "KGRADE" must be bestowed by 
-        night_cleanser.null_cleanser_grader().
+        night_cleanser.null_cleanser_grader(), 
+        unless `timecolor` != False.
     sid : int
         13-digit WFCAM source ID of star to plot
     season : int, optional
@@ -1481,10 +1482,15 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     hflag = h_table.HPPERRBITS
     kflag = k_table.KPPERRBITS
 
-    # Get the grade
-    jgrade = j_table.JGRADE
-    hgrade = h_table.HGRADE
-    kgrade = k_table.KGRADE
+    # Get the grade, unless timecolor overrides
+    if timecolor:
+        jgrade = np.zeros_like(j_table.JAPERMAG3)
+        hgrade = np.zeros_like(h_table.HAPERMAG3)
+        kgrade = np.zeros_like(k_table.KAPERMAG3)
+    else:
+        jgrade = j_table.JGRADE
+        hgrade = h_table.HGRADE
+        kgrade = k_table.KGRADE
 
     ## Second: info
 
@@ -1532,10 +1538,15 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     hflag = h_table_info.HPPERRBITS
     kflag = k_table_info.KPPERRBITS
 
-    # Get the grade
-    jgrade_info = j_table_info.JGRADE
-    hgrade_info = h_table_info.HGRADE
-    kgrade_info = k_table_info.KGRADE
+    # Get the grade, unless timecolor overrides
+    if timecolor:
+        jgrade_info = np.zeros_like(j_table_info.JAPERMAG3)
+        hgrade_info = np.zeros_like(h_table_info.HAPERMAG3)
+        kgrade_info = np.zeros_like(k_table_info.KAPERMAG3)
+    else:
+        jgrade_info = j_table_info.JGRADE
+        hgrade_info = h_table_info.HGRADE
+        kgrade_info = k_table_info.KGRADE
 
     
     ## Define the components and parameters of the figure:
