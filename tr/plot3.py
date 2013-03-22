@@ -1343,7 +1343,8 @@ def graded_lc (table, sid, season=0, outfile='', name='',
                stetson=True, png_too=False, abridged=False,
                timecolor=False, time_cmap='jet',
                d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'},
-               date_offset = 51544, color_slope=False):
+               date_offset = 51544, color_slope=False,
+               custom_xlabel=None):
     """ 
     Plots JHK lightcurves of a star, with data colored by grade or time.
 
@@ -1398,9 +1399,15 @@ def graded_lc (table, sid, season=0, outfile='', name='',
     date_offset : float, optional
         What MJD to use as day "zero". Default 01/01/2000, 
         aka MJD=51544, unless `abridged`=True, in which case
-        MJD = 54034 is set (initial observations of Orion dataset).
+        MJD = 54034 is set (initial observations of Orion dataset). 
+        Date corresponding to the start of Cyg OB7 observations 
+        (04/23/2008) is MJD=54579.
     color_slope : bool, optional (defalt: False)
         Whether to fit color slope lines to the KvH-K and J-HvH-K plots.
+    custom_xlabel : str or None, optional
+        What string to use (e.g. "Time (JD since 04/23/2008)") instead of
+        the default "Time (MJD - `date_offset`)" for the lightcurve
+        x-axis label. 
         
     Returns
     -------
@@ -1739,7 +1746,10 @@ def graded_lc (table, sid, season=0, outfile='', name='',
 
     # Label stuff
 #    ax_k.set_xlabel( "Time (JD since 01/01/2000)" )
-    ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
+    if custom_xlabel:
+        ax_k.set_xlabel( custom_xlabel )
+    else:
+        ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
 
     ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
