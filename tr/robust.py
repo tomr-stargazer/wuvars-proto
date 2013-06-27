@@ -326,3 +326,23 @@ def stdr(x, nsigma=3, niter=Inf, finite=True, verbose=False, axis=None):
             ret[ii] = stdr(x[ii], nsigma=nsigma,niter=niter,finite=finite,\
                                  verbose=verbose, axis=nextaxis)
         return ret
+
+def mad(x):
+    """
+    Calculates the median absolute deviation of an array.
+
+    See http://en.wikipedia.org/wiki/Median_absolute_deviation
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Array of numbers
+
+    Returns
+    -------
+    mad : float
+        Median absolute deviation
+
+    """
+
+    return median(abs(x - median(x)))
