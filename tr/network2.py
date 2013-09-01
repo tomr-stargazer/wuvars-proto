@@ -8,6 +8,8 @@ Replaces network.py and will eventually be renamed network.py
 after the smoke clears.
 '''
 
+import os
+
 import numpy as np
 import robust as rb
 
@@ -18,7 +20,8 @@ from tr_helpers import data_cut, season_cut
 # Loading up some good default data, which can be completely ignored
 # with proper keyword usage. (I don't anticipate this happening, but...)
 
-path = '/media/storage/Documents/Research/reu/DATA/Merged_Catalogs/network/'
+script_location = os.path.dirname(os.path.realpath(__file__))
+path = script_location+'/../network/'
 
 dates = np.loadtxt( path + "sorted_date_list.txt")
 
