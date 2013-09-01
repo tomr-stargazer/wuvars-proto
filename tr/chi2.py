@@ -15,12 +15,14 @@ Useful functions:
 # runchi2! If something goes wrong everything crashes and burns. 
 # Update (2 Oct '12) : The above issue never comes up in practice.
 
+import os
 import subprocess
 
 import numpy as np
 
 from tr_helpers import season_cut
 
+script_location = os.path.dirname(os.path.realpath(__file__))
 
 def chi_input_writer (name, t, x, err, outfile):
     """ 
@@ -246,9 +248,11 @@ def test_analyze (t, x, err, ret_chimin=False):
     """
 
     datafile = chi_input_writer("test", t, x, err, 
-                                '/home/trice/reu/DATA/chi2/chitest.in')
+                                script_location+'/chitest.in')
 
-    return parse_chi( run_chi(datafile), ret_chimin=ret_chimin )
+    return_value = parse_chi( run_chi(datafile), ret_chimin=ret_chimin )
+    os.remove(datafile) # clean up your tracks so we don't clutter
+    return return_value
 
 # Next step... combine stat and chi2 to make a table of best-freq and chi^2 
 # values for every source. I've been assuming that chi^2 can be used as a 
@@ -306,8 +310,8 @@ def diagnostic_analyze(t, x, err):
 
     """
     
-    input_file = '/home/trice/reu/DATA/chi2/chitest.in'
-    diag_file = '/home/trice/reu/DATA/chi2/diagnostic.txt'
+    input_file = script_location+'/chitest.in'
+    diag_file = script_location+'/diagnostic.txt'
 
     # This line is the same as for test_analyze()
     datafile = chi_input_writer("test", t, x, err, input_file)
@@ -315,4 +319,9 @@ def diagnostic_analyze(t, x, err):
     # do a runchi2, but ignore the piped output; we just want diag_file
     run_chi(datafile, diagnostic=diag_file)
     
-    return parse_diagnostic( diag_file )
+    return_value = parse_diagnostic( diag_file )
+
+    os.remove(datafile) # removing clutter
+    os.remove(diag_file) 
+
+    return return_value
