@@ -36,6 +36,47 @@ stat_t1.py
 stat_t2.py
 transient_disks.py
 
+## THE FOLLOWING IS CLONED FROM github/gitignore
+
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+### THE ABOVE IS COPIED FROM github/gitignore
+
 # Compiled source #
 ###################
 *.com
