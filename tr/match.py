@@ -17,7 +17,10 @@ import atpy
 import numpy as np
 #import math
 import matplotlib.pyplot as plt
-import coords
+try:
+    import coords
+except ImportError:
+    import astrolib.coords as coords
 
 where = np.where
 sect = np.intersect1d
