@@ -1112,7 +1112,10 @@ def lsp_power (table, sid, season=0, upper_frequency=0.5,
     ax_h.set_xscale('log')
     ax_k.set_xscale('log')
 
-    ax_j.set_title(name)
+    if name != '':
+        ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
     ax_k.set_xlabel("Period (days)")
     ax_h.set_ylabel("Periodogram Power")
 
@@ -1252,7 +1255,11 @@ def fx2_periodogram (table, sid, season=0,
     ax_h.set_xscale('log')
     ax_k.set_xscale('log')
 
-    ax_j.set_title(name)
+    if name != '':
+        ax_j.set_title(name)
+    else:
+        ax_j.set_title(str(sid))
+
     ax_k.set_xlabel("Period (days)")
     ax_h.set_ylabel(r"$\chi^2$ reduction")
 
