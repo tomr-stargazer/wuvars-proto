@@ -613,11 +613,11 @@ def make_sidset ( table ) :
     return np.array(list(set(table.SOURCEID)))
 
     
-def base_lookup (table):
+def base_lookup (table, sourceid_offset=44027700000000):
     """ makes a really basic lookup table if you're too lazy"""
 
     sidarr = np.array( list( set( table.SOURCEID ) ) )
-    names = sidarr - 44027700000000L
+    names = sidarr - sourceid_offset
 
     Lookup = atpy.Table()
     Lookup.add_column("SOURCEID", sidarr)
