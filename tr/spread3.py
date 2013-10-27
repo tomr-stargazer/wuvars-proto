@@ -1037,7 +1037,6 @@ def spreadsheet_write_efficient(n_splits, table, lookup,
         table_i = table.where((table.SOURCEID % n_splits) == i)
         lookup_i = lookup.where((lookup.SOURCEID % n_splits) == i)
 
-        #        print (table_i, lookup_i, True, args, kwargs)
         spreadsheet_i = spreadsheet_write(table_i, lookup_i, nowrite=True, 
                                           *args, **kwargs)
         now = datetime.datetime.strftime(datetime.datetime.now(),
