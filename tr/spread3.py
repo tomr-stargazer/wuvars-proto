@@ -625,8 +625,8 @@ def base_lookup (table):
 
 
 def spreadsheet_write (table, lookup, season, outfile, flags=0,
-                       Test=False, rob=False, per=False, 
-                       graded=False, colorslope=False):
+                       nowrite=False, Test=False,
+                       rob=False, per=False, graded=False, colorslope=False):
     """ 
     Makes my spreadsheet! Basically with a big forloop.
 
@@ -648,6 +648,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
         What filename to save spreadsheet to.
     flags : int, optional 
         Maximum ppErrBit quality flags to use (default 0)
+    nowrite : bool, optional
+        Return the output table instead of writing it?
+        (default False). 
     Test : bool, optional
         Whether to exit after 30 sources and save to a dummy location
         (default False). Useful for performance/sanity testing.
@@ -667,7 +670,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
       
     Returns
     -------
-    None (but writes an output file to `outfile`)
+    Output : atpy.Table, or None
+        Either returns the output table (if nowrite==True) or 
+        writes the output table to `outfile` and returns None.
 
     Note: possibly crashes if given any stars with only 
     1 observation and per=True.
@@ -989,10 +994,13 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     # Output.add_column('hpp_max', hpp_max)
     # Output.add_column('kpp_max', kpp_max)
 
-    Output.write(outfile, overwrite=True)
-    print "Wrote output to %s" % outfile
+    if nowrite:
+        return Output
+    else:
+        Output.write(outfile, overwrite=True)
+        print "Wrote output to %s" % outfile
 
-    return
+        return
 
 def spread_write_test (table, lookup, flags=0) :
     """ Tests spreadsheet_write."""
