@@ -1040,8 +1040,8 @@ def spreadsheet_write_efficient(n_splits, table, lookup,
         spreadsheet_i = spreadsheet_write(table_i, lookup_i, nowrite=True, 
                                           *args, **kwargs)
         now = datetime.datetime.strftime(datetime.datetime.now(),
-                                         "%Y-%m-%d %H:%M:%S")
-        print "finished chunk %d at %s" % (i, now)
+                                         "%m-%d %H:%M:%S")
+        print "part %d: %s. " % (i, now)
 
         sub_spreadsheets.append(spreadsheet_i)
 
