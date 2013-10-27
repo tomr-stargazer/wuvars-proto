@@ -38,6 +38,8 @@ Procedure for adding a parameter to spread3:
 
 from __future__ import division
 
+import datetime
+
 import numpy as np
 
 import atpy
@@ -1007,3 +1009,45 @@ def spread_write_test (table, lookup, flags=0) :
 
     test_path = '/home/trice/reu/DATA/Merged_Catalogs/spreadsheet/test.fits'
     spreadsheet_write (table, lookup, -1, test_path, flags=flags, Test=True)
+
+def spreadsheet_write_efficient(n_splits, table, lookup, 
+                                *args, **kwargs):
+    """
+    Speeds up spreadsheet_write by splitting into subtables.
+
+    Parameters
+    ----------
+    n_splits : int
+        How many sub-tables to split the master table into.
+    table : atpy.Table
+        Table with time-series photometry
+    lookup : atpy.Table
+        Table of interesting sources and their names
+        (must contain columns "SOURCEID" and "Designation")
+
+    """
+
+    if n_splits > len(lookup):
+        raise ValueError("Too many subsplits!")
+    
+    sub_spreadsheets = []
+    
+    for i in range(n_splits):
+
+        table_i = table.where((table.SOURCEID % n_splits) == i)
+        lookup_i = lookup.where((lookup.SOURCEID % n_splits) == i)
+
+        #        print (table_i, lookup_i, True, args, kwargs)
+        spreadsheet_i = spreadsheet_write(table_i, lookup_i, nowrite=True, 
+                                          *args, **kwargs)
+        now = datetime.datetime.strftime(datetime.datetime.now(),
+                                         "%Y-%m-%d %H:%M:%S")
+        print "finished chunk %d at %s" % (i, now)
+
+        sub_spreadsheets.append(spreadsheet_i)
+
+    agglomerated_spreadsheet = sub_spreadsheets[0]
+    for sub_spreadsheet in sub_spreadsheets[1:]:
+        agglomerated_spreadsheet.append(sub_spreadsheet)
+
+    return agglomerated_spreadsheet
