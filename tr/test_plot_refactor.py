@@ -39,7 +39,22 @@ def test_5():
     
     pass # will be "new plot"
 
-tests = [test_1, test_2, test_3, test_4, test_5]
+def test_6():
+    plot3.graded_phase(variables_photometry, ukvar_spread.SOURCEID[6], 
+                       color_slope=True, period=7.244539,
+                       name='graded_phase: color_slope=True, ONCvar 7')
+
+    pass # will be "new plot"
+
+def test_7():
+    plot3.graded_phase(variables_photometry, ukvar_spread.SOURCEID[6], 
+                       timecolor='time', period=7.244539,
+                       name='graded_phase: timecolor="time", ONCvar 7')
+
+    pass # will be "new plot"
+    
+
+tests = [test_1, test_2, test_3, test_4, test_5, test_6, test_7]
 
 for t in tests:
     t()
