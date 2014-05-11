@@ -33,53 +33,19 @@ class StarData(object):
         if len(self.s_table) == 0:
             raise ValueError("no data here")
 
-  #       """
-        # if abridged: 
-        #     date_offset = 54034
-        #     abridger_stuff = abridger(self.s_table, 54034, flags=256)
-
-        #     ab_s2sub = abridger_stuff[0]
-        #     ab_s3sub = abridger_stuff[1]
-        #     ab_s1s2line = abridger_stuff[2]
-        #     ab_s2s3line = abridger_stuff[3]
-        #     ab_xticks = abridger_stuff[4]
-        #     ab_xticklab = abridger_stuff[5]
-        #     ab_xlim = abridger_stuff[6] """
-        
-        ## Let's do the 3 lightcurve bands.
-
-        ### Initializing variables. Most of the following are done twice:
         # Once with no errors (normal),
         # once with small errors (info).
 
         ## First: normal
-
         # Use band_cut to get relevant data chunks.
-
-
         j_table = band_cut(self.s_table, 'j', max_flag=0)
         h_table = band_cut(self.s_table, 'h', max_flag=0)
         k_table = band_cut(self.s_table, 'k', max_flag=0)
-
-
-        # The Julian date for CE  2000 January  1 00:00:00.0 UT is
-        # JD 2451544.500000
-        # (i.e. MJD 51544.0)
 
         # get a date (x-axis) for each plot
         self.jdate = j_table.MEANMJDOBS
         self.hdate = h_table.MEANMJDOBS
         self.kdate = k_table.MEANMJDOBS
-
-        # """
-        # if abridged:
-        #     jdate[jdate > 54300-date_offset] -= ab_s2sub
-        #     jdate[jdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        #     hdate[hdate > 54300-date_offset] -= ab_s2sub 
-        #     hdate[hdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        #     kdate[kdate > 54300-date_offset] -= ab_s2sub 
-        #     kdate[kdate > (54600-date_offset) - ab_s2sub] -= ab_s3sub """
-
         
         # get a magnitude (y-axis) for each plot
         self.jcol = j_table.JAPERMAG3
@@ -97,44 +63,16 @@ class StarData(object):
         self.hflag = h_table.HPPERRBITS
         self.kflag = k_table.KPPERRBITS
 
-        # Get the grade, unless timecolor overrides
-        # """
-        # if timecolor:
-        #     jgrade = np.zeros_like(j_table.JAPERMAG3)
-        #     hgrade = np.zeros_like(h_table.HAPERMAG3)
-        #     kgrade = np.zeros_like(k_table.KAPERMAG3)
-        # else:
-        #     jgrade = j_table.JGRADE
-        #     hgrade = h_table.HGRADE
-        #     kgrade = k_table.KGRADE """
- 
         ## Second: info
-
-        # Use band_cut to get relevant data chunks.
-
         j_table_info = band_cut(self.s_table, 'j', min_flag=1, max_flag=256)
         h_table_info = band_cut(self.s_table, 'h', min_flag=1, max_flag=256)
         k_table_info = band_cut(self.s_table, 'k', min_flag=1, max_flag=256)
-
-
-        # The Julian date for CE  2000 January  1 00:00:00.0 UT is
-        # JD 2451544.500000
-        # (i.e. MJD 51544.0)
 
         # get a date (x-axis) for each plot
         self.jdate_info = j_table_info.MEANMJDOBS
         self.hdate_info = h_table_info.MEANMJDOBS
         self.kdate_info = k_table_info.MEANMJDOBS
 
-        # """
-        # if abridged:
-        #     jdate_info[jdate_info > 54300-date_offset] -= ab_s2sub
-        #     jdate_info[jdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        #     hdate_info[hdate_info > 54300-date_offset] -= ab_s2sub 
-        #     hdate_info[hdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub
-        #     kdate_info[kdate_info > 54300-date_offset] -= ab_s2sub 
-        #     kdate_info[kdate_info > (54600-date_offset) - ab_s2sub] -= ab_s3sub """
-        
         # get a magnitude (y-axis) for each plot
         self.jcol_info = j_table_info.JAPERMAG3
         self.hcol_info = h_table_info.HAPERMAG3
@@ -149,18 +87,6 @@ class StarData(object):
         self.jflag = j_table_info.JPPERRBITS
         self.hflag = h_table_info.HPPERRBITS
         self.kflag = k_table_info.KPPERRBITS
-
-        # Get the grade, unless timecolor overrides
-        # """
-        # if timecolor:
-        #     jgrade_info = np.zeros_like(j_table_info.JAPERMAG3)
-        #     hgrade_info = np.zeros_like(h_table_info.HAPERMAG3)
-        #     kgrade_info = np.zeros_like(k_table_info.KAPERMAG3)
-        # else:
-        #     jgrade_info = j_table_info.JGRADE
-        #     hgrade_info = h_table_info.HGRADE
-        #     kgrade_info = k_table_info.KGRADE
-        #     """
 
         # We'll use different data-cuts for the two different plots.
         # Relevant comment: I made an executive call to include only
@@ -188,10 +114,63 @@ class StarData(object):
         self.jmh_jhk_err = jhk_table.JMHPNTERR
         self.hmk_jhk_err = jhk_table.HMKPNTERR
 
+    def get_columns(self, band, flags=0):
+
+        b_table = band_cut(self.s_table, band, max_flag=flags)
+
+        columns = {}
+
+        columns['date'] = b_table['MEANMJDOBS']
+        columns['mag'] = b_table['{0}APERMAG3'.format(band.upper())]
+        columns['err'] = b_table['{0}APERMAG3ERR'.format(band.upper())]
+        columns['flag'] = b_table['{0}PPERRBITS'.format(band.upper())]
+        try:
+            columns['grade'] = b_table['{0}GRADE'.format(band.upper())]
+        except:
+            columns['grade'] = np.zeros_like(columns['mag'])
+
+        return columns
 
 
+def lightcurve_axes_with_info(stardata, band, axes, colorscale, 
+                              cmap, vmin, vmax):
 
 
+        columns = stardata.get_columns(band, flags=0)
+        columns_info = stardata.get_columns(band, flags=256)
+
+        if len(columns['date']) > 0:
+            # First, plot the errorbars, with no markers, in the background:
+            axes.errorbar( columns['date'], columns['mag'], marker=None,
+                                 yerr=columns['err'], fmt=None, ecolor='k',
+                                 zorder=0)
+            
+            # Next, scatter the points themselves, colored re:grade :
+            axes.scatter( columns['date'], columns['mag'], cmap=cmap,
+                                c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
+
+        if len(columns_info['date']) > 0:
+            # First, plot the errorbars, with no markers, in the background:
+            axes.errorbar( columns_info['date'], columns_info['mag'], 
+                                 yerr=columns_info['err'], marker=None,
+                                 fmt=None, ecolor='k', zorder=0)
+
+            # Next, scatter the points themselves, colored re:grade :
+            axes.scatter( columns_info['date'], columns_info['mag'], 
+                                marker='d', 
+                                c=columns_info[colorscale], cmap=cmap, 
+                                vmin=vmin, vmax=vmax, zorder=100)
+
+        # Finally, flip it (magnitudes are backwards).
+        axes.invert_yaxis()
+
+        # And plot the dotted lines, if relevant.
+        # if abridged:
+        #     d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "k--",
+        #                     scaley=False, scalex=False)
+
+        #     d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "k--",
+        #                     scaley=False, scalex=False)
 
 def basic_lc(stardata):
 
@@ -199,6 +178,9 @@ def basic_lc(stardata):
     timecolor = True
     time_cmap = 'jet'
     color_slope = False
+
+    if timecolor is True:
+        colorscale='date'
 
     fig = plt.figure(figsize = (10, 6), dpi=80, facecolor='w', edgecolor='k')
 
@@ -229,16 +211,9 @@ def basic_lc(stardata):
         d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
-    d_fmt = {'j': 'bo', 'h': 'go', 'k': 'ro'}
-    d_fmt_info = {'j': 'b'+fmt_info, 'h':'g'+fmt_info, 'k': 'o'+fmt_info}
 
     d_date = {'j': stardata.jdate, 'h': stardata.hdate, 'k': stardata.kdate}
-    d_col = {'j': stardata.jcol, 'h': stardata.hcol, 'k': stardata.kcol}
-    d_err = {'j': stardata.jerr, 'h': stardata.herr, 'k': stardata.kerr}
-
     d_date_info = {'j': stardata.jdate_info, 'h': stardata.hdate_info, 'k': stardata.kdate_info}
-    d_col_info = {'j': stardata.jcol_info, 'h': stardata.hcol_info, 'k': stardata.kcol_info}
-    d_err_info = {'j': stardata.jerr_info, 'h': stardata.herr_info, 'k': stardata.kerr_info}
 
     # d_rawdate = {'j': stardata.raw_jdate, 'h': stardata.raw_hdate, 'k': stardata.raw_kdate}
     # d_rawdate_info = {
@@ -266,43 +241,9 @@ def basic_lc(stardata):
 
     for band in ['j', 'h', 'k']:
 
-        # Plot a generic band and reduce the size of the code!
+        lightcurve_axes_with_info(stardata, band, d_ax[band], colorscale, 
+                                  cmap=d_cmap[band], vmin=vmin, vmax=vmax)
 
-        if len(d_date[band]) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-
-            d_ax[band].errorbar( d_date[band], d_col[band], marker=None,
-                                 yerr=d_err[band], fmt=None, ecolor='k',
-                                 zorder=0)
-            
-            # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date[band], d_col[band], cmap=d_cmap[band],
-                                c=d_c[band], vmin=vmin, vmax=vmax, zorder=100)
-
-            
-
-        if len(d_date_info[band]) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-            d_ax[band].errorbar( d_date_info[band], d_col_info[band], 
-                                 yerr=d_err_info[band], marker=None,
-                                 fmt=None, ecolor='k', zorder=0)
-
-            # Next, scatter the points themselves, colored re:grade :
-            d_ax[band].scatter( d_date_info[band], d_col_info[band], 
-                                marker=fmt_info, 
-                                c=d_c_info[band], cmap=d_cmap[band], 
-                                vmin=vmin, vmax=vmax, zorder=100)
-
-        # Finally, flip it (magnitudes are backwards).
-        d_ax[band].invert_yaxis()
-
-        # And plot the dotted lines, if relevant.
-        # if abridged:
-        #     d_ax[band].plot([ab_s1s2line, ab_s1s2line], [0,30], "k--",
-        #                     scaley=False, scalex=False)
-
-        #     d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "k--",
-        #                     scaley=False, scalex=False)
             
 
 
