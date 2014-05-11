@@ -56,6 +56,7 @@ class StarData(object):
 
         # Use band_cut to get relevant data chunks.
 
+
         j_table = band_cut(self.s_table, 'j', max_flag=0)
         h_table = band_cut(self.s_table, 'h', max_flag=0)
         k_table = band_cut(self.s_table, 'k', max_flag=0)
@@ -161,6 +162,34 @@ class StarData(object):
         #     kgrade_info = k_table_info.KGRADE
         #     """
 
+        # We'll use different data-cuts for the two different plots.
+        # Relevant comment: I made an executive call to include only
+        # 'normal' and 'info'-flagged data in the C-C and C-M plots
+        # (i.e. max_flag=256 in all relevant bands).
+        
+        # In the color-mag plot, we need data where H and K are defined 
+        # everywhere. That's two cuts.
+        khk_table = band_cut( band_cut(self.s_table, 'k', max_flag=256),
+                              'h', max_flag=256)
+
+        self.khkdate = khk_table.MEANMJDOBS #- date_offset
+        self.k_khk = khk_table.KAPERMAG3
+        self.hmk_khk = khk_table.HMKPNT
+        self.k_khk_err = khk_table.KAPERMAG3ERR
+        self.hmk_khk_err = khk_table.HMKPNTERR
+
+        # In the color-color plot, we need data where J, H, and K are
+        # defined everywhere. That's one more cut.
+        jhk_table = band_cut(khk_table, 'j', max_flag=256)
+
+        self.jhkdate = jhk_table.MEANMJDOBS #- date_offset
+        self.jmh_jhk = jhk_table.JMHPNT
+        self.hmk_jhk = jhk_table.HMKPNT
+        self.jmh_jhk_err = jhk_table.JMHPNTERR
+        self.hmk_jhk_err = jhk_table.HMKPNTERR
+
+
+
 
 
 
@@ -169,6 +198,7 @@ def basic_lc(stardata):
     # kwargs defaulting over
     timecolor = True
     time_cmap = 'jet'
+    color_slope = False
 
     fig = plt.figure(figsize = (10, 6), dpi=80, facecolor='w', edgecolor='k')
 
@@ -278,60 +308,34 @@ def basic_lc(stardata):
 
     ## Now let's do the 2 color-mag/color-color plots.
 
-    # We'll use different data-cuts for the two different plots.
-    # Relevant comment: I made an executive call to include only
-    # 'normal' and 'info'-flagged data in the C-C and C-M plots
-    # (i.e. max_flag=256 in all relevant bands).
-    
-    # In the color-mag plot, we need data where H and K are defined 
-    # everywhere. That's two cuts.
-    khk_table = band_cut( band_cut(stardata.s_table, 'k', max_flag=256),
-                          'h', max_flag=256)
-
-    khkdate = khk_table.MEANMJDOBS #- date_offset
-    k_khk = khk_table.KAPERMAG3
-    hmk_khk = khk_table.HMKPNT
-    k_khk_err = khk_table.KAPERMAG3ERR
-    hmk_khk_err = khk_table.HMKPNTERR
-
-    # In the color-color plot, we need data where J, H, and K are
-    # defined everywhere. That's one more cut.
-    jhk_table = band_cut(khk_table, 'j', max_flag=256)
-
-    jhkdate = jhk_table.MEANMJDOBS #- date_offset
-    jmh_jhk = jhk_table.JMHPNT
-    hmk_jhk = jhk_table.HMKPNT
-    jmh_jhk_err = jhk_table.JMHPNTERR
-    hmk_jhk_err = jhk_table.HMKPNTERR
-
     # Plot J-H vs H-K using the "jhk_" variables.
     try:
-        plot_trajectory_core( ax_jhk, hmk_jhk, jmh_jhk, jhkdate,
+        plot_trajectory_core( ax_jhk, stardata.hmk_jhk, stardata.jmh_jhk, stardata.jhkdate,
                               vmin=color_vmin, vmax=color_vmax) 
 
         if color_slope:
             jhk_slope, jhk_intercept, slope_err = (
-                slope(hmk_jhk, jmh_jhk, hmk_jhk_err, jmh_jhk_err,
+                slope(stardata.hmk_jhk, stardata.jmh_jhk, stardata.hmk_jhk_err, stardata.jmh_jhk_err,
                       verbose=False) )
             
             ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
                         ':', scalex=False, scaley=False)
             
-    except Exception:
-        print "JHK plot broke!"
+    except Exception as e:
+        print "JHK plot broke: {0}".format(e)
         pass
         
 
     # Plot K vs H-K using the "khk_" variables.
     try:
-        plot_trajectory_core( ax_khk, hmk_khk, k_khk, khkdate,
+        plot_trajectory_core( ax_khk, stardata.hmk_khk, stardata.k_khk, stardata.khkdate,
                               ms=False, ctts=False, 
                               vmin=color_vmin, vmax=color_vmax) 
 
         # plot boundaries are manually set for readability, if necessary
         if len(ax_khk.get_xticks()) > 7:
-            khk_xmin = np.floor(hmk_khk.min() * 0.95 * 20)/20.
-            khk_xmax = np.ceil( hmk_khk.max() * 1.05 * 20)/20.
+            khk_xmin = np.floor(stardata.hmk_khk.min() * 0.95 * 20)/20.
+            khk_xmax = np.ceil( stardata.hmk_khk.max() * 1.05 * 20)/20.
 
             khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
             ax_khk.set_xticks(khk_xticks)
@@ -344,8 +348,8 @@ def basic_lc(stardata):
             ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
                         '--', scalex=False, scaley=False)
     
-    except Exception:
-        print "KHK plot broke!"
+    except Exception as e:
+        print "KHK plot broke: {0}".format(e)
         pass
     ax_khk.invert_yaxis()
 
