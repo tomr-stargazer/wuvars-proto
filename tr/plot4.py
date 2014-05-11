@@ -33,61 +33,6 @@ class StarData(object):
         if len(self.s_table) == 0:
             raise ValueError("no data here")
 
-        # Once with no errors (normal),
-        # once with small errors (info).
-
-        ## First: normal
-        # Use band_cut to get relevant data chunks.
-        j_table = band_cut(self.s_table, 'j', max_flag=0)
-        h_table = band_cut(self.s_table, 'h', max_flag=0)
-        k_table = band_cut(self.s_table, 'k', max_flag=0)
-
-        # get a date (x-axis) for each plot
-        self.jdate = j_table.MEANMJDOBS
-        self.hdate = h_table.MEANMJDOBS
-        self.kdate = k_table.MEANMJDOBS
-        
-        # get a magnitude (y-axis) for each plot
-        self.jcol = j_table.JAPERMAG3
-        self.hcol = h_table.HAPERMAG3
-        self.kcol = k_table.KAPERMAG3
-
-        # get a magnitude error (y-error) for each plot
-        self.jerr = j_table.JAPERMAG3ERR
-        self.herr = h_table.HAPERMAG3ERR
-        self.kerr = k_table.KAPERMAG3ERR
-
-        # get a quality flag for each plot
-        # (aftercomment: not sure we're going to ever use these)
-        self.jflag = j_table.JPPERRBITS
-        self.hflag = h_table.HPPERRBITS
-        self.kflag = k_table.KPPERRBITS
-
-        ## Second: info
-        j_table_info = band_cut(self.s_table, 'j', min_flag=1, max_flag=256)
-        h_table_info = band_cut(self.s_table, 'h', min_flag=1, max_flag=256)
-        k_table_info = band_cut(self.s_table, 'k', min_flag=1, max_flag=256)
-
-        # get a date (x-axis) for each plot
-        self.jdate_info = j_table_info.MEANMJDOBS
-        self.hdate_info = h_table_info.MEANMJDOBS
-        self.kdate_info = k_table_info.MEANMJDOBS
-
-        # get a magnitude (y-axis) for each plot
-        self.jcol_info = j_table_info.JAPERMAG3
-        self.hcol_info = h_table_info.HAPERMAG3
-        self.kcol_info = k_table_info.KAPERMAG3
-
-        # get a magnitude error (y-error) for each plot
-        self.jerr_info = j_table_info.JAPERMAG3ERR
-        self.herr_info = h_table_info.HAPERMAG3ERR
-        self.kerr_info = k_table_info.KAPERMAG3ERR
-
-        # get a quality flag for each plot
-        self.jflag = j_table_info.JPPERRBITS
-        self.hflag = h_table_info.HPPERRBITS
-        self.kflag = k_table_info.KPPERRBITS
-
         # We'll use different data-cuts for the two different plots.
         # Relevant comment: I made an executive call to include only
         # 'normal' and 'info'-flagged data in the C-C and C-M plots
@@ -114,9 +59,9 @@ class StarData(object):
         self.jmh_jhk_err = jhk_table.JMHPNTERR
         self.hmk_jhk_err = jhk_table.HMKPNTERR
 
-    def get_columns(self, band, flags=0):
+    def get_columns(self, band, max_flag=0, min_flag=0):
 
-        b_table = band_cut(self.s_table, band, max_flag=flags)
+        b_table = band_cut(self.s_table, band, max_flag=max_flag, min_flag=min_flag)
 
         columns = {}
 
@@ -136,8 +81,8 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
                               cmap, vmin, vmax):
 
 
-        columns = stardata.get_columns(band, flags=0)
-        columns_info = stardata.get_columns(band, flags=256)
+        columns = stardata.get_columns(band, max_flag=0)
+        columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
 
         if len(columns['date']) > 0:
             # First, plot the errorbars, with no markers, in the background:
@@ -181,6 +126,8 @@ def basic_lc(stardata):
 
     if timecolor is True:
         colorscale='date'
+    else:
+        colorscale='grade'
 
     fig = plt.figure(figsize = (10, 6), dpi=80, facecolor='w', edgecolor='k')
 
@@ -212,9 +159,6 @@ def basic_lc(stardata):
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
 
-    d_date = {'j': stardata.jdate, 'h': stardata.hdate, 'k': stardata.kdate}
-    d_date_info = {'j': stardata.jdate_info, 'h': stardata.hdate_info, 'k': stardata.kdate_info}
-
     # d_rawdate = {'j': stardata.raw_jdate, 'h': stardata.raw_hdate, 'k': stardata.raw_kdate}
     # d_rawdate_info = {
     #     'j': stardata.raw_jdate_info, 'h': stardata.raw_hdate_info, 'k': stardata.raw_kdate_info}
@@ -229,13 +173,9 @@ def basic_lc(stardata):
     #      d_rawdate_info['j'].max(), d_rawdate_info['h'].max(), d_rawdate_info['k'].max()))
 
     if timecolor:
-        d_c = d_date
-        d_c_info = d_date_info
         vmin = color_vmin
         vmax = color_vmax
     else:
-        d_c = d_grade
-        d_c_info = d_grade_info
         vmin = 0.8
         vmax = 1
 
