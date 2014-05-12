@@ -22,50 +22,50 @@ from color_slope import slope
 
 class StarData(object):
 
-    def __init__(self, table, sid):
+    """
+    StarData contains the data for a single star,
+    plus methods to access its relevant columns.
+    Used primarily for making light curves -- probably
+    too slow for running computations.
 
-        self.table = table
+    Example use:
+
+        >>> from plot4 import StarData. basic_lc
+        >>> sd = StarData(variables_photometry, 44199508443333, date_offset=54034)
+        >>> light_curve = basic_lc(sd)
+
+    """
+
+    def __init__(self, table, sid, date_offset=0):
+
         self.sid = sid
+        self.date_offset = date_offset
 
         # Loading data
         self.s_table = data_cut (table, sid)
 
+        self.min_date = self.s_table.MEANMJDOBS.min() - date_offset
+        self.max_date = self.s_table.MEANMJDOBS.max() - date_offset        
+
         if len(self.s_table) == 0:
             raise ValueError("no data here")
 
-        # We'll use different data-cuts for the two different plots.
-        # Relevant comment: I made an executive call to include only
-        # 'normal' and 'info'-flagged data in the C-C and C-M plots
-        # (i.e. max_flag=256 in all relevant bands).
-        
-        # In the color-mag plot, we need data where H and K are defined 
-        # everywhere. That's two cuts.
-        khk_table = band_cut( band_cut(self.s_table, 'k', max_flag=256),
-                              'h', max_flag=256)
-
-        self.khkdate = khk_table.MEANMJDOBS #- date_offset
-        self.k_khk = khk_table.KAPERMAG3
-        self.hmk_khk = khk_table.HMKPNT
-        self.k_khk_err = khk_table.KAPERMAG3ERR
-        self.hmk_khk_err = khk_table.HMKPNTERR
-
-        # In the color-color plot, we need data where J, H, and K are
-        # defined everywhere. That's one more cut.
-        jhk_table = band_cut(khk_table, 'j', max_flag=256)
-
-        self.jhkdate = jhk_table.MEANMJDOBS #- date_offset
-        self.jmh_jhk = jhk_table.JMHPNT
-        self.hmk_jhk = jhk_table.HMKPNT
-        self.jmh_jhk_err = jhk_table.JMHPNTERR
-        self.hmk_jhk_err = jhk_table.HMKPNTERR
-
     def get_columns(self, band, max_flag=0, min_flag=0):
+        """
+        Returns relevant columns for a given photometry band.
+
+        `band` must be 'j', 'h', or 'k'.
+
+        """
+
+        if band.lower() not in ('j', 'h', 'k'):
+            raise ValueError("Invalid band: {0} not in ('j', 'h', 'k')".format(band.lower()))
 
         b_table = band_cut(self.s_table, band, max_flag=max_flag, min_flag=min_flag)
 
         columns = {}
 
-        columns['date'] = b_table['MEANMJDOBS']
+        columns['date'] = b_table['MEANMJDOBS'] - self.date_offset
         columns['mag'] = b_table['{0}APERMAG3'.format(band.upper())]
         columns['err'] = b_table['{0}APERMAG3ERR'.format(band.upper())]
         columns['flag'] = b_table['{0}PPERRBITS'.format(band.upper())]
@@ -77,23 +77,22 @@ class StarData(object):
         return columns
 
     def get_colormag_columns(self, band, max_flag=256, min_flag=0):
+        """
+        Returns relevant columns for color+magnitude pair.
 
-        # So we have some options: we might want 
-        # J, J-H,
-        # K, H-K 
+        """
+
         if band.lower() not in ('jjh', 'khk'):
             raise ValueError("Invalid color-mag combination: {0} not in ('jjh', 'khk')".format(band.lower()))
 
-        mag = band.lower()[0]
-        red = band.lower()[-1]
-        blue = band.lower()[-2]
+        mag, blue, red = band.lower()
 
         colormag_table = band_cut(band_cut(self.s_table, red, max_flag=max_flag),
                                   blue, max_flag=max_flag)
 
         columns = {}
 
-        columns['date'] = colormag_table['MEANMJDOBS'] #- date_offset
+        columns['date'] = colormag_table['MEANMJDOBS'] - self.date_offset
         columns['mag'] = colormag_table['{0}APERMAG3'.format(mag.upper())]
         columns['color'] = colormag_table['{0}M{1}PNT'.format(blue.upper(), red.upper())]
         columns['mag_err'] = colormag_table['{0}APERMAG3ERR'.format(mag.upper())]
@@ -103,13 +102,17 @@ class StarData(object):
 
 
     def get_colorcolor_columns(self, max_flag=256, min_flag=0):
+        """
+        Returns relevant columns for the J-H, H-K color+color pair.
+
+        """
 
         colorcolor_table = band_cut(band_cut(band_cut(self.s_table, 'k', max_flag=max_flag),
                                   'h', max_flag=max_flag), 'j', max_flag=max_flag)
 
         columns = {}
 
-        columns['date'] = colorcolor_table['MEANMJDOBS'] #- date_offset
+        columns['date'] = colorcolor_table['MEANMJDOBS'] - self.date_offset
         columns['jmh'] = colorcolor_table['JMHPNT']
         columns['hmk'] = colorcolor_table['HMKPNT']
         columns['jmh_err'] = colorcolor_table['JMHPNTERR']
@@ -131,7 +134,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
                                  yerr=columns['err'], fmt=None, ecolor='k',
                                  zorder=0)
             
-            # Next, scatter the points themselves, colored re:grade :
+            # Next, scatter the points themselves, colored re:colorscale :
             axes.scatter( columns['date'], columns['mag'], cmap=cmap,
                                 c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
 
@@ -141,7 +144,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
                                  yerr=columns_info['err'], marker=None,
                                  fmt=None, ecolor='k', zorder=0)
 
-            # Next, scatter the points themselves, colored re:grade :
+            # Next, scatter the points themselves, colored re:colorscale :
             axes.scatter( columns_info['date'], columns_info['mag'], 
                                 marker='d', 
                                 c=columns_info[colorscale], cmap=cmap, 
@@ -149,6 +152,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
 
         # Finally, flip it (magnitudes are backwards).
         axes.invert_yaxis()
+        axes.get_figure().canvas.draw()
 
         # And plot the dotted lines, if relevant.
         # if abridged:
@@ -189,6 +193,7 @@ def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slop
         print "Color-mag plot broke: {0}".format(e)
         pass
     axes.invert_yaxis()
+    axes.get_figure().canvas.draw()    
 
 
 def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False):
@@ -215,12 +220,14 @@ def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=Fa
             
             axes.plot([0, 6], [jmh_intercept, jmh_intercept + 6*colorcolor_slope],
                         '--', scalex=False, scaley=False)
+
+        axes.get_figure().canvas.draw()            
     
     except Exception as e:
         print "Color-color plot broke: {0}".format(e)
         pass
 
-def basic_lc(stardata, timecolor=True, custom_xlabel=False, date_offset=0):
+def basic_lc(stardata, timecolor=True, custom_xlabel=False):
 
     # kwargs defaulting over
     time_cmap = 'jet'
@@ -246,13 +253,6 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False, date_offset=0):
     ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
     ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
 
-    ## Start plotting. 
-    # Every band will take two steps: putting the errorbars
-    
-    fmt_info = 'd'
-#    fmt_warn = '.'
-
-    # Let's define dictionaries
     d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
     
     if timecolor:
@@ -262,18 +262,8 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False, date_offset=0):
     elif type(d_cmap) is not dict:
         d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
 
-    # d_rawdate = {'j': stardata.raw_jdate, 'h': stardata.raw_hdate, 'k': stardata.raw_kdate}
-    # d_rawdate_info = {
-    #     'j': stardata.raw_jdate_info, 'h': stardata.raw_hdate_info, 'k': stardata.raw_kdate_info}
-
-    color_vmin = stardata.s_table.MEANMJDOBS.min() 
-    color_vmax = stardata.s_table.MEANMJDOBS.max() 
-    # min(
-    #     (d_rawdate['j'].min(), d_rawdate['h'].min(), d_rawdate['k'].min(),
-    #      d_rawdate_info['j'].min(), d_rawdate_info['h'].min(), d_rawdate_info['k'].min()))
-    # color_vmax = max(
-    #     (d_rawdate['j'].max(), d_rawdate['h'].max(), d_rawdate['k'].max(),
-    #      d_rawdate_info['j'].max(), d_rawdate_info['h'].max(), d_rawdate_info['k'].max()))
+    color_vmin = stardata.min_date
+    color_vmax = stardata.max_date 
 
     if timecolor:
         vmin = color_vmin
@@ -300,7 +290,7 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False, date_offset=0):
     if custom_xlabel:
         ax_k.set_xlabel( custom_xlabel )
     else:
-        ax_k.set_xlabel( "Time (MJD - %.1f)" % date_offset )
+        ax_k.set_xlabel( "Time (MJD - %.1f)" % stardata.date_offset )
 
     ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
