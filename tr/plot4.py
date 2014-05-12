@@ -308,3 +308,44 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False):
     fig.ax_khk = ax_khk
 
     return fig
+
+def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
+                     colorscale='date'):
+
+    xdim, ydim = dimensions
+
+    if len(stardatas) != (xdim * ydim):
+        raise ValueError("Product of dimensions must equal number of input stars")
+    elif len(stardatas) != len(bands):
+        raise ValueError("List of bands should be same length as list of input stars")
+
+    fig = plt.figure(figsize = (1.5+xdim*5, 0.6+ydim*1.8), 
+                     dpi=80, facecolor='w', edgecolor='k')
+
+    for stardata, band, i in zip(stardatas, bands, range(1, 1+xdim*ydim)):
+
+        if i == 1: sharex = None
+        else: sharex = fig.ax1
+
+        ax = fig.add_subplot(xdim, ydim, i, sharex=sharex)
+
+        if colorscale == 'date':
+            vmin = stardata.min_date
+            vmax = stardata.max_date
+        elif colorscale == 'grade':
+            vmin = 0.8
+            vmax = 1.0
+
+        lightcurve_axes_with_info(stardata, band, ax, 'date', 
+                                  cmap=cmap, vmin=vmin, vmax=vmax)
+
+        ax.set_ylabel( band.upper(),{'rotation':'horizontal', 'fontsize':'large'} )
+        if i <= xdim*ydim - xdim:
+            plt.setp(ax.get_xticklabels(), visible=False)
+
+        fig.__setattr__('ax{0}'.format(i), ax)
+
+    fig.canvas.draw()
+    return fig
+
+
