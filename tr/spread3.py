@@ -37,11 +37,9 @@ Procedure for adding a parameter to spread3:
 """
 
 from __future__ import division
-
 import datetime
 
 import numpy as np
-
 import atpy
 
 import stetson
