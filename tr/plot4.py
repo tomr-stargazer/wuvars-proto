@@ -76,6 +76,47 @@ class StarData(object):
 
         return columns
 
+    def get_colormag_columns(self, band, max_flag=256, min_flag=0):
+
+        # So we have some options: we might want 
+        # J, J-H,
+        # K, H-K 
+        if band.lower() not in ('jjh', 'khk'):
+            raise ValueError("Invalid color-mag combination: {0} not in ('jjh', 'khk')".format(band.lower()))
+
+        mag = band.lower()[0]
+        red = band.lower()[-1]
+        blue = band.lower()[-2]
+
+        colormag_table = band_cut(band_cut(self.s_table, red, max_flag=max_flag),
+                                  blue, max_flag=max_flag)
+
+        columns = {}
+
+        columns['date'] = colormag_table['MEANMJDOBS'] #- date_offset
+        columns['mag'] = colormag_table['{0}APERMAG3'.format(mag.upper())]
+        columns['color'] = colormag_table['{0}M{1}PNT'.format(blue.upper(), red.upper())]
+        columns['mag_err'] = colormag_table['{0}APERMAG3ERR'.format(mag.upper())]
+        columns['color_err'] = colormag_table['{0}M{1}PNTERR'.format(blue.upper(), red.upper())]
+
+        return columns
+
+
+    def get_colorcolor_columns(self, max_flag=256, min_flag=0):
+
+        colorcolor_table = band_cut(band_cut(band_cut(self.s_table, 'k', max_flag=max_flag),
+                                  'h', max_flag=max_flag), 'j', max_flag=max_flag)
+
+        columns = {}
+
+        columns['date'] = colorcolor_table['MEANMJDOBS'] #- date_offset
+        columns['jmh'] = colorcolor_table['JMHPNT']
+        columns['hmk'] = colorcolor_table['HMKPNT']
+        columns['jmh_err'] = colorcolor_table['JMHPNTERR']
+        columns['hmk_err'] = colorcolor_table['HMKPNTERR']
+
+        return columns
+
 
 def lightcurve_axes_with_info(stardata, band, axes, colorscale, 
                               cmap, vmin, vmax):
@@ -117,12 +158,74 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
         #     d_ax[band].plot([ab_s2s3line, ab_s2s3line], [0,30], "k--",
         #                     scaley=False, scalex=False)
 
-def basic_lc(stardata):
+
+def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False):
+
+    colormag_columns = stardata.get_colormag_columns(band, max_flag=256)
+
+    try:
+        plot_trajectory_core(axes, colormag_columns['color'], colormag_columns['mag'], colormag_columns['date'],
+                             ms=False, ctts=False, 
+                             vmin=vmin, vmax=vmax)
+
+        # plot boundaries are manually set for readability, if necessary
+        if len(axes.get_xticks()) > 7:
+            xmin = np.floor(colormag_columns['color'].min() * 0.95 * 20)/20.
+            xmax = np.ceil( colormag_columns['color'].max() * 1.05 * 20)/20.
+
+            xticks = np.linspace(xmin, xmax, 6)
+            axes.set_xticks(xticks)
+
+        if color_slope:
+            slope_color, color_intercept, slope_err = (
+                slope(colormag_columns['color'], colormag_columns['mag'], 
+                      colormag_columns['color_err'], colormag_columns['mag_err'],
+                      verbose=False) )
+            
+            axes.plot([0, 6], [color_intercept, color_intercept + 6*slope_color],
+                        '--', scalex=False, scaley=False)
+    
+    except Exception as e:
+        print "Color-mag plot broke: {0}".format(e)
+        pass
+    axes.invert_yaxis()
+
+
+def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False):
+
+    colorcolor_columns = stardata.get_colorcolor_columns(max_flag=256)
+
+    try:
+        plot_trajectory_core(axes, colorcolor_columns['hmk'], colorcolor_columns['jmh'], colorcolor_columns['date'],
+                             vmin=vmin, vmax=vmax)
+
+        # plot boundaries are manually set for readability, if necessary
+        if len(axes.get_xticks()) > 7:
+            xmin = np.floor(colorcolor_columns['hmk'].min() * 0.95 * 20)/20.
+            xmax = np.ceil( colorcolor_columns['hmk'].max() * 1.05 * 20)/20.
+
+            xticks = np.linspace(xmin, xmax, 6)
+            axes.set_xticks(xticks)
+
+        if color_slope:
+            colorcolor_slope, jmh_intercept, slope_err = (
+                slope(colorcolor_columns['hmk'], colorcolor_columns['jmh'], 
+                      colorcolor_columns['hmk_err'], colorcolor_columns['jmh_err'],
+                      verbose=False) )
+            
+            axes.plot([0, 6], [jmh_intercept, jmh_intercept + 6*colorcolor_slope],
+                        '--', scalex=False, scaley=False)
+    
+    except Exception as e:
+        print "Color-color plot broke: {0}".format(e)
+        pass
+
+def basic_lc(stardata, timecolor=True):
 
     # kwargs defaulting over
-    timecolor = True
     time_cmap = 'jet'
     color_slope = False
+    d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}
 
     if timecolor is True:
         colorscale='date'
@@ -184,55 +287,56 @@ def basic_lc(stardata):
         lightcurve_axes_with_info(stardata, band, d_ax[band], colorscale, 
                                   cmap=d_cmap[band], vmin=vmin, vmax=vmax)
 
-            
-
-
     ## Now let's do the 2 color-mag/color-color plots.
 
-    # Plot J-H vs H-K using the "jhk_" variables.
-    try:
-        plot_trajectory_core( ax_jhk, stardata.hmk_jhk, stardata.jmh_jhk, stardata.jhkdate,
-                              vmin=color_vmin, vmax=color_vmax) 
+    colorcolor_axes(stardata, ax_jhk, colorscale, cmap='jet', vmin=vmin, vmax=vmax)
+    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap='jet', vmin=vmin, vmax=vmax)
 
-        if color_slope:
-            jhk_slope, jhk_intercept, slope_err = (
-                slope(stardata.hmk_jhk, stardata.jmh_jhk, stardata.hmk_jhk_err, stardata.jmh_jhk_err,
-                      verbose=False) )
+
+    # # Plot J-H vs H-K using the "jhk_" variables.
+    # try:
+    #     plot_trajectory_core( ax_jhk, stardata.hmk_jhk, stardata.jmh_jhk, stardata.jhkdate,
+    #                           vmin=color_vmin, vmax=color_vmax) 
+
+    #     if color_slope:
+    #         jhk_slope, jhk_intercept, slope_err = (
+    #             slope(stardata.hmk_jhk, stardata.jmh_jhk, stardata.hmk_jhk_err, stardata.jmh_jhk_err,
+    #                   verbose=False) )
             
-            ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
-                        ':', scalex=False, scaley=False)
+    #         ax_jhk.plot([0, 6], [jhk_intercept, jhk_intercept + 6*jhk_slope], 
+    #                     ':', scalex=False, scaley=False)
             
-    except Exception as e:
-        print "JHK plot broke: {0}".format(e)
-        pass
+    # except Exception as e:
+    #     print "JHK plot broke: {0}".format(e)
+    #     pass
         
 
-    # Plot K vs H-K using the "khk_" variables.
-    try:
-        plot_trajectory_core( ax_khk, stardata.hmk_khk, stardata.k_khk, stardata.khkdate,
-                              ms=False, ctts=False, 
-                              vmin=color_vmin, vmax=color_vmax) 
+    # # Plot K vs H-K using the "khk_" variables.
+    # try:
+    #     plot_trajectory_core( ax_khk, stardata.hmk_khk, stardata.k_khk, stardata.khkdate,
+    #                           ms=False, ctts=False, 
+    #                           vmin=color_vmin, vmax=color_vmax) 
 
-        # plot boundaries are manually set for readability, if necessary
-        if len(ax_khk.get_xticks()) > 7:
-            khk_xmin = np.floor(stardata.hmk_khk.min() * 0.95 * 20)/20.
-            khk_xmax = np.ceil( stardata.hmk_khk.max() * 1.05 * 20)/20.
+    #     # plot boundaries are manually set for readability, if necessary
+    #     if len(ax_khk.get_xticks()) > 7:
+    #         khk_xmin = np.floor(stardata.hmk_khk.min() * 0.95 * 20)/20.
+    #         khk_xmax = np.ceil( stardata.hmk_khk.max() * 1.05 * 20)/20.
 
-            khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
-            ax_khk.set_xticks(khk_xticks)
+    #         khk_xticks = np.linspace(khk_xmin, khk_xmax, 6)
+    #         ax_khk.set_xticks(khk_xticks)
 
-        if color_slope:
-            khk_slope, khk_intercept, slope_err = (
-                slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
-                      verbose=False) )
+    #     if color_slope:
+    #         khk_slope, khk_intercept, slope_err = (
+    #             slope(hmk_khk, k_khk, hmk_khk_err, k_khk_err,
+    #                   verbose=False) )
             
-            ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
-                        '--', scalex=False, scaley=False)
+    #         ax_khk.plot([0, 6], [khk_intercept, khk_intercept + 6*khk_slope],
+    #                     '--', scalex=False, scaley=False)
     
-    except Exception as e:
-        print "KHK plot broke: {0}".format(e)
-        pass
-    ax_khk.invert_yaxis()
+    # except Exception as e:
+    #     print "KHK plot broke: {0}".format(e)
+    #     pass
+    # ax_khk.invert_yaxis()
 
     # Hide the bad labels...
     plt.setp(ax_j.get_xticklabels(), visible=False)
