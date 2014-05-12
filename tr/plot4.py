@@ -152,6 +152,12 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale,
 
         # Finally, flip it (magnitudes are backwards).
         axes.invert_yaxis()
+
+        # don't go negative on the X axis ever
+        if stardata.min_date >= 0:
+            xlims = axes.get_xlim()
+            axes.set_xlim( max(xlims[0], 0), xlims[1] )
+
         axes.get_figure().canvas.draw()
 
         # And plot the dotted lines, if relevant.
@@ -228,6 +234,12 @@ def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=Fa
         pass
 
 def basic_lc(stardata, timecolor=True, custom_xlabel=False):
+    """
+    Proof-of-concept reimplementation of plot3.graded_lc.
+
+    Fewer bells and whistles, but looks perfect, and is much cleaner.
+
+    """
 
     # kwargs defaulting over
     time_cmap = 'jet'
@@ -314,20 +326,20 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
 
     xdim, ydim = dimensions
 
-    if len(stardatas) != (xdim * ydim):
-        raise ValueError("Product of dimensions must equal number of input stars")
+    if len(stardatas) > (xdim * ydim):
+        raise ValueError("Number of input stars should be less than or equal to product of dimensions")
     elif len(stardatas) != len(bands):
         raise ValueError("List of bands should be same length as list of input stars")
 
     fig = plt.figure(figsize = (1.5+xdim*5, 0.6+ydim*1.8), 
                      dpi=80, facecolor='w', edgecolor='k')
 
-    for stardata, band, i in zip(stardatas, bands, range(1, 1+xdim*ydim)):
+    for stardata, band, i in zip(stardatas, bands, range(1, 1+len(stardatas))):
 
         if i == 1: sharex = None
         else: sharex = fig.ax1
 
-        ax = fig.add_subplot(xdim, ydim, i, sharex=sharex)
+        ax = fig.add_subplot(ydim, xdim, i, sharex=sharex)
 
         if colorscale == 'date':
             vmin = stardata.min_date
@@ -340,6 +352,7 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
                                   cmap=cmap, vmin=vmin, vmax=vmax)
 
         ax.set_ylabel( band.upper(),{'rotation':'horizontal', 'fontsize':'large'} )
+
         if i <= xdim*ydim - xdim:
             plt.setp(ax.get_xticklabels(), visible=False)
 
