@@ -334,19 +334,20 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
     fig = plt.figure(figsize = (1.5+xdim*5, 0.6+ydim*1.8), 
                      dpi=80, facecolor='w', edgecolor='k')
 
+    # single colorscale across all light curves
+    if colorscale == 'date':
+        vmin = min([stardata.min_date for stardata in stardatas])
+        vmax = max([stardata.max_date for stardata in stardatas])
+    elif colorscale == 'grade':
+        vmin = 0.8
+        vmax = 1.0
+
     for stardata, band, i in zip(stardatas, bands, range(1, 1+len(stardatas))):
 
         if i == 1: sharex = None
         else: sharex = fig.ax1
 
         ax = fig.add_subplot(ydim, xdim, i, sharex=sharex)
-
-        if colorscale == 'date':
-            vmin = stardata.min_date
-            vmax = stardata.max_date
-        elif colorscale == 'grade':
-            vmin = 0.8
-            vmax = 1.0
 
         lightcurve_axes_with_info(stardata, band, ax, 'date', 
                                   cmap=cmap, vmin=vmin, vmax=vmax)
