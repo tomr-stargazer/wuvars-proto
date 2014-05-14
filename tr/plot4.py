@@ -394,6 +394,8 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
         ax.set_xticks(fig.xticks)
         ax.set_xticklabels(fig.xticklabels)
 
+        ax.text(0.7, 0.1, stardata.name, transform=ax.transAxes, fontsize='small')
+
     fig.canvas.draw()
     return fig
 
