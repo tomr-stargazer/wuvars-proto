@@ -340,8 +340,7 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False):
 
     return fig
 
-def multi_lightcurve(stardatas, dimensions, bands, cmap='jet',
-                     colorscale='date'):
+def multi_lightcurve(stardatas, dimensions, bands, cmap='jet', colorscale='date'):
 
     xdim, ydim = dimensions
 
