@@ -188,6 +188,60 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax
         axes.get_figure().canvas.draw()
 
 
+def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, vmax, offset=0):
+
+    columns = stardata.get_columns(band, max_flag=0)
+    columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
+
+    date = np.copy(columns['date'])
+    date_info = np.copy(columns_info['date'])
+
+    phase = ((date % period) / period + offset) % 1
+    phase_info = ((date_info % period) / period + offset) % 1
+
+    if len(columns['date']) > 0:
+        # plot the greyed-out versions on left and right
+        axes.errorbar(phase-1,columns['mag'],yerr=columns['err'],fmt='o', mfc='0.7',mec='0.7', 
+                     ecolor='0.7', ms=6, zorder=-5)
+        axes.errorbar(phase+1,columns['mag'],yerr=columns['err'],fmt='o', mfc='0.7',mec='0.7', 
+                     ecolor='0.7', ms=6, zorder=-5)
+
+        # First, plot the errorbars, with no markers, in the background:
+        axes.errorbar(phase, columns['mag'], marker=None,
+                      yerr=columns['err'], fmt=None, ecolor='k',
+                      zorder=0)
+        # Next, scatter the points themselves, colored re:colorscale :
+        axes.scatter(phase, columns['mag'], cmap=cmap,
+                     c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
+
+    if len(columns_info['date']) > 0:
+        # plot the greyed-out versions on left and right
+        axes.errorbar(phase_info-1,columns_info['mag'],yerr=columns_info['err'],fmt='d', mfc='0.7',mec='0.7', 
+                     ecolor='0.7', ms=6, zorder=-5)
+        axes.errorbar(phase_info+1,columns_info['mag'],yerr=columns_info['err'],fmt='d', mfc='0.7',mec='0.7', 
+                     ecolor='0.7', ms=6, zorder=-5)
+
+        # First, plot the errorbars, with no markers, in the background:
+        axes.errorbar(phase_info, columns_info['mag'], 
+                      yerr=columns_info['err'], marker=None,
+                      fmt=None, ecolor='k', zorder=0)
+        # Next, scatter the points themselves, colored re:colorscale :
+        axes.scatter(phase_info, columns_info['mag'], 
+                     marker='d', 
+                     c=columns_info[colorscale], cmap=cmap, 
+                     vmin=vmin, vmax=vmax, zorder=100)
+
+    # Finally, flip it (magnitudes are backwards).
+    axes.invert_yaxis()
+
+    axes.set_xticks( [0, 0.5, 1] )
+    axes.set_xticks( np.arange(-.5,1.5,.1), minor=True)
+
+    axes.set_xlim(-0.25, 1.25)
+
+    axes.get_figure().canvas.draw()
+
+
 def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False):
 
     colormag_columns = stardata.get_colormag_columns(band, max_flag=256)
@@ -339,6 +393,92 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False):
     fig.ax_khk = ax_khk
 
     return fig
+
+def basic_phase(stardata, period, timecolor=True, offset=0):
+    """
+    Proof-of-concept reimplementation of plot3.graded_phase.
+
+    This is begging to be refactored, with basic_lc, into a single function.
+    Proposed idea: Make the single function pretty general and take a couple extra "messy"
+    kwargs, and then define basic_phase and basic_lc as partials of the generic version.
+
+    """
+
+    # kwargs defaulting over
+    time_cmap = 'jet'
+    color_slope = False
+    d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}
+
+    if timecolor is True:
+        colorscale='date'
+    else:
+        colorscale='grade'
+
+    fig = plt.figure(figsize = (10, 6), dpi=80, facecolor='w', edgecolor='k')
+
+    bottom = 0.1
+    height = .25
+    left = 0.075
+    width = 0.5
+
+    ax_k = fig.add_axes( (left, bottom, width, height) )
+    ax_h = fig.add_axes( (left, bottom+.3, width, height), sharex=ax_k )
+    ax_j = fig.add_axes( (left, bottom+.6, width, height), sharex=ax_k )
+    
+    ax_jhk = fig.add_axes( (.65, bottom, .3, .375) )
+    ax_khk = fig.add_axes( (.65, bottom+.475, .3, .375) )
+
+    d_ax = {'j': ax_j, 'h': ax_h, 'k': ax_k}
+    
+    if timecolor:
+        d_cmap = {'j': time_cmap, 'h': time_cmap, 'k': time_cmap}
+    elif type(d_cmap) is str:
+        d_cmap = {'j': d_cmap, 'h': d_cmap, 'k': d_cmap}
+    elif type(d_cmap) is not dict:
+        d_cmap = {'j': d_cmap[0], 'h': d_cmap[1], 'k': d_cmap[2]}
+
+    color_vmin = stardata.min_date
+    color_vmax = stardata.max_date
+
+    if timecolor:
+        vmin = color_vmin
+        vmax = color_vmax
+    else:
+        vmin = 0.8
+        vmax = 1
+
+    for band in ['j', 'h', 'k']:
+        phase_axes_with_info(stardata, band, period, d_ax[band], colorscale, 
+                             cmap=d_cmap[band], vmin=vmin, vmax=vmax, offset=offset)
+
+    colorcolor_axes(stardata, ax_jhk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+                    color_slope=color_slope)
+    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+                  color_slope=color_slope)
+
+    # Hide the bad labels...
+    plt.setp(ax_j.get_xticklabels(), visible=False)
+    plt.setp(ax_h.get_xticklabels(), visible=False)
+
+    ax_j.set_ylabel( "J",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
+    ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
+
+    ax_k.set_xlabel("Phase (Period = {0:.4} days)".format(period))
+
+    ax_jhk.set_xlabel( "H-K" )
+    ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
+    ax_khk.set_xlabel( "H-K" )
+    ax_khk.set_ylabel( "K")#, {'rotation':'horizontal'})
+
+    fig.ax_k = ax_k
+    fig.ax_h = ax_h
+    fig.ax_j = ax_j
+    fig.ax_jhk = ax_jhk
+    fig.ax_khk = ax_khk
+
+    return fig
+
 
 def multi_lightcurve(stardatas, dimensions, bands, cmap='jet', colorscale='date'):
 
