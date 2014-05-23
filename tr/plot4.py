@@ -128,64 +128,63 @@ class StarData(object):
 
 def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax):
 
+    columns = stardata.get_columns(band, max_flag=0)
+    columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
 
-        columns = stardata.get_columns(band, max_flag=0)
-        columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
+    date = np.copy(columns['date'])
+    date_info = np.copy(columns_info['date'])
 
-        date = np.copy(columns['date'])
-        date_info = np.copy(columns_info['date'])
+    if stardata.abridger:
+        bridge = stardata.abridger(stardata, flags=256)
+        # this logic should get moved into StarData...
+        # The following uses the signature of wuvars-proto/tr/abridger.py
+        date[date > bridge['s1_s2_bound']] -= bridge['s2_subtraction_factor']
+        date[date > bridge['s2_s3_bound'] - bridge['s2_subtraction_factor']] -= bridge['s3_subtraction_factor']
+        date_info[date_info > bridge['s1_s2_bound']] -= bridge['s2_subtraction_factor']
+        date_info[date_info > bridge['s2_s3_bound'] - bridge['s2_subtraction_factor']] -= bridge['s3_subtraction_factor']
 
-        if stardata.abridger:
-            bridge = stardata.abridger(stardata, flags=256)
-            # this logic should get moved into StarData...
-            # The following uses the signature of wuvars-proto/tr/abridger.py
-            date[date > bridge['s1_s2_bound']] -= bridge['s2_subtraction_factor']
-            date[date > bridge['s2_s3_bound'] - bridge['s2_subtraction_factor']] -= bridge['s3_subtraction_factor']
-            date_info[date_info > bridge['s1_s2_bound']] -= bridge['s2_subtraction_factor']
-            date_info[date_info > bridge['s2_s3_bound'] - bridge['s2_subtraction_factor']] -= bridge['s3_subtraction_factor']
+    if len(columns['date']) > 0:
+        # First, plot the errorbars, with no markers, in the background:
+        axes.errorbar( date, columns['mag'], marker=None,
+                             yerr=columns['err'], fmt=None, ecolor='k',
+                             zorder=0)
+        
+        # Next, scatter the points themselves, colored re:colorscale :
+        axes.scatter( date, columns['mag'], cmap=cmap,
+                            c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
 
-        if len(columns['date']) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-            axes.errorbar( date, columns['mag'], marker=None,
-                                 yerr=columns['err'], fmt=None, ecolor='k',
-                                 zorder=0)
-            
-            # Next, scatter the points themselves, colored re:colorscale :
-            axes.scatter( date, columns['mag'], cmap=cmap,
-                                c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
+    if len(columns_info['date']) > 0:
+        # First, plot the errorbars, with no markers, in the background:
+        axes.errorbar( date_info, columns_info['mag'], 
+                             yerr=columns_info['err'], marker=None,
+                             fmt=None, ecolor='k', zorder=0)
 
-        if len(columns_info['date']) > 0:
-            # First, plot the errorbars, with no markers, in the background:
-            axes.errorbar( date_info, columns_info['mag'], 
-                                 yerr=columns_info['err'], marker=None,
-                                 fmt=None, ecolor='k', zorder=0)
+        # Next, scatter the points themselves, colored re:colorscale :
+        axes.scatter( date_info, columns_info['mag'], 
+                            marker='d', 
+                            c=columns_info[colorscale], cmap=cmap, 
+                            vmin=vmin, vmax=vmax, zorder=100)
 
-            # Next, scatter the points themselves, colored re:colorscale :
-            axes.scatter( date_info, columns_info['mag'], 
-                                marker='d', 
-                                c=columns_info[colorscale], cmap=cmap, 
-                                vmin=vmin, vmax=vmax, zorder=100)
+    # Finally, flip it (magnitudes are backwards).
+    axes.invert_yaxis()
 
-        # Finally, flip it (magnitudes are backwards).
-        axes.invert_yaxis()
+    # don't go negative on the X axis ever
+    if stardata.min_date >= 0:
+        xlims = axes.get_xlim()
+        axes.set_xlim( max(xlims[0], 0), xlims[1] )
 
-        # don't go negative on the X axis ever
-        if stardata.min_date >= 0:
-            xlims = axes.get_xlim()
-            axes.set_xlim( max(xlims[0], 0), xlims[1] )
+    if stardata.abridger:
+        axes.plot([bridge['s1_s2_line'], bridge['s1_s2_line']], [0,30], "k--",
+                        scaley=False, scalex=False)
 
-        if stardata.abridger:
-            axes.plot([bridge['s1_s2_line'], bridge['s1_s2_line']], [0,30], "k--",
-                            scaley=False, scalex=False)
+        axes.plot([bridge['s2_s3_line'], bridge['s2_s3_line']], [0,30], "k--",
+                        scaley=False, scalex=False)
 
-            axes.plot([bridge['s2_s3_line'], bridge['s2_s3_line']], [0,30], "k--",
-                            scaley=False, scalex=False)
+        axes.set_xticks(bridge['xticks'])
+        axes.set_xticklabels(bridge['xticklabels'])
+        axes.set_xlim(bridge['xlim_bounds'])
 
-            axes.set_xticks(bridge['xticks'])
-            axes.set_xticklabels(bridge['xticklabels'])
-            axes.set_xlim(bridge['xlim_bounds'])
-
-        axes.get_figure().canvas.draw()
+    axes.get_figure().canvas.draw()
 
 
 def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, vmax, offset=0):
