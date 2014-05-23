@@ -8,8 +8,6 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
-import atpy
-
 from helpers3 import data_cut, band_cut
 from plot2 import plot_trajectory_core
 from chi2 import test_analyze, diagnostic_analyze
@@ -115,7 +113,7 @@ class StarData(object):
         """
 
         colorcolor_table = band_cut(band_cut(band_cut(self.s_table, 'k', max_flag=max_flag),
-                                  'h', max_flag=max_flag), 'j', max_flag=max_flag)
+                                    'h', max_flag=max_flag), 'j', max_flag=max_flag)
 
         columns = {}
 
@@ -128,8 +126,7 @@ class StarData(object):
         return columns
 
 
-def lightcurve_axes_with_info(stardata, band, axes, colorscale, 
-                              cmap, vmin, vmax):
+def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax):
 
 
         columns = stardata.get_columns(band, max_flag=0)
