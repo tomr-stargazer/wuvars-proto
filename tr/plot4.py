@@ -463,7 +463,7 @@ def basic_phase(stardata, period, timecolor=True, offset=0):
     ax_h.set_ylabel( "H",{'rotation':'horizontal', 'fontsize':'large'} )
     ax_k.set_ylabel( "K",{'rotation':'horizontal', 'fontsize':'large'} )
 
-    ax_k.set_xlabel("Phase (Period = {0:.4} days)".format(period))
+    ax_k.set_xlabel("Phase (Period = {0:.4} days)".format(float(period)))
 
     ax_jhk.set_xlabel( "H-K" )
     ax_jhk.set_ylabel( "J-H")#, {'rotation':'horizontal'})
