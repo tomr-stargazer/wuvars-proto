@@ -42,13 +42,13 @@ class StarData(object):
         # Loading data
         self.s_table = data_cut (table, sid)
 
+        if len(self.s_table) == 0:
+            raise ValueError("no data here")
+
         self.min_date = self.s_table.MEANMJDOBS.min() - date_offset
         self.max_date = self.s_table.MEANMJDOBS.max() - date_offset
 
         self.abridger = abridger
-
-        if len(self.s_table) == 0:
-            raise ValueError("no data here")
 
         if name is not None:
             self.name = name
