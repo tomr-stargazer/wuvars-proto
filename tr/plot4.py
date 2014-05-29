@@ -241,14 +241,14 @@ def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, v
     axes.get_figure().canvas.draw()
 
 
-def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False):
+def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True):
 
     colormag_columns = stardata.get_colormag_columns(band, max_flag=256)
 
     try:
         plot_trajectory_core(axes, colormag_columns['color'], colormag_columns['mag'], colormag_columns['date'],
                              ms=False, ctts=False, 
-                             vmin=vmin, vmax=vmax)
+                             vmin=vmin, vmax=vmax, colorbar=colorbar)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -274,13 +274,13 @@ def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slop
     axes.get_figure().canvas.draw()    
 
 
-def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False):
+def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True):
 
     colorcolor_columns = stardata.get_colorcolor_columns(max_flag=256)
 
     try:
         plot_trajectory_core(axes, colorcolor_columns['hmk'], colorcolor_columns['jmh'], colorcolor_columns['date'],
-                             vmin=vmin, vmax=vmax)
+                             vmin=vmin, vmax=vmax, colorbar=colorbar)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
