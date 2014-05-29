@@ -534,4 +534,63 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet', colorscale='date'
     fig.canvas.draw()
     return fig
 
+def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', colorscale='date', figscale=1):
+
+    ydim = len(stardatas)
+
+    if offsets is None:
+        offsets = [0]*ydim
+
+    if not (len(stardatas) == len(bands) == len(periods)):
+        raise ValueError("Length of input lists should be the same for stardatas, bands & periods")
+
+    # single colorscale across all light curves
+    if colorscale == 'date':
+        vmin = min([stardata.min_date for stardata in stardatas])
+        vmax = max([stardata.max_date for stardata in stardatas])
+    elif colorscale == 'grade':
+        vmin = 0.8
+        vmax = 1.0
+
+    x_stretch_factor = 1.875
+    y_stretch_factor = 1 + (ydim-1)*0.9
+
+    fig = plt.figure(figsize = (10*x_stretch_factor*figscale, 2.4*y_stretch_factor*figscale), dpi=80, facecolor='w', edgecolor='k')
+
+    bottom = 0.15 / y_stretch_factor
+    height = 0.7 / y_stretch_factor
+    left = 0.075 / x_stretch_factor
+    phase_width = 0.5 / x_stretch_factor
+    lc_width = 0.6 / x_stretch_factor
+
+    color_left = 3*left + lc_width+phase_width
+    color_width = 0.2 / x_stretch_factor
+
+    axes_dicts = []
+
+    for stardata, band, period, offset, i in zip(stardatas, bands, periods, offsets, range(ydim)):
+
+        axes_dict = {}
+        local_bottom = bottom + (height+bottom)*i
+
+        axes_dict['phase'] = fig.add_axes( (left, local_bottom, phase_width, height) )
+        axes_dict['lc'] = fig.add_axes( (left+(left+phase_width), local_bottom, lc_width, height) )
+
+        axes_dict['jhk'] = fig.add_axes( (color_left, local_bottom, color_width, height) )
+        axes_dict['khk'] = fig.add_axes( (left+color_left+color_width, local_bottom, color_width, height) )
+
+        axes_dicts.append(axes_dict)
+
+        lightcurve_axes_with_info(stardata, band, axes_dict['lc'], colorscale, 
+                                  cmap=cmap, vmin=vmin, vmax=vmax)
+        phase_axes_with_info(stardata, band, period, axes_dict['phase'], colorscale, offset=offset,
+                             cmap=cmap, vmin=vmin, vmax=vmax)
+        colormag_axes(stardata, 'khk', axes_dict['khk'], colorscale,
+                      cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False)
+        colorcolor_axes(stardata, axes_dict['jhk'], colorscale,
+                        cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False)
+
+
+
+    return fig
 
