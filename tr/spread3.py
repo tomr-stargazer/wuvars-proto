@@ -38,6 +38,7 @@ Procedure for adding a parameter to spread3:
 
 from __future__ import division
 import datetime
+import os
 
 import numpy as np
 import atpy
@@ -619,7 +620,7 @@ def base_lookup (table, sourceid_offset=44027700000000):
 
     Lookup = atpy.Table()
     Lookup.add_column("SOURCEID", sidarr)
-    Lookup.add_column("Designation", names )
+    Lookup.add_column("Designation", names.astype(int) )
 
     return Lookup
 
@@ -994,6 +995,9 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
     # Output.add_column('hpp_max', hpp_max)
     # Output.add_column('kpp_max', kpp_max)
 
+    if Output.table_name is None:
+        Output.table_name = 'spreadsheet'
+
     if nowrite:
         return Output
     else:
@@ -1005,7 +1009,7 @@ def spreadsheet_write (table, lookup, season, outfile, flags=0,
 def spread_write_test (table, lookup, flags=0) :
     """ Tests spreadsheet_write."""
 
-    test_path = '/home/trice/reu/DATA/Merged_Catalogs/spreadsheet/test.fits'
+    test_path = os.path.expanduser('~/Dropbox/Bo_Tom/NGC1333/WSERV7/DATA/spreadsheet/test.fits')
     spreadsheet_write (table, lookup, -1, test_path, flags=flags, Test=True)
 
 def spreadsheet_write_efficient(n_splits, table, lookup, 
