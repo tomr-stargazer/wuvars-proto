@@ -55,6 +55,9 @@ class StarData(object):
         else:
             self.name = ''
 
+    def Stetson(self):
+        return Stetson_machine(self.s_table, flags=256)[0]
+
     def get_columns(self, band, max_flag=0, min_flag=0):
         """
         Returns relevant columns for a given photometry band.
