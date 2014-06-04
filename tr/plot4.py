@@ -129,7 +129,7 @@ class StarData(object):
         return columns
 
 
-def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax):
+def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax, **kwargs):
 
     columns = stardata.get_columns(band, max_flag=0)
     columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
@@ -154,7 +154,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax
         
         # Next, scatter the points themselves, colored re:colorscale :
         axes.scatter( date, columns['mag'], cmap=cmap,
-                            c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
+                            c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100, **kwargs)
 
     if len(columns_info['date']) > 0:
         # First, plot the errorbars, with no markers, in the background:
@@ -166,7 +166,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax
         axes.scatter( date_info, columns_info['mag'], 
                             marker='d', 
                             c=columns_info[colorscale], cmap=cmap, 
-                            vmin=vmin, vmax=vmax, zorder=100)
+                            vmin=vmin, vmax=vmax, zorder=100, **kwargs)
 
     # Finally, flip it (magnitudes are backwards).
     axes.invert_yaxis()
@@ -190,7 +190,7 @@ def lightcurve_axes_with_info(stardata, band, axes, colorscale, cmap, vmin, vmax
     axes.get_figure().canvas.draw()
 
 
-def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, vmax, offset=0):
+def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, vmax, offset=0, **kwargs):
 
     columns = stardata.get_columns(band, max_flag=0)
     columns_info = stardata.get_columns(band, min_flag=1, max_flag=256)
@@ -214,7 +214,7 @@ def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, v
                       zorder=0)
         # Next, scatter the points themselves, colored re:colorscale :
         axes.scatter(phase, columns['mag'], cmap=cmap,
-                     c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100)
+                     c=columns[colorscale], vmin=vmin, vmax=vmax, zorder=100, **kwargs)
 
     if len(columns_info['date']) > 0:
         # plot the greyed-out versions on left and right
@@ -231,7 +231,7 @@ def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, v
         axes.scatter(phase_info, columns_info['mag'], 
                      marker='d', 
                      c=columns_info[colorscale], cmap=cmap, 
-                     vmin=vmin, vmax=vmax, zorder=100)
+                     vmin=vmin, vmax=vmax, zorder=100, **kwargs)
 
     # Finally, flip it (magnitudes are backwards).
     axes.invert_yaxis()
@@ -244,14 +244,14 @@ def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, v
     axes.get_figure().canvas.draw()
 
 
-def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True):
+def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, **kwargs):
 
     colormag_columns = stardata.get_colormag_columns(band, max_flag=256)
 
     try:
         plot_trajectory_core(axes, colormag_columns['color'], colormag_columns['mag'], colormag_columns['date'],
                              ms=False, ctts=False, 
-                             vmin=vmin, vmax=vmax, colorbar=colorbar)
+                             vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -277,13 +277,13 @@ def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slop
     axes.get_figure().canvas.draw()    
 
 
-def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True):
+def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, **kwargs):
 
     colorcolor_columns = stardata.get_colorcolor_columns(max_flag=256)
 
     try:
         plot_trajectory_core(axes, colorcolor_columns['hmk'], colorcolor_columns['jmh'], colorcolor_columns['date'],
-                             vmin=vmin, vmax=vmax, colorbar=colorbar)
+                             vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -585,16 +585,21 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
         axes_dicts.append(axes_dict)
 
         lightcurve_axes_with_info(stardata, band, axes_dict['lc'], colorscale, 
-                                  cmap=cmap, vmin=vmin, vmax=vmax)
+                                  cmap=cmap, vmin=vmin, vmax=vmax, s=20*figscale)
         phase_axes_with_info(stardata, band, period, axes_dict['phase'], colorscale, offset=offset,
-                             cmap=cmap, vmin=vmin, vmax=vmax)
+                             cmap=cmap, vmin=vmin, vmax=vmax, s=20*figscale)
         colormag_axes(stardata, 'khk', axes_dict['khk'], colorscale,
-                      cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False)
+                      cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False, s=10*figscale)
         colorcolor_axes(stardata, axes_dict['jhk'], colorscale,
-                        cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False)
+                        cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False, s=10*figscale)
 
+        for key in axes_dict:
+            fontsize = axes_dict[key].get_xticklabels()[0].get_fontsize()
+            axes_dict[key].tick_params(axis='both', which='major', labelsize=figscale * fontsize)
 
+    fig.canvas.draw()
 
+    fig.axes_dicts = axes_dicts
     return fig
 
 

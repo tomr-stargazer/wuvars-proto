@@ -100,7 +100,7 @@ def plot_trajectory_vanilla (ax, a_k=1, ctts=True):
 # Change the colorbar call to the figure method (figure it out) [ ]
 def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
                           fmt='k.', ms_hmk=ms_hmk, ms_jmh=ms_jmh, a_k=1,
-                          ms=True, ctts=True, colorbar=True, **kwargs):
+                          ms=True, ctts=True, colorbar=True, s=10, **kwargs):
     """ Plots the trajectory of some star in color-color space.
     
     Inputs:
@@ -143,7 +143,7 @@ def plot_trajectory_core (ax, hmk, jmh, c, cmap='jet', label="Time",
 
 
     # Then, plot the actual data we were given
-    sc = ax.scatter(hmk, jmh, c=c, marker='o', s=10, 
+    sc = ax.scatter(hmk, jmh, c=c, marker='o', s=s, 
                     cmap=cmap, edgecolors='none', **kwargs)
     if colorbar:
         cbar = plt.gcf().colorbar(sc, ax=ax) # This should really be changed to the method
