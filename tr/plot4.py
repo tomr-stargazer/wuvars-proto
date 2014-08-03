@@ -607,7 +607,7 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
 
     axes_dicts = []
 
-    for stardata, band, period, offset, i in zip(stardatas, bands, periods, offsets, range(ydim)):
+    for stardata, band, period, offset, i in reversed(zip(stardatas, bands, periods, offsets, reversed(range(ydim)))):
 
         axes_dict = {}
         local_bottom = bottom + (height+y_spacing)*i
