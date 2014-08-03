@@ -483,6 +483,23 @@ def basic_phase(stardata, period, timecolor=True, offset=0):
 
 
 def multi_lightcurve(stardatas, dimensions, bands, cmap='jet', colorscale='date'):
+    """
+    Makes a multi-panel "grid" of lightcurves. Each panel shows a single star's lc.
+
+    Parameters
+    ----------
+    stardatas : list of StarData
+    dimensions : (int, int) tuple
+    bands : list of str
+    cmap : str, optional
+    colorscale : {'date' | 'grade'}, optional
+
+    Returns
+    -------
+    fig : plt.Figure
+
+    """
+
 
     xdim, ydim = dimensions
 
@@ -538,6 +555,24 @@ def multi_lightcurve(stardatas, dimensions, bands, cmap='jet', colorscale='date'
     return fig
 
 def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', colorscale='date', figscale=1):
+    """
+    Makes a multi-panel lightcurve. Each line shows a single star's lc, phase, colormag.
+
+    Parameters
+    ----------
+    stardatas : list of StarData
+    bands : list of str
+    periods : list of float
+    offsets : (list of float) or None, optional
+    cmap : str, optional
+    colorscale : {'date' | 'grade'}, optional
+    figscale : float, optional
+
+    Returns
+    -------
+    fig : plt.Figure
+
+    """
 
     ydim = len(stardatas)
 
