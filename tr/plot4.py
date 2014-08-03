@@ -637,7 +637,7 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
             fontsize = axes_dict[key].get_xticklabels()[0].get_fontsize()
             axes_dict[key].tick_params(axis='both', which='major', labelsize=figscale * fontsize)
 
-`        # This song-and-dance gets all the lightcurves on a common x axis. Cloned from multi_lightcurve
+        # This song-and-dance gets all the lightcurves on a common x axis. Cloned from multi_lightcurve
         fig.lc_xlim = (min(fig.lc_xlim[0], axes_dict['lc'].get_xlim()[0]), max(fig.lc_xlim[1], axes_dict['lc'].get_xlim()[1]))
         if len(axes_dict['lc'].get_xticks()) > len(fig.lc_xticks):
             fig.lc_xticks = axes_dict['lc'].get_xticks()
