@@ -595,6 +595,10 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
 
     fig = plt.figure(figsize = (10*x_stretch_factor*figscale, 2.4*y_stretch_factor*figscale), dpi=80, facecolor='w', edgecolor='k')
 
+    fig.lc_xlim = (0,0)
+    fig.lc_xticks = []
+    fig.lc_xticklabels = []    
+
     bottom = 0.15 / y_stretch_factor
     y_spacing = 0.15 / y_stretch_factor
     height = 0.7 / y_stretch_factor
@@ -632,6 +636,17 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
         for key in axes_dict:
             fontsize = axes_dict[key].get_xticklabels()[0].get_fontsize()
             axes_dict[key].tick_params(axis='both', which='major', labelsize=figscale * fontsize)
+
+`        # This song-and-dance gets all the lightcurves on a common x axis. Cloned from multi_lightcurve
+        fig.lc_xlim = (min(fig.lc_xlim[0], axes_dict['lc'].get_xlim()[0]), max(fig.lc_xlim[1], axes_dict['lc'].get_xlim()[1]))
+        if len(axes_dict['lc'].get_xticks()) > len(fig.lc_xticks):
+            fig.lc_xticks = axes_dict['lc'].get_xticks()
+            fig.lc_xticklabels = [x.get_text() for x in axes_dict['lc'].get_xticklabels()]
+
+        axes_dict['lc'].set_xlim(fig.lc_xlim)
+        axes_dict['lc'].set_xticks(fig.lc_xticks)
+        axes_dict['lc'].set_xticklabels(fig.lc_xticklabels)
+
 
     fig.canvas.draw()
 
