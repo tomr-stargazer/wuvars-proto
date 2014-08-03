@@ -571,6 +571,8 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
     Returns
     -------
     fig : plt.Figure
+        has attributes `axes_dicts`, as well as the inputs `stardatas`, 
+        `bands`, `periods`, `offsets`. They are all lists.
 
     """
 
@@ -579,8 +581,8 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
     if offsets is None:
         offsets = [0]*ydim
 
-    if not (len(stardatas) == len(bands) == len(periods)):
-        raise ValueError("Length of input lists should be the same for stardatas, bands & periods")
+    if not (len(stardatas) == len(bands) == len(periods) == len(offsets)):
+        raise ValueError("Length of input lists should be the same for stardatas, bands, periods & offsets")
 
     # single colorscale across all light curves
     if colorscale == 'date':
@@ -650,7 +652,12 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
 
     fig.canvas.draw()
 
-    fig.axes_dicts = axes_dicts
+    fig.axes_dicts = axes_dicts[::-1]
+    fig.stardatas = stardatas
+    fig.bands = bands
+    fig.periods = periods
+    fig.offsets = offsets
+
     return fig
 
 
