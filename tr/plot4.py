@@ -661,6 +661,107 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
     return fig
 
 
+def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date', figscale=1):
+    """
+    Makes a multi-panel lightcurve. Each line shows a single star's lc, colormag, colorcolor.
+
+    Parameters
+    ----------
+    stardatas : list of StarData
+    bands : list of str
+    offsets : (list of float) or None, optional
+    cmap : str, optional
+    colorscale : {'date' | 'grade'}, optional
+    figscale : float, optional
+
+    Returns
+    -------
+    fig : plt.Figure
+        has attributes `axes_dicts`, as well as the inputs `stardatas`, 
+        `bands`, `offsets`. They are all lists.
+
+    """
+
+    ydim = len(stardatas)
+
+    if offsets is None:
+        offsets = [0]*ydim
+
+    if not (len(stardatas) == len(bands) == len(offsets)):
+        raise ValueError("Length of input lists should be the same for stardatas, bands & offsets")
+
+    # single colorscale across all light curves
+    if colorscale == 'date':
+        vmin = min([stardata.min_date for stardata in stardatas])
+        vmax = max([stardata.max_date for stardata in stardatas])
+    elif colorscale == 'grade':
+        vmin = 0.8
+        vmax = 1.0
+
+    x_stretch_factor = 1.3
+    y_stretch_factor = 1 + (ydim-1)*0.9
+
+    fig = plt.figure(figsize = (10*x_stretch_factor*figscale, 2.4*y_stretch_factor*figscale), dpi=80, facecolor='w', edgecolor='k')
+
+    fig.lc_xlim = (0,0)
+    fig.lc_xticks = []
+    fig.lc_xticklabels = []    
+
+    bottom = 0.15 / y_stretch_factor
+    y_spacing = 0.15 / y_stretch_factor
+    height = 0.7 / y_stretch_factor
+    left = 0.075 / x_stretch_factor
+    lc_width = 0.5 / x_stretch_factor
+
+    color_left = 3*left + lc_width
+    color_width = 0.2 / x_stretch_factor
+
+    axes_dicts = []
+
+    for stardata, band, offset, i in reversed(zip(stardatas, bands, offsets, reversed(range(ydim)))):
+
+        axes_dict = {}
+        local_bottom = bottom + (height+y_spacing)*i
+
+        axes_dict['lc'] = fig.add_axes( (left+(left), local_bottom, lc_width, height) )
+
+        axes_dict['jhk'] = fig.add_axes( (color_left, local_bottom, color_width, height) )
+        axes_dict['khk'] = fig.add_axes( (left+color_left+color_width, local_bottom, color_width, height) )
+
+        axes_dicts.append(axes_dict)
+
+        lightcurve_axes_with_info(stardata, band, axes_dict['lc'], colorscale, 
+                                  cmap=cmap, vmin=vmin, vmax=vmax, s=20*figscale)
+        colormag_axes(stardata, 'khk', axes_dict['khk'], colorscale,
+                      cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False, s=10*figscale)
+        colorcolor_axes(stardata, axes_dict['jhk'], colorscale,
+                        cmap=cmap, vmin=vmin, vmax=vmax, colorbar=False, s=10*figscale)
+
+        for key in axes_dict:
+            fontsize = axes_dict[key].get_xticklabels()[0].get_fontsize()
+            axes_dict[key].tick_params(axis='both', which='major', labelsize=figscale * fontsize)
+
+        # This song-and-dance gets all the lightcurves on a common x axis. Cloned from multi_lightcurve
+        fig.lc_xlim = (min(fig.lc_xlim[0], axes_dict['lc'].get_xlim()[0]), max(fig.lc_xlim[1], axes_dict['lc'].get_xlim()[1]))
+        if len(axes_dict['lc'].get_xticks()) > len(fig.lc_xticks):
+            fig.lc_xticks = axes_dict['lc'].get_xticks()
+            fig.lc_xticklabels = [x.get_text() for x in axes_dict['lc'].get_xticklabels()]
+
+        axes_dict['lc'].set_xlim(fig.lc_xlim)
+        axes_dict['lc'].set_xticks(fig.lc_xticks)
+        axes_dict['lc'].set_xticklabels(fig.lc_xticklabels)
+
+
+    fig.canvas.draw()
+
+    fig.axes_dicts = axes_dicts[::-1]
+    fig.stardatas = stardatas
+    fig.bands = bands
+    fig.offsets = offsets
+
+    return fig
+
+
 def lc_and_phase_and_colors(stardata, period=None, timecolor=True, custom_xlabel=False, offset=0):
     """
     Generates an eight-panel lightcurve: phase-folded, straight, and color info.
