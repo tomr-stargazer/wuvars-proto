@@ -661,7 +661,7 @@ def multi_lc_phase_colors(stardatas, bands, periods, offsets=None, cmap='jet', c
     return fig
 
 
-def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date', figscale=1):
+def multi_lc_colors(stardatas, bands, cmap='jet', colorscale='date', figscale=1):
     """
     Makes a multi-panel lightcurve. Each line shows a single star's lc, colormag, colorcolor.
 
@@ -669,7 +669,6 @@ def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date
     ----------
     stardatas : list of StarData
     bands : list of str
-    offsets : (list of float) or None, optional
     cmap : str, optional
     colorscale : {'date' | 'grade'}, optional
     figscale : float, optional
@@ -678,17 +677,14 @@ def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date
     -------
     fig : plt.Figure
         has attributes `axes_dicts`, as well as the inputs `stardatas`, 
-        `bands`, `offsets`. They are all lists.
+        `bands`. They are all lists.
 
     """
 
     ydim = len(stardatas)
 
-    if offsets is None:
-        offsets = [0]*ydim
-
-    if not (len(stardatas) == len(bands) == len(offsets)):
-        raise ValueError("Length of input lists should be the same for stardatas, bands & offsets")
+    if not (len(stardatas) == len(bands)):
+        raise ValueError("Length of input lists should be the same for stardatas & bands")
 
     # single colorscale across all light curves
     if colorscale == 'date':
@@ -718,7 +714,7 @@ def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date
 
     axes_dicts = []
 
-    for stardata, band, offset, i in reversed(zip(stardatas, bands, offsets, reversed(range(ydim)))):
+    for stardata, band, i in reversed(zip(stardatas, bands, reversed(range(ydim)))):
 
         axes_dict = {}
         local_bottom = bottom + (height+y_spacing)*i
@@ -757,7 +753,6 @@ def multi_lc_colors(stardatas, bands, offsets=None, cmap='jet', colorscale='date
     fig.axes_dicts = axes_dicts[::-1]
     fig.stardatas = stardatas
     fig.bands = bands
-    fig.offsets = offsets
 
     return fig
 
