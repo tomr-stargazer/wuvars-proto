@@ -11,7 +11,7 @@ Godspeed yo.
 import numpy as np
 import atpy
 import matplotlib.pyplot as plt
-from tr import make_sidset
+from spread3 import make_sidset
 
 def date_analyzer  ( table, cutoff=0.08 ):
     ''' 
@@ -92,11 +92,11 @@ def disk_analyzer2 ( table, cutoff=0.08 ):
 
         tab = tab.where(tab.PSTAR > 0.8)
 
-        tab = tab.where(tab.JAPERMAG3ERR < .02)
+        tab = tab.where(tab.JAPERMAG3ERR < .05)
         tab = tab.where(tab.JAPERMAG3ERR > 0)
-        tab = tab.where(tab.HAPERMAG3ERR < .02)
+        tab = tab.where(tab.HAPERMAG3ERR < .05)
         tab = tab.where(tab.HAPERMAG3ERR > 0)
-        tab = tab.where(tab.KAPERMAG3ERR < .02)
+        tab = tab.where(tab.KAPERMAG3ERR < .05)
         tab = tab.where(tab.KAPERMAG3ERR > 0)
         
         tab = tab.where(tab.JPPERRBITS < 5)
