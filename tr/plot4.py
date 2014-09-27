@@ -308,7 +308,7 @@ def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=Fa
         print "Color-color plot broke: {0}".format(e)
         pass
 
-def basic_lc(stardata, timecolor=True, custom_xlabel=False):
+def basic_lc(stardata, timecolor=True, custom_xlabel=False, time_cmap='jet'):
     """
     Proof-of-concept reimplementation of plot3.graded_lc.
 
@@ -317,7 +317,7 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False):
     """
 
     # kwargs defaulting over
-    time_cmap = 'jet'
+    # time_cmap = 'jet'
     color_slope = False
     d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}
 
@@ -363,9 +363,9 @@ def basic_lc(stardata, timecolor=True, custom_xlabel=False):
         lightcurve_axes_with_info(stardata, band, d_ax[band], colorscale, 
                                   cmap=d_cmap[band], vmin=vmin, vmax=vmax)
 
-    colorcolor_axes(stardata, ax_jhk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+    colorcolor_axes(stardata, ax_jhk, colorscale, cmap=time_cmap, vmin=vmin, vmax=vmax,
                     color_slope=color_slope)
-    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap=time_cmap, vmin=vmin, vmax=vmax,
                   color_slope=color_slope)
 
     # Hide the bad labels...
