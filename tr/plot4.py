@@ -251,7 +251,7 @@ def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slop
     try:
         plot_trajectory_core(axes, colormag_columns['color'], colormag_columns['mag'], colormag_columns['date'],
                              ms=False, ctts=False, 
-                             vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
+                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -283,7 +283,7 @@ def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=Fa
 
     try:
         plot_trajectory_core(axes, colorcolor_columns['hmk'], colorcolor_columns['jmh'], colorcolor_columns['date'],
-                             vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
+                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -757,14 +757,14 @@ def multi_lc_colors(stardatas, bands, cmap='jet', colorscale='date', figscale=1)
     return fig
 
 
-def lc_and_phase_and_colors(stardata, period=None, timecolor=True, custom_xlabel=False, offset=0):
+def lc_and_phase_and_colors(stardata, period=None, timecolor=True, custom_xlabel=False, time_cmap='jet', offset=0):
     """
     Generates an eight-panel lightcurve: phase-folded, straight, and color info.
 
     """
 
     # kwargs defaulting over
-    time_cmap = 'jet'
+    # time_cmap = 'jet'
     color_slope = False
     d_cmap={'j':'Blues', 'h': 'Greens', 'k': 'Reds'}
 
@@ -824,9 +824,9 @@ def lc_and_phase_and_colors(stardata, period=None, timecolor=True, custom_xlabel
         phase_axes_with_info(stardata, band, period, d_ax_phase[band], colorscale, 
                                   cmap=d_cmap[band], vmin=vmin, vmax=vmax, offset=offset)
 
-    colorcolor_axes(stardata, ax_jhk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+    colorcolor_axes(stardata, ax_jhk, colorscale, cmap=time_cmap, vmin=vmin, vmax=vmax,
                     color_slope=color_slope)
-    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap='jet', vmin=vmin, vmax=vmax,
+    colormag_axes(stardata, 'khk', ax_khk, colorscale, cmap=time_cmap, vmin=vmin, vmax=vmax,
                   color_slope=color_slope)
 
     # Hide the bad labels...
