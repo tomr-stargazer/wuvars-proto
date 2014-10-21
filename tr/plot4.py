@@ -244,14 +244,16 @@ def phase_axes_with_info(stardata, band, period, axes, colorscale, cmap, vmin, v
     axes.get_figure().canvas.draw()
 
 
-def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, **kwargs):
+def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, 
+                  edgecolors='k', **kwargs):
 
     colormag_columns = stardata.get_colormag_columns(band, max_flag=256)
 
     try:
         plot_trajectory_core(axes, colormag_columns['color'], colormag_columns['mag'], colormag_columns['date'],
                              ms=False, ctts=False, 
-                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
+                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, 
+                             edgecolors=edgecolors, linewidths=0.5, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
@@ -277,13 +279,15 @@ def colormag_axes(stardata, band, axes, colorscale, cmap, vmin, vmax, color_slop
     axes.get_figure().canvas.draw()    
 
 
-def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, **kwargs):
+def colorcolor_axes(stardata, axes, colorscale, cmap, vmin, vmax, color_slope=False, colorbar=True, 
+                    edgecolors='k', **kwargs):
 
     colorcolor_columns = stardata.get_colorcolor_columns(max_flag=256)
 
     try:
         plot_trajectory_core(axes, colorcolor_columns['hmk'], colorcolor_columns['jmh'], colorcolor_columns['date'],
-                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, **kwargs)
+                             cmap=cmap, vmin=vmin, vmax=vmax, colorbar=colorbar, 
+                             edgecolors=edgecolors, linewidths=0.5, **kwargs)
 
         # plot boundaries are manually set for readability, if necessary
         if len(axes.get_xticks()) > 7:
